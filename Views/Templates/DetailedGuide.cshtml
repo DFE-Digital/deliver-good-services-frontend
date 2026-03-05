@@ -1,0 +1,94 @@
+@using ServiceManual.Models
+@{
+    var guide = ViewBag.Guide as DetailedGuide ?? new DetailedGuide();
+    ViewData["Title"] = guide.Title;
+    var hasRightPanel = guide.RelatedContent.Count > 0 || guide.Collections.Count > 0;
+}
+
+@section Breadcrumbs {
+<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+@if (!string.IsNullOrEmpty(guide.CollectionSlug) && !string.IsNullOrEmpty(guide.CollectionTitle))
+{
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">@guide.CollectionTitle</li>
+}
+}
+
+<div class="govuk-grid-row">
+    <div class="@(hasRightPanel ? "govuk-grid-column-two-thirds" : "govuk-grid-column-full")">
+
+        <div class="dfe-f-header">
+        <span class="govuk-caption-xl  govuk-!-margin-top-5">Guidance</span>
+            <h1 class="govuk-heading-xl dfe-f-header__title">@guide.Title</h1>
+            @if (!string.IsNullOrEmpty(guide.MetaDescription))
+            {
+                <p class="govuk-body-l dfe-f-header__intro">@guide.MetaDescription</p>
+            }
+        </div>
+
+        @if (guide.Pages.Count > 0)
+        {
+            <nav class="dfe-f-guide-contents" aria-label="Guide contents">
+                <p class="dfe-f-guide-contents__skip"><a class="govuk-link" href="/guidance/guides/@guide.Slug/@guide.Pages[0].Slug">Skip contents</a></p>
+                <h2 class="dfe-f-guide-contents__title">Contents</h2>
+                <ul class="dfe-f-guide-contents__list">
+                    @foreach (var guidePage in guide.Pages)
+                    {
+                        <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
+                            <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
+                            <a class="govuk-link dfe-f-guide-contents__link" href="/guidance/guides/@guide.Slug/@guidePage.Slug">@guidePage.Title</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+
+    </div>
+
+    @if (hasRightPanel)
+    {
+        <div class="govuk-grid-column-one-third">
+            @if (guide.Collections.Count > 0)
+            {
+                <aside class="dfe-f-sidebar-box dfe-f-sidebar-box--highlight" aria-label="Part of">
+                    <div class="dfe-f-sidebar-box__section">
+                        <h3>Part of</h3>
+                        <ul class="govuk-list govuk-list--spaced">
+                            <li><a class="govuk-link" href="/guidance/collections/@guide.Collections[0].Slug"><strong>@guide.Collections[0].Title</strong></a></li>
+                        </ul>
+                    </div>
+                    @if (guide.Collections.Count > 1)
+                    {
+                        <div class="dfe-f-sidebar-box__section">
+                            <h3 class="govuk-!-font-weight-regular">Also part of</h3>
+                            <ul class="govuk-list govuk-list--spaced">
+                                @foreach (var c in guide.Collections.Skip(1))
+                                {
+                                    <li><a class="govuk-link" href="/guidance/collections/@c.Slug">@c.Title</a></li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </aside>
+            }
+
+            @if (guide.RelatedContent.Count > 0)
+            {
+                <aside class="dfe-f-sidebar-box" aria-label="Related content">
+                    @foreach (var item in guide.RelatedContent)
+                    {
+                        <div class="dfe-f-sidebar-box__section">
+                            <h3>@Html.Raw(ServiceManual.Helpers.GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
+                            @if (!string.IsNullOrEmpty(item.Content))
+                            {
+                                <div class="govuk-body-s">
+                                    @Html.Raw(ServiceManual.Helpers.GovUkMarkdownHelper.ToGovUkHtmlForRelatedContent(item.Content))
+                                </div>
+                            }
+                        </div>
+                    }
+                </aside>
+            }
+        </div>
+    }
+</div>

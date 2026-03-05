@@ -1,0 +1,51 @@
+@using ServiceManual.Models
+@{
+    var navItems = ViewData["Navigation"] as List<NavigationItem> ?? [];
+    var currentPath = Context.Request.Path.Value ?? string.Empty;
+}
+
+@if (navItems.Any())
+{
+    <nav aria-label="Menu" class="govuk-service-navigation__wrapper">
+        <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle" aria-controls="navigation" hidden>
+            Menu
+        </button>
+        <ul class="govuk-service-navigation__list" id="navigation">
+            @foreach (var item in navItems)
+            {
+                var isActive = item.Url is not null && (currentPath == item.Url || currentPath.StartsWith(item.Url + "/", StringComparison.OrdinalIgnoreCase));
+                var isParentActive = isActive || item.Children.Any(c =>
+                    c.Url is not null && (currentPath == c.Url || currentPath.StartsWith(c.Url + "/", StringComparison.OrdinalIgnoreCase)));
+
+                <li class="govuk-service-navigation__item @(isParentActive ? "govuk-service-navigation__item--active" : "")">
+                    @if (item.Url is not null)
+                    {
+                        <a class="govuk-service-navigation__link" href="@item.Url" @(isParentActive ? Html.Raw("aria-current=\"true\"") : null)>
+                            @if (isParentActive)
+                            {
+                                <strong class="govuk-service-navigation__active-fallback">@item.Title</strong>
+                            }
+                            else
+                            {
+                                @item.Title
+                            }
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="govuk-service-navigation__link govuk-service-navigation__link--no-href">
+                            @if (isParentActive)
+                            {
+                                <strong class="govuk-service-navigation__active-fallback">@item.Title</strong>
+                            }
+                            else
+                            {
+                                @item.Title
+                            }
+                        </span>
+                    }
+                </li>
+            }
+        </ul>
+    </nav>
+}

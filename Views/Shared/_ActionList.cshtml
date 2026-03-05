@@ -1,0 +1,44 @@
+@*
+  _ActionList — Ordered or unordered list of full-width links with chevron (dfe-action-list).
+  ViewData:
+    Items   IEnumerable<dynamic> — Each item: Title, Href (required), OpenInNewTab (optional bool)
+    Ordered bool (optional)      — true for <ol>, false for <ul> (default true)
+*@
+@{
+  var items   = ViewData["Items"]   as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+  var ordered = ViewData["Ordered"] as bool? ?? true;
+}
+@if (ordered)
+{
+  <ol class="govuk-list dfe-action-list">
+    @foreach (var item in items)
+    {
+      var title = (string)(item.Title ?? "");
+      var href = (string)(item.Href ?? "#");
+      var openInNewTab = item.OpenInNewTab as bool? ?? false;
+      <li>
+        <a href="@href" class="govuk-link govuk-link--no-visited-state" @(openInNewTab ? Html.Raw("target=\"_blank\" rel=\"noopener noreferrer\"") : null)>
+          @title
+          <svg class="chevron dfe-icon dfe-icon__chevron-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15.5 12a1 1 0 0 1-.29.71l-5 5a1 1 0 0 1-1.42-1.42l4.3-4.29-4.3-4.29a1 1 0 0 1 1.42-1.42l5 5a1 1 0 0 1 .29.71z"></path></svg>
+        </a>
+      </li>
+    }
+  </ol>
+}
+else
+{
+  <ul class="govuk-list dfe-action-list">
+    @foreach (var item in items)
+    {
+      var title = (string)(item.Title ?? "");
+      var href = (string)(item.Href ?? "#");
+      var openInNewTab = item.OpenInNewTab as bool? ?? false;
+      <li>
+        <a href="@href" class="govuk-link govuk-link--no-visited-state" @(openInNewTab ? Html.Raw("target=\"_blank\" rel=\"noopener noreferrer\"") : null)>
+          @title
+          <svg class="chevron dfe-icon dfe-icon__chevron-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15.5 12a1 1 0 0 1-.29.71l-5 5a1 1 0 0 1-1.42-1.42l4.3-4.29-4.3-4.29a1 1 0 0 1 1.42-1.42l5 5a1 1 0 0 1 .29.71z"></path></svg>
+        </a>
+      </li>
+    }
+  </ul>
+}

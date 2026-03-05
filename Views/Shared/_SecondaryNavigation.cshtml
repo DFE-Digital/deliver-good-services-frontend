@@ -1,0 +1,43 @@
+@using ServiceManual.Models
+@{
+    var navItems = ViewData["Navigation"] as List<NavigationItem> ?? [];
+    var currentPath = Context.Request.Path.Value ?? string.Empty;
+
+    var activeParent = navItems.FirstOrDefault(item =>
+    {
+        var isActive = item.Url is not null && (currentPath == item.Url || currentPath.StartsWith(item.Url + "/", StringComparison.OrdinalIgnoreCase));
+        var hasActiveChild = item.Children.Any(c =>
+            c.Url is not null && (currentPath == c.Url || currentPath.StartsWith(c.Url + "/", StringComparison.OrdinalIgnoreCase)));
+        return item.Children.Any() && (isActive || hasActiveChild);
+    });
+}
+
+@if (activeParent is not null && activeParent.Children.Any())
+{
+    <nav aria-label="@activeParent.Title" class="dfe-secondary-nav" data-module="govuk-service-navigation">
+        <div class="govuk-width-container">
+            <ul class="dfe-secondary-nav__list">
+                @foreach (var child in activeParent.Children)
+                {
+                    var childUrlTrimmed = child.Url?.TrimEnd('/') ?? "";
+                    var isChildActive = child.Url is not null && (
+                        string.Equals(currentPath.TrimEnd('/'), childUrlTrimmed, StringComparison.OrdinalIgnoreCase) ||
+                        currentPath.StartsWith(child.Url + "/", StringComparison.OrdinalIgnoreCase));
+
+                    <li class="dfe-secondary-nav__item @(isChildActive ? "dfe-secondary-nav__item--active" : "")">
+                        @if (child.Url is not null)
+                        {
+                            <a class="dfe-secondary-nav__link" href="@child.Url" @(isChildActive ? Html.Raw("aria-current=\"page\"") : null)>
+                                @child.Title
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="dfe-secondary-nav__link dfe-secondary-nav__link--no-href">@child.Title</span>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    </nav>
+}

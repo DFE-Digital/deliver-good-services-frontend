@@ -1,0 +1,31 @@
+@*
+  _DfeFMetric — Stat counter card
+  ─────────────────────────────────
+  Parameters (via ViewData):
+    Num      string  — the large number / stat (required)
+    Label    string  — descriptive label below the number (required)
+    Change   string  — optional change / status line
+    ChangeVariant string — "positive" | "negative" | "warning" (default: neutral)
+    Colour   string  — blue | green | orange | red | yellow | grey | black | teal | purple (default: grey)
+*@
+@{
+  var num           = ViewData["Num"]           as string ?? "";
+  var label         = ViewData["Label"]         as string ?? "";
+  var change        = ViewData["Change"]        as string ?? "";
+  var changeVariant = ViewData["ChangeVariant"] as string ?? "";
+  var colour        = (ViewData["Colour"]       as string ?? "grey").ToLowerInvariant();
+
+  var cardCls   = $"dfe-f-metric dfe-f-metric--{colour}";
+  var changeCls = string.IsNullOrWhiteSpace(changeVariant)
+    ? "dfe-f-metric__change"
+    : $"dfe-f-metric__change dfe-f-metric__change--{changeVariant}";
+}
+
+<div class="@cardCls">
+  <div class="dfe-f-metric__num">@num</div>
+  <div class="dfe-f-metric__label">@label</div>
+  @if (!string.IsNullOrWhiteSpace(change))
+  {
+    <div class="@changeCls">@change</div>
+  }
+</div>

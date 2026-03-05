@@ -1,0 +1,190 @@
+@using ServiceManual.Services
+@model DdtStandardsResponse
+@{
+    ViewData["Title"] = "DDT Standards";
+    var standards = Model?.Data ?? new List<DdtStandardDto>();
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    var search = ViewBag.Search as string;
+    var selectedCategories = ViewBag.Category as List<string> ?? new List<string>();
+    var hasActiveFilters = !string.IsNullOrEmpty(search) || selectedCategories.Any();
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var totalRecords = ViewBag.TotalRecords as int? ?? 0;
+    var errorMessage = ViewBag.ErrorMessage as string;
+}
+
+@section Breadcrumbs {
+<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance/collections/standards">Standards</a></li>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+                    <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+                    <div class="govuk-error-summary__body">
+                        <ul class="govuk-list govuk-error-summary__list">
+                            <li><a href="#standards-content">@errorMessage</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="dfe-standards-page-header govuk-!-margin-top-6 govuk-!-margin-bottom-6">
+    <span class="govuk-caption-xl">Standards</span>
+    <h1 class="govuk-heading-xl govuk-!-margin-bottom-2">DDT Standards</h1>
+    <p class="govuk-body-l govuk-!-margin-bottom-0">Digital, data and technology standards to support good service delivery in DfE.</p>
+</div>
+
+<div class="govuk-grid-row govuk-!-margin-bottom-6" id="standards-content">
+    <div class="govuk-grid-column-one-third">
+        <aside class="dfe-standards-filter" aria-label="Filter standards">
+            <div class="dfe-standards-filter__panel">
+                <h2 class="dfe-standards-filter__title">Filter standards</h2>
+                <form method="get" action="@Url.Action("Index", "DdtStandards")" class="dfe-standards-filter__form">
+                    <div class="dfe-standards-filter__field">
+                        <label class="dfe-standards-filter__label" for="search">Keyword search</label>
+                        <input class="govuk-input govuk-input--width-full" id="search" name="search" type="text" value="@search" placeholder="e.g. accessibility" autocomplete="off">
+                    </div>
+                    <div class="dfe-standards-filter__field">
+                        <fieldset class="govuk-fieldset" aria-describedby="category-hint">
+                            <legend class="dfe-standards-filter__label govuk-!-margin-bottom-2">Category</legend>
+                            <div id="category-hint" class="govuk-hint govuk-!-margin-bottom-2">Select one or more</div>
+                            <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
+                                @{ var catIndex = 0; }
+                                @foreach (var cat in categories)
+                                {
+                                    var isChecked = selectedCategories.Contains(cat);
+                                    var id = "category-" + catIndex;
+                                    <div class="govuk-checkboxes__item">
+                                        <input class="govuk-checkboxes__input" id="@id" name="category" type="checkbox" value="@cat" checked="@(isChecked ? "checked" : null)">
+                                        <label class="govuk-label govuk-checkboxes__label" for="@id">@cat</label>
+                                    </div>
+                                    catIndex++;
+                                }
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="dfe-standards-filter__actions">
+                        <button type="submit" class="govuk-button govuk-button--primary govuk-!-margin-bottom-0" data-module="govuk-button">Apply filters</button>
+                        <a href="@Url.Action("Index", "DdtStandards")" class="dfe-standards-filter__secondary-link govuk-link govuk-link--no-visited-state">Clear all filters</a>
+                    </div>
+                </form>
+            </div>
+        </aside>
+    </div>
+    <div class="govuk-grid-column-two-thirds">
+        @if (hasActiveFilters)
+        {
+            <div class="dfe-standards-filter__applied dfe-standards-filter__applied--above-results govuk-!-margin-bottom-4">
+                <p class="dfe-standards-filter__applied-heading">Applied filters</p>
+                <ul class="dfe-standards-filter__chips">
+                    @if (!string.IsNullOrEmpty(search))
+                    {
+                        <li>
+                            <span class="dfe-standards-filter__chip">
+                                <span class="dfe-standards-filter__chip-text">Search: @search</span>
+                                <a href="@Url.Action("Index", "DdtStandards", new { category = selectedCategories })" class="dfe-standards-filter__chip-remove" aria-label="Remove search filter"><span aria-hidden="true">×</span></a>
+                            </span>
+                        </li>
+                    }
+                    @foreach (var cat in selectedCategories)
+                    {
+                        var otherCategories = selectedCategories.Where(c => c != cat).ToList();
+                        <li>
+                            <span class="dfe-standards-filter__chip">
+                                <span class="dfe-standards-filter__chip-text">@cat</span>
+                                <a href="@Url.Action("Index", "DdtStandards", new { search = search, category = otherCategories })" class="dfe-standards-filter__chip-remove" aria-label="Remove @cat filter"><span aria-hidden="true">×</span></a>
+                            </span>
+                        </li>
+                    }
+                </ul>
+                <a href="@Url.Action("Index", "DdtStandards")" class="dfe-standards-filter__clear-all govuk-link govuk-link--no-visited-state">Clear all filters</a>
+            </div>
+        }
+        @if (standards.Any())
+        {
+            <div class="govuk-body govuk-!-margin-bottom-4">
+                <p class="govuk-body-s">Showing @standards.Count of @totalRecords standards</p>
+            </div>
+            <ul class="govuk-list">
+                @foreach (var standard in standards)
+                {
+                    <li class="govuk-!-margin-bottom-6 govuk-!-padding-bottom-4" style="border-bottom: 1px solid #b1b4b6;">
+                        <h3 class="govuk-heading-s govuk-!-margin-bottom-2">
+                            <a href="@Url.Action("Details", "DdtStandards", new { slug = standard.Slug })" class="govuk-link">@standard.Title</a>
+                        </h3>
+                        @if (!string.IsNullOrEmpty(standard.Summary))
+                        {
+                            var firstFullStop = standard.Summary.IndexOf('.');
+                            var truncatedSummary = firstFullStop >= 0
+                                ? standard.Summary.Substring(0, firstFullStop + 1)
+                                : standard.Summary;
+                            <p class="govuk-body" style="font-size: 1rem;">@truncatedSummary</p>
+                        }
+                    </li>
+                }
+            </ul>
+            @if (totalPages > 1)
+            {
+                <nav class="govuk-pagination govuk-!-margin-top-6" role="navigation" aria-label="Results">
+                    @if (currentPage > 1)
+                    {
+                        <div class="govuk-pagination__prev">
+                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "DdtStandards", new { search = search, category = selectedCategories, page = currentPage - 1 })" rel="prev">
+                                <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13"><path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.7426-4.5111 4.725-4.4062z"></path></svg>
+                                <span class="govuk-pagination__link-title">Previous</span>
+                            </a>
+                        </div>
+                    }
+                    <ul class="govuk-pagination__list">
+                        @for (var i = 1; i <= totalPages; i++)
+                        {
+                            @if (i == currentPage)
+                            {
+                                <li class="govuk-pagination__item govuk-pagination__item--current">
+                                    <a class="govuk-link govuk-pagination__link" href="#" aria-label="Page @i" aria-current="page">@i</a>
+                                </li>
+                            }
+                            else if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
+                            {
+                                <li class="govuk-pagination__item">
+                                    <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "DdtStandards", new { search = search, category = selectedCategories, page = i })" aria-label="Page @i">@i</a>
+                                </li>
+                            }
+                            else if (i == currentPage - 3 || i == currentPage + 3)
+                            {
+                                <li class="govuk-pagination__item govuk-pagination__item--ellipsis">…</li>
+                            }
+                        }
+                    </ul>
+                    @if (currentPage < totalPages)
+                    {
+                        <div class="govuk-pagination__next">
+                            <a class="govuk-link govuk-pagination__link" href="@Url.Action("Index", "DdtStandards", new { search = search, category = selectedCategories, page = currentPage + 1 })" rel="next">
+                                <span class="govuk-pagination__link-title">Next</span>
+                                <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13"><path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7266z"></path></svg>
+                            </a>
+                        </div>
+                    }
+                </nav>
+            }
+        }
+        else
+        {
+            <div class="govuk-body">
+                <p>No standards found.</p>
+                @if (hasActiveFilters)
+                {
+                    <p><a href="@Url.Action("Index", "DdtStandards")" class="govuk-link">Clear filters</a> to see all standards.</p>
+                }
+            </div>
+        }
+    </div>
+</div>

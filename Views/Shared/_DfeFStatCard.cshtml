@@ -1,0 +1,53 @@
+@*
+  _DfeFStatCard — Scored / progress metric card
+  ───────────────────────────────────────────────
+  Parameters (via ViewData):
+    Title    string  — card heading (required)
+    Stat     string  — large stat value, e.g. "11.2" (optional)
+    Meta     string  — sub-label, e.g. "avg / 15 · High alignment" (optional)
+    Progress int     — 0–100 percentage for the progress bar (optional, omit to hide)
+    Link     string  — URL for an optional footer link (optional)
+    LinkText string  — text for the footer link (default: "View details")
+    Colour   string  — blue | green | orange | red | yellow | grey | black | teal | purple (default: teal)
+*@
+@{
+  var title    = ViewData["Title"]    as string ?? "";
+  var stat     = ViewData["Stat"]     as string ?? "";
+  var meta     = ViewData["Meta"]     as string ?? "";
+  var link     = ViewData["Link"]     as string ?? "";
+  var linkText = ViewData["LinkText"] as string ?? "View details";
+  var colour   = (ViewData["Colour"] as string ?? "teal").ToLowerInvariant();
+
+  int? progress = null;
+  if (ViewData["Progress"] is int p) progress = p;
+  else if (ViewData["Progress"] is string ps && int.TryParse(ps, out var pi)) progress = pi;
+
+  var cardCls = $"dfe-f-stat-card dfe-f-stat-card--{colour}";
+}
+
+<div class="@cardCls">
+  <h3 class="dfe-f-stat-card__title">@title</h3>
+
+  @if (!string.IsNullOrWhiteSpace(stat))
+  {
+    <div class="dfe-f-stat-card__stat">@stat</div>
+  }
+
+  @if (!string.IsNullOrWhiteSpace(meta))
+  {
+    <div class="dfe-f-stat-card__meta">@meta</div>
+  }
+
+  @if (progress.HasValue)
+  {
+    var pct = Math.Clamp(progress.Value, 0, 100);
+    <div class="dfe-f-stat-card__progress">
+      <div class="dfe-f-stat-card__progress-fill" style="width:@(pct)%"></div>
+    </div>
+  }
+
+  @if (!string.IsNullOrWhiteSpace(link))
+  {
+    <a class="dfe-f-stat-card__link" href="@link">@linkText</a>
+  }
+</div>

@@ -1,0 +1,228 @@
+@*
+  DfE Manual Panel Container – reusable component partial
+  =======================================================
+
+  VARIANTS
+  --------
+  1. Title + tags only
+     Pass: Title, Tags
+     Omit: Description, ToggleBodyHtml, Links
+
+  2. Title + tags + description
+     Pass: Title, Tags, Description
+     Omit: ToggleBodyHtml, Links
+
+  3. Title + tags + description + toggle panel (expandable detail)
+     Pass: Title, Tags, Description, ToggleBodyHtml
+     Optionally: Links, Phases
+
+  COLOUR OPTIONS  (pass as Colour parameter)
+  ------------------------------------------
+  blue (default) | green | orange | red | yellow | grey | black
+
+  USAGE EXAMPLES
+  --------------
+
+  1. Title + tags only:
+  @await Html.PartialAsync("_DfeFPanelContainer", new ViewDataDictionary(ViewData)
+  {
+      { "Title", "DDT Standards compliance" },
+      { "Tags", new[] { ("Mandatory", ""), ("Architecture / Standards", "") } },
+      { "Colour", "blue" }
+  })
+
+  2. Title + tags + description:
+  @await Html.PartialAsync("_DfeFPanelContainer", new ViewDataDictionary(ViewData)
+  {
+      { "Title", "Accessibility" },
+      { "Tags", new[] { ("Mandatory", ""), ("Design", "") } },
+      { "Description", "From the point your team starts any delivery work." },
+      { "Colour", "green" }
+  })
+
+  3. Full toggle variant (two columns):
+  @await Html.PartialAsync("_DfeFPanelContainer", new ViewDataDictionary(ViewData)
+  {
+      { "Title", "DDT Standards compliance" },
+      { "Tags", new[] { ("Mandatory", ""), ("Architecture / Standards", "") } },
+      { "Description", "When: From the point your team starts any delivery work in DfE digital, data or technology." },
+      { "Phases", new[] { "Discovery", "Alpha", "Beta", "Live" } },
+      { "ToggleBodyHtml", @"<div class=""dfe-f-panel-component__columns"">...</div>" },
+      { "Links", new[] { ("Find and use standards ↗", "#", true), ("Standards by profession", "#", false) } },
+      { "Colour", "blue" },
+      { "Id", "ddts-compliance" }
+  })
+
+  4. Full toggle variant (single column, custom labels):
+  @await Html.PartialAsync("_DfeFPanelContainer", new ViewDataDictionary(ViewData)
+  {
+      { "Title", "DDT Standards compliance" },
+      { "Tags", new[] { ("Mandatory", "") } },
+      { "Steps", new[] { "Do this first", "Do this second" } },
+      { "StepsLabel", "Steps to follow" },
+      { "Columns", 1 },
+      { "Colour", "blue" },
+      { "Id", "my-panel" }
+  })
+
+  PARAMETERS
+  ----------
+  Title           string          Required. Card heading text.
+  Tags            (string,string)[] Optional. Array of (label, modifier) tuples.
+                                    modifier is appended to dfe-f-panel-component__tag as
+                                    dfe-f-panel-component__tag--{modifier} if set.
+  Description     string          Optional. Trigger / description text shown below the title.
+  Phases          string[]        Optional. Phase names: Discovery, Alpha, Beta, Live.
+  Steps           string[]        Optional. Numbered step items. Renders "What your team needs to do" column.
+  StepsLabel      string          Optional. Override the steps column heading. Default: "What your team needs to do".
+  Checks          string[]        Optional. Bullet check items. Renders "What assessors and reviewers check" column.
+  ChecksLabel     string          Optional. Override the checks column heading. Default: "What assessors and reviewers check".
+  Columns         int             Optional. 1 = single full-width column, 2 = 50/50 (default). Auto-detected if only one column has content.
+  ToggleBodyHtml  string (HTML)   Optional. Raw HTML for the expandable body. Overrides Steps/Checks if set. Enables toggle button.
+  Links           (string,string,bool)[] Optional. Array of (label, href, isPrimary) tuples.
+  Colour          string          Optional. Colour variant. Default: blue.
+  Id              string          Optional. Used for aria-controls. Auto-generated if omitted.
+*@
+
+@{
+  var title          = ViewData["Title"] as string ?? string.Empty;
+  var tagsRaw        = ViewData["Tags"] as IEnumerable<(string Label, string Modifier)> ?? Array.Empty<(string, string)>();
+  var description    = ViewData["Description"] as string;
+  var phasesRaw      = ViewData["Phases"] as IEnumerable<string> ?? Array.Empty<string>();
+  var stepsRaw       = ViewData["Steps"] as IEnumerable<string> ?? Array.Empty<string>();
+  var stepsLabel     = ViewData["StepsLabel"] as string ?? "What your team needs to do";
+  var checksRaw      = ViewData["Checks"] as IEnumerable<string> ?? Array.Empty<string>();
+  var checksLabel    = ViewData["ChecksLabel"] as string ?? "What assessors and reviewers check";
+  var columnsParam   = ViewData["Columns"] is int c ? c : 2;
+  var toggleBodyHtml = ViewData["ToggleBodyHtml"] as string;
+  var linksRaw       = ViewData["Links"] as IEnumerable<(string Label, string Href, bool IsPrimary)> ?? Array.Empty<(string, string, bool)>();
+  var colour         = ViewData["Colour"] as string ?? "blue";
+  var cardId         = ViewData["Id"] as string ?? $"dfe-f-panel-component-{Guid.NewGuid():N}";
+
+  var bodyId   = $"gbody-{cardId}";
+  var toggleId = $"gtog-{cardId}";
+
+  // Build columns HTML from Steps/Checks arrays if ToggleBodyHtml not provided
+  var hasSteps  = stepsRaw.Any();
+  var hasChecks = checksRaw.Any();
+  var hasColumnsContent = hasSteps || hasChecks;
+
+  // Single column if: explicitly set to 1, or only one of steps/checks is present
+  var effectivelySingleCol = columnsParam == 1 || (hasSteps ^ hasChecks);
+  var columnsCls = effectivelySingleCol
+    ? "dfe-f-panel-component__columns dfe-f-panel-component__columns--single"
+    : "dfe-f-panel-component__columns";
+
+  bool hasToggle = !string.IsNullOrWhiteSpace(toggleBodyHtml) || hasColumnsContent || linksRaw.Any();
+
+  var phaseClassMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+  {
+    { "Discovery", "dfe-f-panel-component__phase--discovery" },
+    { "Alpha",     "dfe-f-panel-component__phase--alpha" },
+    { "Beta",      "dfe-f-panel-component__phase--beta" },
+    { "Live",      "dfe-f-panel-component__phase--live" },
+  };
+}
+
+<div class="dfe-f-panel-component dfe-f-panel-component--@colour">
+  <div class="dfe-f-panel-component__header">
+    <div class="dfe-f-panel-component__header-main">
+
+      @if (tagsRaw.Any())
+      {
+        <div class="dfe-f-panel-component__tags">
+          @foreach (var tag in tagsRaw)
+          {
+            var tagClass = string.IsNullOrWhiteSpace(tag.Modifier)
+              ? "dfe-f-panel-component__tag"
+              : $"dfe-f-panel-component__tag dfe-f-panel-component__tag--{tag.Modifier}";
+            <span class="@tagClass">@tag.Label</span>
+          }
+        </div>
+      }
+
+      <h3 class="dfe-f-panel-component__title">@title</h3>
+
+      @if (!string.IsNullOrWhiteSpace(description))
+      {
+        <p class="dfe-f-panel-component__description">@description</p>
+      }
+
+      @if (phasesRaw.Any())
+      {
+        <div class="dfe-f-panel-component__phases">
+          @foreach (var phase in phasesRaw)
+          {
+            var phaseClass = phaseClassMap.TryGetValue(phase, out var pc) ? $"dfe-f-panel-component__phase {pc}" : "dfe-f-panel-component__phase";
+            <span class="@phaseClass">@phase</span>
+          }
+        </div>
+      }
+
+    </div>
+
+    @if (hasToggle)
+    {
+      <button class="dfe-f-panel-component__toggle"
+              id="@toggleId"
+              aria-expanded="false"
+              aria-controls="@bodyId">
+        <span class="dfe-f-panel-component__toggle-label">Detail</span>
+        <svg class="dfe-f-panel-component__toggle-icon" width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true" focusable="false"><path d="M1 1L6 6L11 1" stroke="#0b0c0c" stroke-width="2" stroke-linecap="round"></path></svg>
+      </button>
+    }
+  </div>
+
+  @if (hasToggle)
+  {
+    <div class="dfe-f-panel-component__body" id="@bodyId">
+
+      @if (!string.IsNullOrWhiteSpace(toggleBodyHtml))
+      {
+        @Html.Raw(toggleBodyHtml)
+      }
+      else if (hasColumnsContent)
+      {
+        <div class="@columnsCls">
+          @if (hasSteps)
+          {
+            <div>
+              <div class="dfe-f-panel-component__col-label">@stepsLabel</div>
+              <div>
+                @{ int stepNum = 1; }
+                @foreach (var step in stepsRaw)
+                {
+                  <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">@stepNum</span><span>@step</span></div>
+                  stepNum++;
+                }
+              </div>
+            </div>
+          }
+          @if (hasChecks)
+          {
+            <div>
+              <div class="dfe-f-panel-component__col-label">@checksLabel</div>
+              <div>
+                @foreach (var check in checksRaw)
+                {
+                  <div class="dfe-f-panel-component__bullet">@check</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (linksRaw.Any())
+      {
+        <div class="dfe-f-panel-component__links">
+          @foreach (var link in linksRaw)
+          {
+            var linkClass = link.IsPrimary ? "dfe-f-panel-component__link dfe-f-panel-component__link--primary" : "dfe-f-panel-component__link";
+            <a class="@linkClass" href="@link.Href" rel="noopener noreferrer">@link.Label</a>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

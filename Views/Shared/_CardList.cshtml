@@ -1,0 +1,38 @@
+@*
+  _CardList — Simple list of fully clickable cards (title + description).
+  Replaces _ChevronCards (no chevron icon).
+
+  ViewData:
+    Heading  string (optional) — Section heading above the list
+    Items    IEnumerable<dynamic> — Each item: Title, Description, Href (required), OpenInNewTab (optional bool)
+    Columns  int (optional) — 1 (default), 2, or 3 for layout
+*@
+@{
+  var heading = ViewData["Heading"] as string ?? "";
+  var items   = ViewData["Items"]   as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+  var columns = ViewData["Columns"] as int? ?? 1;
+  var listClass = "dfe-card-list";
+  if (columns == 2) { listClass += " dfe-card-list--2-col"; }
+  else if (columns == 3) { listClass += " dfe-card-list--3-col"; }
+}
+
+@if (!string.IsNullOrWhiteSpace(heading))
+{
+  <h2 class="govuk-heading-l govuk-!-margin-bottom-6">@heading</h2>
+}
+
+<ul class="@listClass">
+  @foreach (var item in items)
+  {
+    var title = (string)(item.Title ?? "");
+    var description = (string)(item.Description ?? "");
+    var href = (string)(item.Href ?? "#");
+    var openInNewTab = item.OpenInNewTab as bool? ?? false;
+    <li class="dfe-card-list__item">
+      <a href="@href" class="dfe-card-list__link govuk-link" target="@(openInNewTab ? "_blank" : null)" rel="@(openInNewTab ? "noopener noreferrer" : null)">
+        <span class="dfe-card-list__heading govuk-heading-s">@title</span>
+        <span class="dfe-card-list__description govuk-body">@description</span>
+      </a>
+    </li>
+  }
+</ul>

@@ -1,0 +1,89 @@
+@model IReadOnlyList<ServiceManual.Models.ContentIndexItem>
+@{
+    ViewData["Title"] = "Content index";
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Content index</li>
+}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <h1 class="govuk-heading-xl">Published content</h1>
+    <p class="govuk-body-l">All published content from the CMS. Click a link to open the page (the correct view is used for each content type).</p>
+
+    @if (Model.Count == 0)
+    {
+      <p class="govuk-body">No published content found.</p>
+    }
+    else
+    {
+      var groupedBySection = Model
+        .GroupBy(i => i.ContentType == "Detailed Guide Page" ? "Detailed Guide" : i.ContentType == "Phase" ? "Lifecycle" : i.ContentType)
+        .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+
+      @foreach (var contentSection in groupedBySection)
+      {
+        <h2 class="govuk-heading-l govuk-!-margin-top-8 govuk-!-margin-bottom-4">@contentSection.Key</h2>
+        <table class="govuk-table">
+          <thead class="govuk-table__head">
+            <tr class="govuk-table__row">
+              <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
+              <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Description</th>
+            </tr>
+          </thead>
+          <tbody class="govuk-table__body">
+            @if (contentSection.Key == "Detailed Guide")
+            {
+              var guides = contentSection.Where(i => i.ContentType == "Detailed Guide").OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
+              foreach (var guide in guides)
+              {
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@guide.Url" class="govuk-link">@guide.Title</a></td>
+                  <td class="govuk-table__cell">@(guide.MetaDescription ?? "—")</td>
+                </tr>
+                var guidePages = contentSection.Where(i => i.ContentType == "Detailed Guide Page" && i.ParentSlug == guide.Slug).OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase);
+                foreach (var guidePage in guidePages)
+                {
+                  <tr class="govuk-table__row">
+                    <td class="govuk-table__cell govuk-!-padding-left-6"><a href="@guidePage.Url" class="govuk-link">@guidePage.Title</a></td>
+                    <td class="govuk-table__cell">@(guidePage.MetaDescription ?? "—")</td>
+                  </tr>
+                }
+              }
+            }
+            else if (contentSection.Key == "Lifecycle")
+            {
+              var lifecycleItem = contentSection.FirstOrDefault(i => i.ContentType == "Lifecycle");
+              if (lifecycleItem != null)
+              {
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@lifecycleItem.Url" class="govuk-link">@lifecycleItem.Title</a></td>
+                  <td class="govuk-table__cell">@(lifecycleItem.MetaDescription ?? "—")</td>
+                </tr>
+              }
+              foreach (var phase in contentSection.Where(i => i.ContentType == "Phase").OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase))
+              {
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell govuk-!-padding-left-6"><a href="@phase.Url" class="govuk-link">@phase.Title</a></td>
+                  <td class="govuk-table__cell">@(phase.MetaDescription ?? "—")</td>
+                </tr>
+              }
+            }
+            else
+            {
+              @foreach (var item in contentSection.OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase))
+              {
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
+                  <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      }
+    }
+  </div>
+</div>

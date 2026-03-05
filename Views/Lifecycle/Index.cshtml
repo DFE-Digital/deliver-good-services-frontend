@@ -1,0 +1,365 @@
+@*
+  All sections are rendered from the CMS. No hardcoded content.
+  CMS content types used:
+  - api/lifecycle (lifecycle): title, summary, ownerLabel, audienceLabel, lastUpdatedLabel, defaultView, lucidResources, stages
+  - api/lifecycle-stage (lifecycle-stage): title, slug, summary, durationLabel, order, colourHex, activeTracks, placements
+  - api/stage-task-placement (stage-task-placement): whenLabel, order, task, overrideOutputs, overrideGuidanceLinks
+  - api/task (task): title, slug, what, whyItMatters, howSteps, guidanceLinks, track, roles, leadRole, outputs
+  - api/track (track): task track + stage activeTracks (title, slug, colourHex)
+  - api/role (role): task roles and leadRole (title, slug, shortCode, colourHex)
+  - api/output (output): task outputs + placement overrideOutputs (title, templateLink)
+  Layout follows: frontend/Documentation/dfe-what-to-do-when.html
+*@
+@using ServiceManual.Helpers
+@using ServiceManual.Models
+@{
+    var lifecycle = ViewBag.Lifecycle as Lifecycle;
+    var fromCms = lifecycle != null;
+    ViewData["Title"] = fromCms ? lifecycle!.Title : "Lifecycle";
+    var stages = fromCms ? lifecycle!.Stages.OrderBy(s => s.Order).ToList() : new List<LifecycleStage>();
+    var allRoles = stages
+        .SelectMany(s => s.Placements.SelectMany(p => p.Task.Roles.Concat(p.Task.LeadRole != null ? [p.Task.LeadRole] : [])))
+        .GroupBy(r => r.Slug)
+        .Select(g => g.First())
+        .OrderBy(r => r.Title)
+        .ToList();
+    var trackSlugs = new[] { ("design", "#9333EA"), ("build", "#EA580C"), ("run", "#16A34A") };
+    var phaseColours = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["explore"] = "#4338CA", ["discovery"] = "#1D70B8", ["alpha"] = "#BE185D", ["beta"] = "#C2410C", ["live"] = "#15803D"
+    };
+}
+<link rel="stylesheet" href="~/css/lifecycle-hub.css" asp-append-version="true" />
+
+@if (fromCms)
+{
+<div class="dfe-f-lifecycle-hub @(lifecycle!.DefaultView == "list" ? "dfe-f-lch-list-view" : "dfe-f-lch-card-view")" id="content">
+  <div class="dfe-f-lch-fbar" id="fbar">
+    <div class="dfe-f-lch-fbar-i">
+      <div class="dfe-f-lch-fbar-r1">
+        <div class="dfe-f-lch-fg">
+          <span class="dfe-f-lch-flbl">Phase</span>
+          <button type="button" class="dfe-f-lch-fb on" data-pf="all">All</button>
+          @foreach (var st in stages)
+          {
+            var col = st.ColourHex ?? phaseColours.GetValueOrDefault(st.Slug, "#505a5f");
+            <button type="button" class="dfe-f-lch-fb" data-pf="@st.Slug" style="color: @col"><span class="dfe-f-lch-fdot" style="background: @col"></span>@st.Title</button>
+          }
+        </div>
+        <div class="dfe-f-lch-fsep"></div>
+        <div class="dfe-f-lch-fg">
+          <span class="dfe-f-lch-flbl">Track</span>
+          <button type="button" class="dfe-f-lch-fb on" data-tf="all">All</button>
+          @foreach (var (name, col) in trackSlugs)
+          {
+            <button type="button" class="dfe-f-lch-fb" data-tf="@name" style="color: @col"><span class="dfe-f-lch-fdot" style="background: @col"></span>@(char.ToUpperInvariant(name[0]) + name[1..])</button>
+          }
+        </div>
+        <div class="dfe-f-lch-fbar-right">
+          <span class="dfe-f-lch-flbl" style="margin-left:8px">View</span>
+          <button type="button" class="dfe-f-lch-vbtn on" id="vbtn-card" aria-pressed="true">Cards</button>
+          <button type="button" class="dfe-f-lch-vbtn" id="vbtn-list" aria-pressed="false">List</button>
+          @if (lifecycle.LucidResources?.Count > 0)
+          {
+          <div class="dfe-f-lch-fsep" style="margin:0 4px"></div>
+          <button type="button" class="dfe-f-lch-lucid-btn" id="lucid-btn">Lucid board</button>
+          }
+          <div class="dfe-f-lch-fsep" style="margin:0 4px"></div>
+          <button type="button" class="dfe-f-lch-vbtn" onclick="collapseAll()" title="Collapse all stages" aria-label="Collapse all stages">‹</button>
+          <button type="button" class="dfe-f-lch-vbtn" onclick="expandAll()" title="Expand all stages" aria-label="Expand all stages">›</button>
+        </div>
+      </div>
+      <div class="dfe-f-lch-fbar-r2">
+        <span class="dfe-f-lch-flbl" style="flex-shrink:0">Role</span>
+        <button type="button" class="dfe-f-lch-rc-all on" id="rc-all">All roles</button>
+        @foreach (var role in allRoles)
+        {
+          var rc = role.ColourHex ?? "#6b7280";
+          <button type="button" class="dfe-f-lch-rc" data-role="@(role.ShortCode ?? role.Slug)" style="--rc: @rc"><span class="dfe-f-lch-rc-dot" style="background: @rc"></span>@role.Title</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="dfe-f-lch-wrap">
+    <p class="dfe-f-lch-intro">Use the filters above to show tasks by <strong>stage</strong>, <strong>track</strong> (Design, Build, Run) or <strong>role</strong>. Click a task to expand it and see what to do, why it matters, how to do it, and links to outputs and guidance.</p>
+    <div id="empty-msg" class="dfe-f-lch-empty">No tasks match your filters. <button type="button" onclick="clearAll()">Clear all filters</button></div>
+
+    @foreach (var stage in stages)
+    {
+      var stageSlug = stage.Slug.ToLowerInvariant();
+      var stageCol = stage.ColourHex ?? phaseColours.GetValueOrDefault(stageSlug, "#505a5f");
+      var activeTrackSlugs = stage.ActiveTracks.Select(t => t.Slug.ToLowerInvariant()).ToHashSet();
+      <section class="dfe-f-lch-pb" id="ph-@stageSlug" data-phase="@stageSlug">
+        <div class="dfe-f-lch-ph-hd" onclick="togglePb(this.closest('.dfe-f-lch-pb'))" tabindex="0" role="button" aria-expanded="true" aria-label="Toggle @stage.Title stage — collapse or expand tasks" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); togglePb(this.closest('.dfe-f-lch-pb')); }">
+          <div class="dfe-f-lch-ph-bar" style="background: @stageCol"></div>
+          <div class="dfe-f-lch-ph-body">
+            <div class="dfe-f-lch-ph-top">
+              <span class="dfe-f-lch-ph-tag" style="background: @stageCol">@stage.Title</span>
+              @foreach (var (name, col) in trackSlugs)
+              {
+                var on = activeTrackSlugs.Contains(name);
+                <span class="dfe-f-lch-tpill @(on ? "" : "dfe-f-lch-tpill-off")" style="@(on ? $"background: {col}" : "")">@(char.ToUpperInvariant(name[0]) + name[1..])</span>
+              }
+              <span class="dfe-f-lch-ph-tog-lbl">Collapse</span>
+            </div>
+            <div class="dfe-f-lch-ph-row">
+              <h2 class="dfe-f-lch-ph-title">@stage.Title</h2>
+              <div class="dfe-f-lch-ph-chev"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+            @if (!string.IsNullOrEmpty(stage.Summary))
+            {
+              <p class="dfe-f-lch-ph-sub">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(stage.Summary))</p>
+            }
+            @if (!string.IsNullOrEmpty(stage.DurationLabel))
+            {
+              <span class="dfe-f-lch-ph-dur">@stage.DurationLabel</span>
+            }
+          </div>
+        </div>
+        <div class="dfe-f-lch-ph-acts">
+          <h3 class="dfe-f-lch-tasks-heading">Tasks in this stage</h3>
+          <div class="dfe-f-lch-list-hdr">
+            <div></div><div>Task</div><div>When</div><div>Who</div><div>Outputs</div>
+          </div>
+          <div class="dfe-f-lch-ac-list">
+            @foreach (var placement in stage.Placements)
+            {
+              var task = placement.Task;
+              var trackSlug = task.Track?.Slug?.ToLowerInvariant() ?? "agile";
+              var trackCol = task.Track?.ColourHex ?? stageCol;
+              var roleCodes = task.Roles.Select(r => r.ShortCode ?? r.Slug).Concat(task.LeadRole != null ? new[] { task.LeadRole.ShortCode ?? task.LeadRole.Slug } : []).Distinct().ToList();
+              var outputs = placement.OverrideOutputs.Count > 0 ? placement.OverrideOutputs : task.Outputs;
+              var guidance = placement.OverrideGuidanceLinks.Count > 0 ? placement.OverrideGuidanceLinks : task.GuidanceLinks;
+              var whoList = (task.LeadRole != null ? new[] { task.LeadRole }.Concat(task.Roles.Where(r => r.Slug != task.LeadRole.Slug)) : task.Roles).ToList();
+              <div class="dfe-f-lch-ac" data-phase="@stageSlug" data-track="@trackSlug" data-roles="@string.Join(" ", roleCodes)">
+                <div class="dfe-f-lch-ac-row" onclick="toggleAc(this.closest('.dfe-f-lch-ac'))" tabindex="0" role="button" aria-expanded="false" aria-label="Expand @task.Title — what to do, why it matters, who’s involved" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); toggleAc(this.closest('.dfe-f-lch-ac')); }">
+                  <div class="dfe-f-lch-ac-bar" style="background: @trackCol"></div>
+                  <div class="dfe-f-lch-ac-id">
+                    <span class="dfe-f-lch-ac-badge" style="background: @trackCol">@(task.Track?.Title ?? "Agile")</span>
+                    <span class="dfe-f-lch-ac-title">@task.Title</span>
+                  </div>
+                  <div class="dfe-f-lch-ac-meta">
+                    @if (!string.IsNullOrEmpty(placement.WhenLabel))
+                    {
+                      <span class="dfe-f-lch-ac-when"><b>When:</b> @placement.WhenLabel</span>
+                    }
+                    <div class="dfe-f-lch-ac-profs">
+                      @foreach (var r in whoList)
+                      {
+                        var pillCol = r.ColourHex ?? "#6b7280";
+                        var isLead = task.LeadRole != null && r.Slug == task.LeadRole.Slug;
+                        <span class="dfe-f-lch-ac-prof-pill" style="border-color: @pillCol; background: @(pillCol)22; color: @pillCol">@r.Title@(isLead ? " (lead)" : "")</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="dfe-f-lch-ac-tog">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+                <div class="dfe-f-lch-ac-list-row">
+                  <div class="dfe-f-lch-acl-badge" style="background: @trackCol">@(task.Track?.Title ?? "Agile")</div>
+                  <div class="dfe-f-lch-acl-title">@task.Title</div>
+                  <div class="dfe-f-lch-acl-when">@(placement.WhenLabel ?? "—")</div>
+                  <div class="dfe-f-lch-acl-who">@string.Join(", ", whoList.Select(r => r.Title + (task.LeadRole != null && r.Slug == task.LeadRole.Slug ? " (lead)" : "")))</div>
+                  <div class="dfe-f-lch-acl-out">@string.Join(" · ", outputs.Select(o => o.Title))</div>
+                </div>
+                <div class="dfe-f-lch-ac-body">
+                  <div class="dfe-f-lch-ac-grid">
+                    <div class="dfe-f-lch-ac-col">
+                      <div class="dfe-f-lch-ac-lbl">What</div>
+                      <p>@Html.Raw(string.IsNullOrEmpty(task.What) ? "—" : GovUkMarkdownHelper.ToGovUkHtml(task.What))</p>
+                    </div>
+                    <div class="dfe-f-lch-ac-col dfe-f-lch-ac-why">
+                      <div class="dfe-f-lch-ac-lbl">Why it matters</div>
+                      <p>@Html.Raw(string.IsNullOrEmpty(task.WhyItMatters) ? "—" : GovUkMarkdownHelper.ToGovUkHtml(task.WhyItMatters))</p>
+                    </div>
+                    <div class="dfe-f-lch-ac-col">
+                      <div class="dfe-f-lch-ac-lbl">How</div>
+                      @if (task.HowSteps?.Count > 0)
+                      {
+                        <ol class="dfe-f-lch-how">
+                          @foreach (var step in task.HowSteps)
+                          {
+                            <li>@step.StepText</li>
+                          }
+                        </ol>
+                      }
+                      else
+                      {
+                        <p>—</p>
+                      }
+                    </div>
+                  </div>
+                  <div class="dfe-f-lch-ac-foot">
+                    <div class="dfe-f-lch-ac-fs"><span class="dfe-f-lch-ac-fl">Who</span>
+                      <div class="dfe-f-lch-ac-ft">
+                        @foreach (var r in whoList)
+                        {
+                          var pillCol = r.ColourHex ?? "#6b7280";
+                          var isLead = task.LeadRole != null && r.Slug == task.LeadRole.Slug;
+                          <span class="dfe-f-lch-ac-prof-pill" style="border-color: @pillCol; background: @(pillCol)22; color: @pillCol">@r.Title@(isLead ? " (lead)" : "")</span>
+                        }
+                      </div>
+                    </div>
+                    <div class="dfe-f-lch-ac-fs"><span class="dfe-f-lch-ac-fl">Outputs</span><div class="dfe-f-lch-ac-ft">@foreach (var o in outputs) { <span class="dfe-f-lch-art">@o.Title</span> }</div></div>
+                    <div class="dfe-f-lch-ac-fs"><span class="dfe-f-lch-ac-fl">Guidance</span>
+                      <div class="dfe-f-lch-ac-ft">
+                        @foreach (var gl in guidance)
+                        {
+                          <a class="dfe-f-lch-gl" href="@gl.Url" target="@(gl.OpensInNewTab ? "_blank" : null)" rel="@(gl.OpensInNewTab ? "noopener noreferrer" : null)">@gl.Label</a>@if (!string.IsNullOrEmpty(gl.SourceLabel)) { <span class="dfe-f-lch-gs"> @gl.SourceLabel</span> }
+                        }
+                        @if (guidance.Count == 0) { <span>—</span> }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+  </div>
+
+  @if (lifecycle.LucidResources?.Count > 0)
+  {
+  <div id="modal" class="dfe-f-lch-mo" aria-hidden="true">
+    <div class="dfe-f-lch-mo-box">
+      <div class="dfe-f-lch-mo-hd">
+        <div class="dfe-f-lch-mo-hd-icon">📋</div>
+        <div class="dfe-f-lch-mo-hd-txt"><h3>Lucid board</h3><p>Resources and templates</p></div>
+        <button type="button" class="dfe-f-lch-mo-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="dfe-f-lch-mo-bd">
+        <div class="dfe-f-lch-mo-links">
+          @foreach (var l in lifecycle.LucidResources)
+          {
+            <a class="dfe-f-lch-mo-link" href="@l.Url" target="_blank" rel="noopener noreferrer">
+              <span class="dfe-f-lch-mo-licon">@(l.Icon ?? "↗")</span>
+              <div class="dfe-f-lch-mo-ltxt"><strong>@l.Label</strong>@if (!string.IsNullOrEmpty(l.Description)) { <span>@l.Description</span> }</div>
+              <span class="dfe-f-lch-mo-larr">→</span>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>
+}
+else
+{
+<div class="dfe-f-lifecycle-hub" id="content">
+  <div class="dfe-f-lch-wrap">
+    <div class="dfe-f-lch-empty-state-msg">
+      <p style="margin:0 0 8px"><strong>No lifecycle content yet</strong></p>
+      <p style="margin:0">Content is managed in the CMS. Create and publish a lifecycle (for example with slug <strong>service-delivery-lifecycle</strong>) and add stages and tasks in the CMS.</p>
+    </div>
+  </div>
+</div>
+}
+
+@section Scripts {
+<script>
+(function(){
+  var hub = document.querySelector('.dfe-f-lifecycle-hub');
+  if (!hub) return;
+  var aPhase = 'all', aTrack = 'all', aRole = 'all', aView = 'card';
+
+  function togglePb(pb) {
+    if (!pb) return;
+    pb.classList.toggle('collapsed');
+    var hd = pb.querySelector('.dfe-f-lch-ph-hd');
+    if (hd) hd.setAttribute('aria-expanded', pb.classList.contains('collapsed') ? 'false' : 'true');
+  }
+  function collapseAll() {
+    hub.querySelectorAll('.dfe-f-lch-pb:not(.filtered-out)').forEach(function(p){
+      p.classList.add('collapsed');
+      var h = p.querySelector('.dfe-f-lch-ph-hd');
+      if (h) h.setAttribute('aria-expanded', 'false');
+    });
+  }
+  function expandAll() {
+    hub.querySelectorAll('.dfe-f-lch-pb').forEach(function(p){
+      p.classList.remove('collapsed');
+      var h = p.querySelector('.dfe-f-lch-ph-hd');
+      if (h) h.setAttribute('aria-expanded', 'true');
+    });
+  }
+  window.collapseAll = collapseAll;
+  window.expandAll = expandAll;
+
+  function toggleAc(ac) { if (ac) { ac.classList.toggle('open'); ac.querySelector('[aria-expanded]') && ac.querySelector('[aria-expanded]').setAttribute('aria-expanded', ac.classList.contains('open')); } }
+  window.toggleAc = toggleAc;
+  window.togglePb = togglePb;
+
+  function applyFilters() {
+    var total = 0;
+    hub.querySelectorAll('.dfe-f-lch-pb').forEach(function(pb) {
+      var phase = pb.dataset.phase;
+      var phaseOk = aPhase === 'all' || aPhase === phase;
+      var vis = 0;
+      pb.querySelectorAll('.dfe-f-lch-ac').forEach(function(ac) {
+        var track = ac.dataset.track;
+        var roles = (ac.dataset.roles || '').split(' ');
+        var tOk = aTrack === 'all' || track === aTrack || track === 'agile';
+        var rOk = aRole === 'all' || roles.indexOf(aRole) >= 0;
+        var show = phaseOk && tOk && rOk;
+        ac.classList.toggle('filtered-out', !show);
+        if (show) vis++;
+      });
+      total += vis;
+      pb.classList.toggle('filtered-out', !phaseOk || vis === 0);
+    });
+    var empty = document.getElementById('empty-msg');
+    if (empty) empty.style.display = total === 0 ? 'block' : 'none';
+  }
+
+  function setPhase(p) {
+    aPhase = p;
+    hub.querySelectorAll('[data-pf]').forEach(function(b){ b.classList.toggle('on', b.dataset.pf === p); });
+    if (p !== 'all') {
+      var el = document.getElementById('ph-' + p);
+      if (el) { el.classList.remove('collapsed'); var off = (document.getElementById('fbar') || {}).offsetHeight + 12 || 80; window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' }); }
+    }
+    applyFilters();
+  }
+
+  function setTrack(t) { aTrack = t; hub.querySelectorAll('[data-tf]').forEach(function(b){ b.classList.toggle('on', b.dataset.tf === t); }); applyFilters(); }
+  function setRole(r) {
+    aRole = r;
+    var allBtn = document.getElementById('rc-all');
+    if (allBtn) allBtn.classList.toggle('on', r === 'all');
+    hub.querySelectorAll('.dfe-f-lch-rc').forEach(function(c){ if (c.dataset.role) c.classList.toggle('on', c.dataset.role === r); });
+    applyFilters();
+  }
+  function setView(v) {
+    aView = v;
+    hub.classList.toggle('dfe-f-lch-list-view', v === 'list');
+    hub.classList.toggle('dfe-f-lch-card-view', v === 'card');
+    var cardBtn = document.getElementById('vbtn-card');
+    var listBtn = document.getElementById('vbtn-list');
+    if (cardBtn) { cardBtn.classList.toggle('on', v === 'card'); cardBtn.setAttribute('aria-pressed', v === 'card' ? 'true' : 'false'); }
+    if (listBtn) { listBtn.classList.toggle('on', v === 'list'); listBtn.setAttribute('aria-pressed', v === 'list' ? 'true' : 'false'); }
+    if (v === 'list') hub.querySelectorAll('.dfe-f-lch-ac.open').forEach(function(a){ a.classList.remove('open'); });
+  }
+  function clearAll() { aPhase = 'all'; aTrack = 'all'; aRole = 'all'; hub.querySelectorAll('[data-pf]').forEach(function(b){ b.classList.toggle('on', b.dataset.pf === 'all'); }); hub.querySelectorAll('[data-tf]').forEach(function(b){ b.classList.toggle('on', b.dataset.tf === 'all'); }); setRole('all'); }
+  window.clearAll = clearAll;
+
+  hub.querySelectorAll('[data-pf]').forEach(function(b){ b.addEventListener('click', function(){ setPhase(b.dataset.pf); }); });
+  hub.querySelectorAll('[data-tf]').forEach(function(b){ b.addEventListener('click', function(){ setTrack(b.dataset.tf); }); });
+  hub.querySelectorAll('.dfe-f-lch-rc').forEach(function(b){ if (b.dataset.role) b.addEventListener('click', function(){ setRole(b.dataset.role); }); });
+  if (document.getElementById('rc-all')) document.getElementById('rc-all').addEventListener('click', function(){ setRole('all'); });
+  if (document.getElementById('vbtn-card')) document.getElementById('vbtn-card').addEventListener('click', function(){ setView('card'); });
+  if (document.getElementById('vbtn-list')) document.getElementById('vbtn-list').addEventListener('click', function(){ setView('list'); });
+  var modalEl = document.getElementById('modal');
+  if (document.getElementById('lucid-btn') && modalEl) document.getElementById('lucid-btn').addEventListener('click', function(){ modalEl.classList.add('open'); document.body.style.overflow = 'hidden'; });
+  if (document.querySelector('.dfe-f-lch-mo-close') && modalEl) document.querySelector('.dfe-f-lch-mo-close').addEventListener('click', function(){ modalEl.classList.remove('open'); document.body.style.overflow = ''; });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modalEl) { modalEl.classList.remove('open'); document.body.style.overflow = ''; } });
+
+  setView('@(fromCms ? (lifecycle!.DefaultView ?? "card") : "card")');
+  applyFilters();
+})();
+</script>
+}

@@ -1,0 +1,40 @@
+@*
+  DfE Pill – standalone inline label component
+  =============================================
+
+  Use either Phase or Colour — not both. Phase takes priority.
+
+  PARAMETERS
+  ----------
+  Label   string   Required. The text displayed inside the pill.
+  Phase   string   Optional. One of: discovery | alpha | beta | live. Fixed colours per phase.
+  Colour  string   Optional. One of: blue | green | orange | red | yellow | grey.
+
+  USAGE EXAMPLES
+  --------------
+
+  Phase pill:
+  @await Html.PartialAsync("_DfePill", new ViewDataDictionary(ViewData)
+  {
+      { "Label", "Discovery" },
+      { "Phase", "discovery" }
+  })
+
+  Colour pill:
+  @await Html.PartialAsync("_DfePill", new ViewDataDictionary(ViewData)
+  {
+      { "Label", "Mandatory" },
+      { "Colour", "blue" }
+  })
+*@
+@{
+  var label  = ViewData["Label"]  as string ?? string.Empty;
+  var phase  = (ViewData["Phase"]  as string ?? string.Empty).ToLowerInvariant();
+  var colour = (ViewData["Colour"] as string ?? string.Empty).ToLowerInvariant();
+
+  // Phase takes priority over colour
+  var modifier = !string.IsNullOrWhiteSpace(phase)  ? $"dfe-pill--{phase}"
+               : !string.IsNullOrWhiteSpace(colour) ? $"dfe-pill--{colour}"
+               : "dfe-pill--grey";
+}
+<span class="dfe-pill @modifier">@label</span>
