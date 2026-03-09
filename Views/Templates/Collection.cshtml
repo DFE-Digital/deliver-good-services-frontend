@@ -55,8 +55,13 @@
 </div>
 
 @* Row 2: body + section groups + right panel *@
-<div class="govuk-grid-row govuk-!-margin-top-6">
+<div class="govuk-grid-row">
     <div class="@(hasRightPanel ? "govuk-grid-column-two-thirds" : "govuk-grid-column-full")">
+
+        @if (ViewBag.PageNotification != null)
+        {
+            @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
+        }
 
         @if (!string.IsNullOrEmpty(collection.Body))
         {

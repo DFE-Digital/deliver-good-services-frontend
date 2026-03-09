@@ -21,6 +21,7 @@ namespace ServiceManual.Controllers
                 return NotFound();
 
             ViewBag.Collection = collection;
+            ViewBag.PageNotification = await _cmsApiService.GetActivePageNotificationAsync("collections", slug);
 
             return View("~/Views/Templates/Collection.cshtml");
         }

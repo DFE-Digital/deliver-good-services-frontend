@@ -37,6 +37,7 @@ namespace ServiceManual.Controllers
                 return NotFound();
 
             ViewBag.Page = guidePage;
+            ViewBag.PageNotification = await _cmsApiService.GetActivePageNotificationAsync("detailed_guide_pages", pageSlug);
 
             return View("~/Views/Templates/DetailedGuidePage.cshtml");
         }

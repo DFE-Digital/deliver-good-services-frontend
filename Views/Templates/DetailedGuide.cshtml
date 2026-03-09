@@ -24,6 +24,10 @@
             {
                 <p class="govuk-body-l dfe-f-header__intro">@guide.MetaDescription</p>
             }
+            @if (guide.ShowLastUpdatedDateOnPage && !string.IsNullOrEmpty(guide.UpdatedAtDisplay))
+            {
+                <p class="govuk-body-s govuk-!-margin-top-2">Last updated: @guide.UpdatedAtDisplay</p>
+            }
         </div>
 
         @if (guide.Pages.Count > 0)
@@ -41,6 +45,11 @@
                     }
                 </ul>
             </nav>
+        }
+
+        @if (ViewBag.PageNotification != null)
+        {
+            @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
         }
 
     </div>

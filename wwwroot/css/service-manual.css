@@ -244,7 +244,7 @@ blockquote.govuk-inset-text {
 .masthead-meta {
     color: #ffffff;
     opacity: 0.85;
-    font-size: 16px;
+    font-size: 1rem;
 }
 
 /* Masthead breadcrumbs - Styled for dark background */
@@ -582,7 +582,7 @@ blockquote.govuk-inset-text {
 }
 
 .download-artifact-description {
-    font-size: 16px;
+    font-size: 1rem;
     color: var(--govuk-colour-secondary-text);
     line-height: 1.6;
     margin: 0;
@@ -666,7 +666,7 @@ blockquote.govuk-inset-text {
 }
 
 .resource-card-description {
-    font-size: 16px;
+    font-size: 1rem;
     color: var(--govuk-colour-secondary-text);
     line-height: 1.5;
     margin: 0;
@@ -886,7 +886,7 @@ blockquote.govuk-inset-text {
     border: 2px solid var(--govuk-colour-border);
     margin-right: 8px;
     margin-bottom: 12px;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--govuk-colour-text);
     text-decoration: none;
@@ -1001,7 +1001,7 @@ blockquote.govuk-inset-text {
 }
 
 .dfe-related-navigation__section-link {
-    font-size: 16px;
+    font-size: 1rem;
     text-decoration: underline;
 }
 
@@ -1042,7 +1042,7 @@ blockquote.govuk-inset-text {
 }
 
 .dfe-share-sidebar__link {
-    font-size: 16px;
+    font-size: 1rem;
     text-decoration: underline;
     background: none;
     border: none;
@@ -1128,7 +1128,7 @@ blockquote.govuk-inset-text {
 }
 
 .lifecycle-journey-stage__roles {
-    font-size: 16px;
+    font-size: 1rem;
     color: var(--govuk-colour-secondary-text);
     margin: 0;
 }
@@ -1331,7 +1331,7 @@ body.has-breadcrumbs .content-page-hero,
 
 .dfe-card-list__description {
     margin: 0;
-    font-size: 16px;
+    font-size: 1rem;
     color: var(--govuk-colour-secondary-text);
     line-height: 1.6;
     display: block;
@@ -1449,7 +1449,7 @@ body.has-breadcrumbs .content-page-hero,
 }
 
 .topic-item ul li a {
-    font-size: 16px;
+    font-size: 1rem;
     color: var(--govuk-colour-blue);
     text-decoration: underline;
 }
@@ -1561,7 +1561,7 @@ body.has-breadcrumbs .content-page-hero,
 
 .content-listing-meta {
     margin-bottom: 16px;
-    font-size: 16px;
+    font-size: 1rem;
     color: var(--govuk-colour-secondary-text);
 }
 
@@ -1581,7 +1581,7 @@ body.has-breadcrumbs .content-page-hero,
 }
 
 .page-metadata__heading {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1602,13 +1602,13 @@ body.has-breadcrumbs .content-page-hero,
 }
 
 .page-metadata__term {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.85);
 }
 
 .page-metadata__detail {
-    font-size: 16px;
+    font-size: 1rem;
     color: #ffffff;
     margin: 0;
 }
@@ -1619,7 +1619,7 @@ body.has-breadcrumbs .content-page-hero,
 
 .page-metadata__history-summary {
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     color: #ffffff;
     list-style: none;
@@ -1686,7 +1686,7 @@ body.has-breadcrumbs .content-page-hero,
 
 .page-metadata__history-item p {
     margin: 0;
-    font-size: 16px;
+    font-size: 1rem;
     color: #ffffff;
 }
 
@@ -1796,7 +1796,7 @@ body.has-breadcrumbs .content-page-hero,
 }
 
 .news-meta {
-    font-size: 16px;
+    font-size: 1rem;
     color: var(--govuk-colour-secondary-text);
     margin-bottom: 16px;
 }
@@ -2160,7 +2160,7 @@ a:focus-visible {
     }
 
     .dfe-cta-section__text {
-        font-size: 16px;
+        font-size: 1rem;
     }
 }
 
@@ -2228,7 +2228,7 @@ a:focus-visible {
 
 @media (max-width: 40.0625em) {
     .dfe-action-link__link {
-        font-size: 16px;
+        font-size: 1rem;
     }
 }
 
@@ -2654,14 +2654,14 @@ a:focus-visible {
 }
 
 .dfe-f-related-content__section-title {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     margin: 0 0 8px 0;
     color: #0b0c0c;
 }
 
 .dfe-f-related-content__section-body {
-    font-size: 16px;
+    font-size: 1rem;
     color: #0b0c0c;
 }
 
@@ -2738,13 +2738,13 @@ a:focus-visible {
 }
 
 .dfe-f-guide-contents__skip {
-    font-size: 16px;
+    font-size: 1rem;
     margin-bottom: 16px;
 }
 
 .dfe-f-guide-contents__title {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 400;
     margin: 0 0 8px 0;
     color: #0b0c0c;
 }
@@ -2765,7 +2765,7 @@ a:focus-visible {
 .dfe-f-guide-contents__dash {
     flex-shrink: 0;
     color: #505a5f;
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.5;
 }
 
@@ -2774,7 +2774,7 @@ a:focus-visible {
 }
 
 .dfe-f-guide-contents__link {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 400;
     color: #1d70b8;
     text-decoration: none;
@@ -2787,7 +2787,7 @@ a:focus-visible {
 }
 
 .dfe-f-guide-contents__item--active > span[aria-current] {
-    font-size: 16px;
+    font-size: 1rem;
     color: #0b0c0c;
     line-height: 1.5;
 }
@@ -2815,12 +2815,12 @@ a:focus-visible {
     content: "\2014";
     flex-shrink: 0;
     color: #505a5f;
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.5;
 }
 
 .dfe-f-guide-nav__item a {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 400;
     color: #1d70b8;
     text-decoration: none;
@@ -2868,7 +2868,7 @@ a:focus-visible {
 }
 
 .dfe-f-guide-list__item-description {
-    font-size: 16px;
+    font-size: 1rem;
     color: #505a5f;
 }
 
@@ -2929,7 +2929,7 @@ a:focus-visible {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-    font-size: 16px;
+    font-size: 1rem;
     color: #505a5f;
     border-top: 1px solid #b1b4b6;
     padding-top: 12px;
@@ -2964,7 +2964,7 @@ a:focus-visible {
 }
 
 .dfe-f-contents-box__item {
-    font-size: 16px;
+    font-size: 1rem;
     margin-bottom: 8px;
     padding-left: 0;
 }
@@ -3393,7 +3393,7 @@ a:focus-visible {
 
 .dfe-standards-filter__label {
     display: block;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--govuk-colour-text);
     margin-bottom: 8px;
@@ -3417,7 +3417,7 @@ a:focus-visible {
 }
 
 .dfe-standards-filter__secondary-link {
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 500;
 }
 
@@ -3430,7 +3430,7 @@ a:focus-visible {
 /* ── ASSiDfE Standard detail page ──────────────────────────────────────────────────────── */
 
 .dfe-f-list{
-    font-size: 16px;
+    font-size: 1rem;
     font-size: 1;
     line-height: 1.33333;
     margin-bottom: 16px;

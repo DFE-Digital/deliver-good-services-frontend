@@ -12,6 +12,10 @@ namespace ServiceManual.Models
         public bool GuidePagesOnRightSide { get; set; }
         public List<DetailedGuidePageSummary> Pages { get; set; } = [];
         public List<RelatedContentItem> RelatedContent { get; set; } = [];
+        /// <summary>When true, show "Last updated: [date]" under the meta description.</summary>
+        public bool ShowLastUpdatedDateOnPage { get; set; }
+        /// <summary>Formatted last updated date for display (e.g. "7 January 2026"), when ShowLastUpdatedDateOnPage is true.</summary>
+        public string? UpdatedAtDisplay { get; set; }
     }
 
     public class DetailedGuidePageSummary

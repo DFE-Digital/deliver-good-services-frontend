@@ -45,10 +45,15 @@
             {
                 <p class="govuk-body-l dfe-f-header__intro">@guideMetaDescription</p>
             }
-        </div>
+            @if (guide.ShowLastUpdatedDateOnPage && !string.IsNullOrEmpty(guide.UpdatedAtDisplay))
+            {
+                <p class="govuk-body-s govuk-!-margin-top-2">Last updated: @guide.UpdatedAtDisplay</p>
+            }
 
-        @if (!guidePagesOnRightSide && !hideTitleAndDescription && siblingPages.Count > 0 && !string.IsNullOrEmpty(guideTitle))
-        {
+
+
+             @if (!guidePagesOnRightSide && !hideTitleAndDescription && siblingPages.Count > 0 && !string.IsNullOrEmpty(guideTitle))
+            {
             <nav class="dfe-f-guide-contents" aria-label="@guideTitle contents">
                 <h2 class="dfe-f-guide-contents__title">Contents</h2>
                 <ol class="dfe-f-guide-contents__list">
@@ -70,6 +75,9 @@
                 </ol>
             </nav>
         }
+        </div>
+
+       
 
     </div>
 </div>
@@ -88,6 +96,8 @@
             }
         }
 
+  
+
         @if (!string.IsNullOrWhiteSpace(beforeContents))
         {
             var beforeContentsForRender = beforeContents.Replace("[[professions]]", professionsTagsHtml);
@@ -95,6 +105,11 @@
                 @Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForBody(beforeContentsForRender))
             </div>
         }
+
+                    @if (ViewBag.PageNotification != null)
+            {
+                @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
+            }
 
         @if (!hideContents && pageHeadings.Count > 0)
         {
@@ -111,6 +126,8 @@
                 </ol>
             </nav>
         }
+
+
 
         <div class="dfe-f-body">
             @Html.Raw(bodyHtml)

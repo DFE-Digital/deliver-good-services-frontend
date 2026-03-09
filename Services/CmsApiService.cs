@@ -35,7 +35,7 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/single-page-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug&fields[3]=body&fields[4]=lastReviewDate&fields[5]=nextReviewDate" +
+                          "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug&fields[3]=body&fields[4]=lastReviewDate&fields[5]=nextReviewDate&fields[6]=showLastUpdatedDateOnPage&fields[7]=updatedAt" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug";
                 var response = await _httpClient.GetAsync(url);
@@ -70,7 +70,9 @@ namespace ServiceManual.Services
                         .ToList() ?? [],
                     CollectionSlug = firstCollection?.Slug,
                     CollectionTitle = firstCollection?.Title,
-                    Collections = collections
+                    Collections = collections,
+                    ShowLastUpdatedDateOnPage = item.ShowLastUpdatedDateOnPage ?? false,
+                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null
                 };
             }
             catch (Exception ex)
@@ -196,7 +198,7 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=guidePagesOnRightSide" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=guidePagesOnRightSide&fields[4]=showLastUpdatedDateOnPage&fields[5]=updatedAt" +
                           "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug" +
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content";
@@ -234,7 +236,9 @@ namespace ServiceManual.Services
                         .ToList() ?? [],
                     RelatedContent = item.RelatedContent?
                         .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
-                        .ToList() ?? []
+                        .ToList() ?? [],
+                    ShowLastUpdatedDateOnPage = item.ShowLastUpdatedDateOnPage ?? false,
+                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null
                 };
             }
             catch (Exception ex)
@@ -249,7 +253,7 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav&fields[8]=showLastUpdatedDateOnPage&fields[9]=updatedAt" +
                           "&populate[professionsApplicable][fields][0]=title" +
                           "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=guidePagesOnRightSide" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug" +
@@ -301,7 +305,9 @@ namespace ServiceManual.Services
                     Professions = item.ProfessionsApplicable?
                         .Where(p => !string.IsNullOrWhiteSpace(p.Title))
                         .Select(p => p.Title!.Trim())
-                        .ToList() ?? []
+                        .ToList() ?? [],
+                    ShowLastUpdatedDateOnPage = item.ShowLastUpdatedDateOnPage ?? false,
+                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null
                 };
             }
             catch (Exception ex)
@@ -348,6 +354,89 @@ namespace ServiceManual.Services
                 _logger.LogError(ex, "Error fetching html-page for slug '{Slug}'", slug);
                 return null;
             }
+        }
+
+        public async Task<PageNotification?> GetActivePageNotificationAsync(string relationFilter, string slug)
+        {
+            try
+            {
+                var now = DateTime.UtcNow.ToString("o");
+                var url = $"api/page-notifications?filters[{relationFilter}][slug][$eq]={Uri.EscapeDataString(slug)}" +
+                          $"&filters[validFrom][$lte]={Uri.EscapeDataString(now)}" +
+                          $"&filters[validTo][$gte]={Uri.EscapeDataString(now)}" +
+                          "&filters[enabled][$eq]=true" +
+                          "&publicationState=live" +
+                          "&fields[0]=title&fields[1]=message";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogDebug("CMS API returned {StatusCode} for page-notifications (relation={Relation}, slug={Slug})", response.StatusCode, relationFilter, slug);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiPageNotification>>(json, JsonOptions);
+                var item = result?.Data?.FirstOrDefault();
+                if (item is null)
+                    return null;
+
+                var message = ExtractNotificationMessage(item.Message);
+                if (string.IsNullOrWhiteSpace(message))
+                    return null;
+
+                return new PageNotification
+                {
+                    Title = item.Title ?? "Important",
+                    Message = message
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Error fetching page notification for {Relation} slug '{Slug}'", relationFilter, slug);
+                return null;
+            }
+        }
+
+        private static string ExtractNotificationMessage(JsonElement? messageElement)
+        {
+            if (!messageElement.HasValue)
+                return string.Empty;
+            var el = messageElement.Value;
+            if (el.ValueKind == JsonValueKind.Null || el.ValueKind == JsonValueKind.Undefined)
+                return string.Empty;
+            if (el.ValueKind == JsonValueKind.String)
+                return el.GetString() ?? string.Empty;
+            if (el.ValueKind == JsonValueKind.Object && el.TryGetProperty("blocks", out var blocks) && blocks.ValueKind == JsonValueKind.Array)
+            {
+                var parts = new List<string>();
+                foreach (var block in blocks.EnumerateArray())
+                {
+                    if (block.TryGetProperty("children", out var children))
+                        foreach (var child in children.EnumerateArray())
+                            if (child.TryGetProperty("text", out var text))
+                                parts.Add(text.GetString() ?? string.Empty);
+                }
+                return string.Join(" ", parts);
+            }
+            if (el.ValueKind == JsonValueKind.Object && el.TryGetProperty("children", out var topChildren))
+                return ExtractTextFromStrapiBlocks(topChildren);
+            return string.Empty;
+        }
+
+        private static string ExtractTextFromStrapiBlocks(JsonElement children)
+        {
+            if (children.ValueKind != JsonValueKind.Array)
+                return string.Empty;
+            var parts = new List<string>();
+            foreach (var node in children.EnumerateArray())
+            {
+                if (node.TryGetProperty("text", out var text))
+                    parts.Add(text.GetString() ?? string.Empty);
+                else if (node.TryGetProperty("children", out var nested))
+                    parts.Add(ExtractTextFromStrapiBlocks(nested));
+            }
+            return string.Join(" ", parts);
         }
 
         public async Task<Lifecycle?> GetLifecycleAsync()
@@ -918,6 +1007,15 @@ namespace ServiceManual.Services
             return isoDate;
         }
 
+        /// <summary>Formats an ISO 8601 datetime (e.g. from Strapi updatedAt) as "7 January 2026".</summary>
+        private static string? FormatDateTime(string? isoDateTime)
+        {
+            if (string.IsNullOrEmpty(isoDateTime)) return null;
+            if (DateTime.TryParse(isoDateTime, null, System.Globalization.DateTimeStyles.RoundtripKind, out var dt))
+                return dt.ToString("d MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-GB"));
+            return null;
+        }
+
         /// <summary>Maps API content type to display label for collection listing (GOV.UK style).</summary>
         private static string? ContentTypeLabel(string? type)
         {
@@ -1303,6 +1401,10 @@ namespace ServiceManual.Services
             public string? NextReviewDate { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
             public StrapiSlugRef? Collection { get; set; }
+            [JsonPropertyName("showLastUpdatedDateOnPage")]
+            public bool? ShowLastUpdatedDateOnPage { get; set; }
+            [JsonPropertyName("updatedAt")]
+            public string? UpdatedAt { get; set; }
         }
 
         private class StrapiCollection
@@ -1409,6 +1511,10 @@ namespace ServiceManual.Services
             public StrapiCollectionRef? Collection { get; set; }
             public List<StrapiDetailedGuidePageSummary>? Detailed_Guide_Pages { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
+            [JsonPropertyName("showLastUpdatedDateOnPage")]
+            public bool? ShowLastUpdatedDateOnPage { get; set; }
+            [JsonPropertyName("updatedAt")]
+            public string? UpdatedAt { get; set; }
         }
 
         private class StrapiTagsProfession
@@ -1429,6 +1535,10 @@ namespace ServiceManual.Services
             public List<StrapiTagsProfession>? ProfessionsApplicable { get; set; }
             public StrapiDetailedGuideRef? Detailed_Guide { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
+            [JsonPropertyName("showLastUpdatedDateOnPage")]
+            public bool? ShowLastUpdatedDateOnPage { get; set; }
+            [JsonPropertyName("updatedAt")]
+            public string? UpdatedAt { get; set; }
         }
 
         private class StrapiDetailedGuideSummary
@@ -1492,6 +1602,12 @@ namespace ServiceManual.Services
             public string? Html { get; set; }
             public string? Css { get; set; }
             public string? Js { get; set; }
+        }
+
+        private class StrapiPageNotification
+        {
+            public string? Title { get; set; }
+            public JsonElement? Message { get; set; }
         }
 
         private class StrapiContentListItem

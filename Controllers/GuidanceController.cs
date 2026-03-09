@@ -21,6 +21,7 @@ namespace ServiceManual.Controllers
                 return NotFound();
 
             ViewBag.Guide = guide;
+            ViewBag.PageNotification = await _cmsApiService.GetActivePageNotificationAsync("single_page_guides", slug);
 
             return View("~/Views/Templates/SinglePageGuide.cshtml");
         }
