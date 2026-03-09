@@ -1,0 +1,68 @@
+@{
+  ViewData["Title"] = "Design components – Service documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/service">Service documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Design components</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-layout">
+  @await Html.PartialAsync("~/Views/Documentation/Service/_ServiceDocLayout.cshtml")
+
+  <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Service</span>
+      <h1 class="govuk-heading-l doc-content__title">Design components</h1>
+      <p class="doc-content__lead">Reusable styles and components used across the service, with examples and usage in both Razor views and CMS markdown.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">The full reference lives in the main <a class="govuk-link" href="/documentation">Documentation</a> section. This page summarises what’s available and points you to detailed examples. No secrets or environment-specific values are used in examples.</p>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Styles</h2>
+      <p class="govuk-body">GOV.UK typography, headings, links, inset text, tables, horizontal rules, and colour. Used in both static pages and CMS-rendered content.</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><a class="govuk-link" href="/documentation/typography">Typography</a> — Type scale and conventions</li>
+        <li><a class="govuk-link" href="/documentation/headings">Headings</a> — Sizes and markdown mapping</li>
+        <li><a class="govuk-link" href="/documentation/links">Links</a> — Standard and new-tab links</li>
+        <li><a class="govuk-link" href="/documentation/inset-text">Inset text</a> — Blockquotes and callouts</li>
+        <li><a class="govuk-link" href="/documentation/tables">Tables</a> — Markdown tables and alignment</li>
+        <li><a class="govuk-link" href="/documentation/horizontal-rule">Horizontal rule</a> — Section breaks</li>
+        <li><a class="govuk-link" href="/documentation/colour">Colour</a> — Palette and phase colours</li>
+      </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Markdown and shortcodes</h2>
+      <p class="govuk-body">CMS body content is written in Markdown. Custom shortcodes provide panels, metrics, cards, and action links. The pipeline converts markdown and shortcodes to GOV.UK-styled HTML.</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><a class="govuk-link" href="/documentation/markdown">Markdown syntax</a> — Headings, lists, warning/info panels, full shortcode reference</li>
+        <li><a class="govuk-link" href="/documentation/action-link">Action link</a> — <code class="doc-inline-code">[actionLink]</code> for prominent CTAs</li>
+        <li><a class="govuk-link" href="/documentation/panel-component">Panel component</a> — <code class="doc-inline-code">[panel]</code> with tags, colours, expandable content</li>
+        <li><a class="govuk-link" href="/documentation/pill-component">Pill component</a> — Phase or status labels</li>
+        <li><a class="govuk-link" href="/documentation/cards">Cards</a> — Metric and stat cards, markdown and Razor</li>
+        <li><a class="govuk-link" href="/documentation/chevron-cards">Card list</a> — Chevron/card list layout</li>
+        <li><a class="govuk-link" href="/documentation/related-content">Related content</a> — Sidebar and guide navigation</li>
+        <li><a class="govuk-link" href="/documentation/phase-components">Delivery phase components</a> — Phase picker, nav, headers, criteria, task panels</li>
+      </ul>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Using components in the CMS</h2>
+      <p class="govuk-body">In rich-text or markdown fields in the CMS, use the shortcodes documented above (e.g. <code class="doc-inline-code">[panel]</code>, <code class="doc-inline-code">[metric]</code>, <code class="doc-inline-code">[actionLink]</code>). The frontend renders them with the same styles as the design system. Copy examples from the linked documentation pages; they use only public structure and placeholder content.</p>
+    </section>
+  </main>
+</div>

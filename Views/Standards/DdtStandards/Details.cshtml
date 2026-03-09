@@ -40,19 +40,19 @@
     var hasContents = hasPurpose || hasHowToMeet || hasGovernance || hasRelatedGuidance;
     var relatedStandards = ViewBag.RelatedStandards as List<DdtStandardDto> ?? new List<DdtStandardDto>();
 
-    <div class="govuk-width-container" id="standard-content">
-        @* Row 1: header + contents (aligned with DetailedGuidePage) *@
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                <div class="dfe-f-header">
-                    <span class="govuk-caption-xl govuk-!-margin-top-5">Standards</span>
-                    <h1 class="govuk-heading-xl dfe-f-header__title">@Model.Title</h1>
-                    @if (!string.IsNullOrEmpty(Model.Summary))
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+        <div class="dfe-f-header">
+
+        <span class="govuk-caption-xl  govuk-!-margin-top-5">Standards</span>
+            <h1 class="govuk-heading-xl dfe-f-header__title">@Model.Title</h1>
+             @if (!string.IsNullOrEmpty(Model.Summary))
                     {
                         <p class="govuk-body-l dfe-f-header__intro">@Model.Summary</p>
                     }
-                </div>
-                @if (hasContents)
+
+                        @if (hasContents)
                 {
                     <nav class="dfe-f-guide-contents govuk-!-margin-bottom-8" aria-label="Contents">
                         <h2 class="dfe-f-guide-contents__title">Contents</h2>
@@ -104,12 +104,27 @@
                         </ol>
                     </nav>
                 }
-            </div>
         </div>
+    </div>
+</div>
 
-        @* Row 2: body content + right panel (Part of, About this standard, Related standards) *@
+
+
+
         <div class="govuk-grid-row govuk-!-margin-top-6">
             <div class="govuk-grid-column-two-thirds">
+
+                @if(Model.LegalStandard == true)
+                {
+                    <div class="govuk-warning-text">
+                        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                        <strong class="govuk-warning-text__text">
+                            <span class="govuk-visually-hidden">Warning</span>
+                            You are breaking the law if you do not meet this standard.
+                        </strong>
+                    </div>
+                }
+            
                 @if (hasPurpose)
                 {
                     <h2 class="govuk-heading-l" id="purpose">Purpose</h2>
@@ -274,7 +289,7 @@
                 </details>
             </div>
         </div>
-    </div>
+  
 }
 else
 {

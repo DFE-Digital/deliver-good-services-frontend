@@ -1,0 +1,89 @@
+@{
+  ViewData["Title"] = "Code and content lifecycle – Publishing";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/publishing">Publishing</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Code and content lifecycle</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Publishing</span>
+        <h1 class="govuk-heading-l doc-content__title">Code and content lifecycle</h1>
+        <p class="doc-content__lead">How code and content move through Local, Dev, Test, and Production — and when to promote content.</p>
+      </div>
+
+      <section class="doc-section">
+        <h2 class="doc-section__title">Code pipeline</h2>
+        <p class="govuk-body">Application code (frontend and CMS) is deployed in one direction. Each environment uses the same codebase with different configuration.</p>
+        <div class="lifecycle-diagram lifecycle-diagram--code" role="img" aria-label="Code flow: Local to Dev to Test to Production">
+          <ol class="lifecycle-diagram__pipeline">
+            <li class="lifecycle-diagram__step lifecycle-diagram__step--local">
+              <span class="lifecycle-diagram__step-num">1</span>
+              <span class="lifecycle-diagram__step-name">Local</span>
+              <span class="lifecycle-diagram__step-desc">Build and develop; local CMS and DB.</span>
+            </li>
+            <li class="lifecycle-diagram__step lifecycle-diagram__step--dev">
+              <span class="lifecycle-diagram__step-num">2</span>
+              <span class="lifecycle-diagram__step-name">Dev</span>
+              <span class="lifecycle-diagram__step-desc">Deploy; validate models with content.</span>
+            </li>
+            <li class="lifecycle-diagram__step lifecycle-diagram__step--test">
+              <span class="lifecycle-diagram__step-num">3</span>
+              <span class="lifecycle-diagram__step-name">Test</span>
+              <span class="lifecycle-diagram__step-desc">Deploy; editors draft and test.</span>
+            </li>
+            <li class="lifecycle-diagram__step lifecycle-diagram__step--prod">
+              <span class="lifecycle-diagram__step-num">4</span>
+              <span class="lifecycle-diagram__step-name">Production</span>
+              <span class="lifecycle-diagram__step-desc">Deploy after sign-off; live site.</span>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section__title">Content</h2>
+        <p class="govuk-body">Content is managed in the CMS. Promoting <strong>replaces</strong> the target environment’s data, so we only promote between non-live environments. Production content is created and edited only in Production.</p>
+        <div class="lifecycle-diagram lifecycle-diagram--content" role="img" aria-label="Content: promote between Local, Dev, Test; never promote into Production">
+          <div class="lifecycle-diagram__zones">
+            <div class="lifecycle-diagram__zone lifecycle-diagram__zone--promote">
+              <p class="lifecycle-diagram__zone-title">Promotion zone</p>
+              <p class="lifecycle-diagram__zone-envs">Local · Dev · Test</p>
+              <p class="lifecycle-diagram__zone-note">Promote between these as needed. Replace is acceptable.</p>
+            </div>
+            <div class="lifecycle-diagram__divider" aria-hidden="true">
+              <span class="lifecycle-diagram__divider-label">Do not promote content into Production</span>
+            </div>
+            <div class="lifecycle-diagram__zone lifecycle-diagram__zone--prod">
+              <p class="lifecycle-diagram__zone-title">Production</p>
+              <p class="lifecycle-diagram__zone-note">Content created and edited only here. Never import from Test.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2 class="doc-section__title">Summary</h2>
+        <table class="govuk-table doc-table">
+          <thead><tr><th>Environment</th><th>Code</th><th>Content</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Local</strong></td><td>Develop locally</td><td>Seed data; can promote to Dev</td></tr>
+            <tr><td><strong>Dev</strong></td><td>Deployed; test models</td><td>Test content; promote to/from Local and Test</td></tr>
+            <tr><td><strong>Test</strong></td><td>Deployed; mirrors prod</td><td>Editors draft; promote to/from Dev only</td></tr>
+            <tr><td><strong>Production</strong></td><td>Deployed after sign-off</td><td>Content only in Prod; never import from Test</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>

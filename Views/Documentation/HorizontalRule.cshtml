@@ -1,0 +1,124 @@
+@{
+  ViewData["Title"] = "Horizontal rule – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/styles">Styles</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Horizontal rule</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Styles</span>
+      <h1 class="govuk-heading-l doc-content__title">Horizontal rule</h1>
+      <p class="doc-content__lead">Use a horizontal rule to create a visible section break between distinct areas of content.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">Three dashes (<code class="doc-inline-code">---</code>) on their own line in markdown renders as a <a href="https://design-system.service.gov.uk/styles/layout/#section-breaks" class="govuk-link" rel="noopener noreferrer">GOV.UK section break</a>. Use sparingly — if you find yourself using many section breaks, consider whether the content should be split into separate pages or sections with headings instead.</p>
+    </div>
+
+    <!-- ── Section break ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Section break</h2>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <p class="govuk-body">Content above the section break.</p>
+          <hr class="govuk-section-break govuk-section-break--visible">
+          <p class="govuk-body">Content below the section break.</p>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-hr-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-hr-html">HTML</button>
+          </div>
+          <div id="ex-hr-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>Content above the section break.
+
+---
+
+Content below the section break.</code></pre>
+          </div>
+          <div id="ex-hr-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;hr class="govuk-section-break govuk-section-break--visible"&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Size variants ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Size variants</h2>
+      <p class="govuk-body doc-section__description">Three size variants are available in addition to the default. Use the suffixed markdown syntax to choose a size.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <p class="govuk-body-s" style="color:#505a5f;margin-bottom:4px">Default (<code class="doc-inline-code">---</code>)</p>
+          <hr class="govuk-section-break govuk-section-break--visible">
+          <p class="govuk-body-s" style="color:#505a5f;margin-bottom:4px;margin-top:16px">M (<code class="doc-inline-code">---m</code>)</p>
+          <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+          <p class="govuk-body-s" style="color:#505a5f;margin-bottom:4px;margin-top:16px">L (<code class="doc-inline-code">---l</code>)</p>
+          <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+          <p class="govuk-body-s" style="color:#505a5f;margin-bottom:4px;margin-top:16px">XL (<code class="doc-inline-code">---xl</code>)</p>
+          <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-sizes-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-sizes-html">HTML</button>
+          </div>
+          <div id="ex-sizes-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>---
+
+---m
+
+---l
+
+---xl</code></pre>
+          </div>
+          <div id="ex-sizes-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;hr class="govuk-section-break govuk-section-break--visible"&gt;
+&lt;hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"&gt;
+&lt;hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible"&gt;
+&lt;hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible"&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Markdown</th><th>Size</th><th>Spacing</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">---</code></td><td>Default</td><td>Standard vertical spacing</td></tr>
+          <tr><td><code class="doc-inline-code">---m</code></td><td>M</td><td>Medium — equivalent to 30px top and bottom</td></tr>
+          <tr><td><code class="doc-inline-code">---l</code></td><td>L</td><td>Large — equivalent to 40px top and bottom</td></tr>
+          <tr><td><code class="doc-inline-code">---xl</code></td><td>XL</td><td>Extra large — equivalent to 50px top and bottom</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    </main>
+  </div>
+</div>

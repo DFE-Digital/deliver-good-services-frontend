@@ -1,0 +1,187 @@
+@{
+  ViewData["Title"] = "Headings – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/styles">Styles</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Headings</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Styles</span>
+      <h1 class="govuk-heading-l doc-content__title">Headings</h1>
+      <p class="doc-content__lead">GOV.UK Frontend heading classes and how markdown heading levels map to them in the Service Manual.</p>
+    </div>
+
+    <!-- ── All heading sizes ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Heading sizes</h2>
+      <p class="govuk-body doc-section__description">Four heading sizes are available. Use them in order — do not skip levels.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <h1 class="govuk-heading-xl">Heading XL — <code style="font-size:0.7em;font-weight:400"># H1</code></h1>
+          <h2 class="govuk-heading-l">Heading L — <code style="font-size:0.7em;font-weight:400">## H2</code></h2>
+          <h3 class="govuk-heading-m">Heading M — <code style="font-size:0.7em;font-weight:400">### H3</code></h3>
+          <h4 class="govuk-heading-s">Heading S — <code style="font-size:0.7em;font-weight:400">#### H4</code></h4>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-sizes-html">HTML</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-sizes-markdown">Markdown</button>
+          </div>
+          <div id="ex-sizes-html" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;h1 class="govuk-heading-xl"&gt;Heading XL&lt;/h1&gt;
+&lt;h2 class="govuk-heading-l"&gt;Heading L&lt;/h2&gt;
+&lt;h3 class="govuk-heading-m"&gt;Heading M&lt;/h3&gt;
+&lt;h4 class="govuk-heading-s"&gt;Heading S&lt;/h4&gt;</code></pre>
+          </div>
+          <div id="ex-sizes-markdown" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code># Heading — renders as govuk-heading-xl
+## Heading — renders as govuk-heading-l
+### Heading — renders as govuk-heading-m
+#### Heading — renders as govuk-heading-s</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Markdown</th><th>HTML element</th><th>GOV.UK class</th><th>Usage</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">#</code></td><td><code class="doc-inline-code">&lt;h1&gt;</code></td><td><code class="doc-inline-code">govuk-heading-xl</code></td><td>Page title — one per page. The template already provides the page heading above the body.</td></tr>
+          <tr><td><code class="doc-inline-code">##</code></td><td><code class="doc-inline-code">&lt;h2&gt;</code></td><td><code class="doc-inline-code">govuk-heading-l</code></td><td>Major sections — these appear in the "On this page" contents list.</td></tr>
+          <tr><td><code class="doc-inline-code">###</code></td><td><code class="doc-inline-code">&lt;h3&gt;</code></td><td><code class="doc-inline-code">govuk-heading-m</code></td><td>Sub-sections within a major section.</td></tr>
+          <tr><td><code class="doc-inline-code">####</code></td><td><code class="doc-inline-code">&lt;h4&gt;</code></td><td><code class="doc-inline-code">govuk-heading-s</code></td><td>Minor headings — use sparingly.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Body text ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Body text</h2>
+      <p class="govuk-body doc-section__description">Three body text sizes are available. Standard paragraphs in markdown use <code class="doc-inline-code">govuk-body</code> automatically.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <p class="govuk-body-l">govuk-body-l — lead paragraph, used for introductory text.</p>
+          <p class="govuk-body">govuk-body — standard body text for all content.</p>
+          <p class="govuk-body-s">govuk-body-s — small text, used for metadata and captions.</p>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-body-html">HTML</button>
+          </div>
+          <div id="ex-body-html" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;p class="govuk-body-l"&gt;Lead paragraph text.&lt;/p&gt;
+&lt;p class="govuk-body"&gt;Standard body text.&lt;/p&gt;
+&lt;p class="govuk-body-s"&gt;Small text.&lt;/p&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Bold and italic ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Bold and italic</h2>
+      <p class="govuk-body doc-section__description">Use bold and italic sparingly. Bold should only be used to highlight critical information — not for decorative emphasis.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <p class="govuk-body">This sentence has <strong class="govuk-!-font-weight-bold">bold text</strong> in it.</p>
+          <p class="govuk-body">This sentence has <em class="govuk-!-font-style-italic">italic text</em> in it.</p>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-emphasis-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-emphasis-html">HTML</button>
+          </div>
+          <div id="ex-emphasis-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>This sentence has **bold text** in it.
+This sentence has *italic text* in it.</code></pre>
+          </div>
+          <div id="ex-emphasis-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;strong class="govuk-!-font-weight-bold"&gt;bold text&lt;/strong&gt;
+&lt;em class="govuk-!-font-style-italic"&gt;italic text&lt;/em&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Lists ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Lists</h2>
+      <p class="govuk-body doc-section__description">In markdown, <code class="doc-inline-code">-</code> or <code class="doc-inline-code">*</code> produces a bullet list; <code class="doc-inline-code">1.</code> produces a numbered list. Both are automatically styled with GOV.UK classes.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <ul class="govuk-list govuk-list--bullet">
+            <li>First bullet item</li>
+            <li>Second bullet item</li>
+            <li>Third bullet item</li>
+          </ul>
+          <ol class="govuk-list govuk-list--number">
+            <li>First numbered item</li>
+            <li>Second numbered item</li>
+            <li>Third numbered item</li>
+          </ol>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-lists-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-lists-html">HTML</button>
+          </div>
+          <div id="ex-lists-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>- First bullet item
+- Second bullet item
+- Third bullet item
+
+1. First numbered item
+2. Second numbered item
+3. Third numbered item</code></pre>
+          </div>
+          <div id="ex-lists-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;ul class="govuk-list govuk-list--bullet"&gt;
+  &lt;li&gt;First bullet item&lt;/li&gt;
+  &lt;li&gt;Second bullet item&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol class="govuk-list govuk-list--number"&gt;
+  &lt;li&gt;First numbered item&lt;/li&gt;
+  &lt;li&gt;Second numbered item&lt;/li&gt;
+&lt;/ol&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    </main>
+  </div>
+</div>

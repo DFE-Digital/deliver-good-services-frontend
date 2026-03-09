@@ -1,0 +1,825 @@
+@{
+  ViewData["Title"] = "Panel component – Documentation";
+
+  // ── Razor code examples ──────────────────────────────────────────────────────
+  var razor1 = @"@await Html.PartialAsync(""_DfeFPanelContainer"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"", ""DDT Standards compliance"" },
+    { ""Tags"", new[] { (""Mandatory"", """"), (""Architecture / Standards"", """") } },
+    { ""Colour"", ""blue"" }
+})";
+
+  var razor2 = @"@await Html.PartialAsync(""_DfeFPanelContainer"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"", ""Accessibility requirements"" },
+    { ""Tags"", new[] { (""Mandatory"", """"), (""Accessibility"", """") } },
+    { ""Description"", ""When: From the point your team starts any delivery work in DfE digital, data or technology."" },
+    { ""Colour"", ""green"" }
+})";
+
+  var razor3 = @"@await Html.PartialAsync(""_DfeFPanelContainer"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"", ""DDT Standards compliance"" },
+    { ""Tags"", new[] { (""Mandatory"", """"), (""Architecture / Standards"", """") } },
+    { ""Description"", ""When: From the point your team starts any delivery work in DfE digital, data or technology."" },
+    { ""Phases"", new[] { ""Discovery"", ""Alpha"", ""Beta"", ""Live"" } },
+    { ""Steps"", new[] {
+        ""Identify which DDT Standards apply to your team and service"",
+        ""Assign ownership of each applicable standard to a named team member"",
+        ""Track compliance as part of your team's Definition of Done"" } },
+    { ""Checks"", new[] {
+        ""Team can demonstrate awareness of and compliance with applicable DDT Standards"",
+        ""Any exceptions or non-compliance are documented with approved remediation plans"" } },
+    { ""Links"", new[] { (""Find and use standards ↗"", ""#"", true), (""Standards by profession"", ""#"", false) } },
+    { ""Colour"", ""blue"" },
+    { ""Id"", ""ddts-compliance"" }
+})";
+
+  var razor2col = @"@await Html.PartialAsync(""_DfeFPanelContainer"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"", ""DDT Standards compliance"" },
+    { ""Tags"", new[] { (""Mandatory"", """"), (""Architecture / Standards"", """") } },
+    { ""Description"", ""When: From the point your team starts any delivery work in DfE digital, data or technology."" },
+    { ""Phases"", new[] { ""Discovery"", ""Alpha"", ""Beta"", ""Live"" } },
+    { ""Steps"", new[] {
+        ""Identify which DDT Standards apply to your team and service using the [standards by profession](https://standards.education.gov.uk/profession) view"",
+        ""Assign ownership of each applicable standard to a **named team member**"",
+        ""Track compliance as part of your team's Definition of Done and sprint ceremonies"",
+        ""Raise non-compliance early — contact the DDT Standards team to agree an exception and remediation plan"",
+        ""Review standards at the start of each new phase as new standards may become applicable"" } },
+    { ""Checks"", new[] {
+        ""Team can demonstrate awareness of and compliance with applicable DDT Standards"",
+        ""Any exceptions or non-compliance are documented with **approved remediation plans**"" } },
+    { ""Links"", new[] { (""Find and use standards ↗"", ""https://standards.education.gov.uk"", true), (""Standards by profession"", ""https://standards.education.gov.uk/profession"", false) } },
+    { ""Colour"", ""blue"" },
+    { ""Id"", ""ddts-compliance-2col"" }
+})";
+
+  var razor1col = @"@await Html.PartialAsync(""_DfeFPanelContainer"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"", ""DDT Standards compliance"" },
+    { ""Tags"", new[] { (""Mandatory"", """"), (""Architecture / Standards"", """") } },
+    { ""Description"", ""When: From the point your team starts any delivery work in DfE digital, data or technology."" },
+    { ""Phases"", new[] { ""Discovery"", ""Alpha"", ""Beta"", ""Live"" } },
+    { ""Steps"", new[] {
+        ""Identify which DDT Standards apply to your team and service using the [standards by profession](https://standards.education.gov.uk/profession) view"",
+        ""Assign ownership of each applicable standard to a **named team member**"",
+        ""Track compliance as part of your team's Definition of Done and sprint ceremonies"",
+        ""Raise non-compliance early — contact the DDT Standards team to agree an exception and remediation plan"",
+        ""Review standards at the start of each new phase as new standards may become applicable"" } },
+    { ""Checks"", new[] {
+        ""Team can demonstrate awareness of and compliance with applicable DDT Standards"",
+        ""Any exceptions or non-compliance are documented with **approved remediation plans**"" } },
+    { ""Links"", new[] { (""Find and use standards ↗"", ""https://standards.education.gov.uk"", true), (""Standards by profession"", ""https://standards.education.gov.uk/profession"", false) } },
+    { ""Columns"", 1 },
+    { ""Colour"", ""blue"" },
+    { ""Id"", ""ddts-compliance-1col"" }
+})";
+
+  // ── Markdown code examples ───────────────────────────────────────────────────
+  var md1 = @"[panel colour=""blue"" title=""DDT Standards compliance""
+       tags=""Mandatory, Architecture / Standards""]
+[/panel]";
+
+  var md2 = @"[panel colour=""green"" title=""Accessibility requirements""
+       tags=""Mandatory, Accessibility""
+       description=""When: From the point your team starts any delivery work in DfE digital, data or technology.""]
+[/panel]";
+
+  var md3 = @"[panel id=""ddts-compliance"" colour=""blue"" title=""DDT Standards compliance""
+       tags=""Mandatory, Architecture / Standards""
+       description=""When: From the point your team starts any delivery work in DfE digital, data or technology.""
+       phases=""Discovery,Alpha,Beta,Live""]
+  [steps]
+  1. Identify which DDT Standards apply to your team and service
+  2. Assign ownership of each applicable standard to a named team member
+  3. Track compliance as part of your team's Definition of Done and sprint ceremonies
+  4. Raise non-compliance early — contact the DDT Standards team to agree an exception
+  5. Review standards at the start of each new phase
+  [/steps]
+  [checks]
+  - Team can demonstrate awareness of and compliance with applicable DDT Standards
+  - Any exceptions or non-compliance are documented with approved remediation plans
+  [/checks]
+  [links]
+  Find and use standards ↗ | https://standards.education.gov.uk | primary
+  Standards by profession | https://standards.education.gov.uk/profession
+  [/links]
+[/panel]";
+
+  var md2col = @"[panel id=""ddts-compliance-2col"" colour=""blue"" title=""DDT Standards compliance""
+       tags=""Mandatory, Architecture / Standards""
+       description=""When: From the point your team starts any delivery work in DfE digital, data or technology.""
+       phases=""Discovery,Alpha,Beta,Live""]
+  [steps]
+  1. Identify which DDT Standards apply to your team and service using the [standards by profession](https://standards.education.gov.uk/profession) view
+  2. Assign ownership of each applicable standard to a **named team member**
+  3. Track compliance as part of your team's Definition of Done and sprint ceremonies
+  4. Raise non-compliance early — contact the DDT Standards team to agree an exception and remediation plan
+  5. Review standards at the start of each new phase as new standards may become applicable
+  [/steps]
+  [checks]
+  - Team can demonstrate awareness of and compliance with applicable DDT Standards
+  - Any exceptions or non-compliance are documented with **approved remediation plans**
+  [/checks]
+  [links]
+  Find and use standards ↗ | https://standards.education.gov.uk | primary
+  Standards by profession | https://standards.education.gov.uk/profession
+  [/links]
+[/panel]";
+
+  var md1col = @"[panel id=""ddts-compliance-1col"" colour=""blue"" title=""DDT Standards compliance""
+       tags=""Mandatory, Architecture / Standards""
+       description=""When: From the point your team starts any delivery work in DfE digital, data or technology.""
+       phases=""Discovery,Alpha,Beta,Live""
+       columns=""1""]
+  [steps]
+  1. Identify which DDT Standards apply to your team and service using the [standards by profession](https://standards.education.gov.uk/profession) view
+  2. Assign ownership of each applicable standard to a **named team member**
+  3. Track compliance as part of your team's Definition of Done and sprint ceremonies
+  4. Raise non-compliance early — contact the DDT Standards team to agree an exception and remediation plan
+  5. Review standards at the start of each new phase as new standards may become applicable
+  [/steps]
+  [checks]
+  - Team can demonstrate awareness of and compliance with applicable DDT Standards
+  - Any exceptions or non-compliance are documented with **approved remediation plans**
+  [/checks]
+  [links]
+  Find and use standards ↗ | https://standards.education.gov.uk | primary
+  Standards by profession | https://standards.education.gov.uk/profession
+  [/links]
+[/panel]";
+
+  // ── HTML output examples ─────────────────────────────────────────────────────
+  var html1 = @"<div class=""dfe-f-panel-component dfe-f-panel-component--blue"">
+  <div class=""dfe-f-panel-component__header"">
+    <div class=""dfe-f-panel-component__header-main"">
+      <div class=""dfe-f-panel-component__tags"">
+        <span class=""dfe-f-panel-component__tag"">Mandatory</span>
+        <span class=""dfe-f-panel-component__tag"">Architecture / Standards</span>
+      </div>
+      <h3 class=""dfe-f-panel-component__title"">DDT Standards compliance</h3>
+    </div>
+  </div>
+</div>";
+
+  var html2 = @"<div class=""dfe-f-panel-component dfe-f-panel-component--green"">
+  <div class=""dfe-f-panel-component__header"">
+    <div class=""dfe-f-panel-component__header-main"">
+      <div class=""dfe-f-panel-component__tags"">
+        <span class=""dfe-f-panel-component__tag"">Mandatory</span>
+        <span class=""dfe-f-panel-component__tag"">Accessibility</span>
+      </div>
+      <h3 class=""dfe-f-panel-component__title"">Accessibility requirements</h3>
+      <p class=""dfe-f-panel-component__description"">When: From the point your team starts any delivery work in DfE digital, data or technology.</p>
+    </div>
+  </div>
+</div>";
+
+  var html3 = @"<div class=""dfe-f-panel-component dfe-f-panel-component--blue"">
+  <div class=""dfe-f-panel-component__header"">
+    <div class=""dfe-f-panel-component__header-main"">
+      <div class=""dfe-f-panel-component__tags"">
+        <span class=""dfe-f-panel-component__tag"">Mandatory</span>
+        <span class=""dfe-f-panel-component__tag"">Architecture / Standards</span>
+      </div>
+      <h3 class=""dfe-f-panel-component__title"">DDT Standards compliance</h3>
+      <p class=""dfe-f-panel-component__description"">When: From the point your team starts any delivery work in DfE digital, data or technology.</p>
+      <div class=""dfe-f-panel-component__phases"">
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--discovery"">Discovery</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--alpha"">Alpha</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--beta"">Beta</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--live"">Live</span>
+      </div>
+    </div>
+    <button class=""dfe-f-panel-component__toggle"" id=""gtog-ddts-compliance"" aria-expanded=""false"" aria-controls=""gbody-ddts-compliance"">
+      <span class=""dfe-f-panel-component__toggle-label"">Detail</span>
+      <svg class=""dfe-f-panel-component__toggle-icon"" width=""12"" height=""8"" viewBox=""0 0 12 8"" fill=""none"" aria-hidden=""true"" focusable=""false"">
+        <path d=""M1 1L6 6L11 1"" stroke=""#0b0c0c"" stroke-width=""2"" stroke-linecap=""round""></path>
+      </svg>
+    </button>
+  </div>
+  <div class=""dfe-f-panel-component__body"" id=""gbody-ddts-compliance"">
+    <div class=""dfe-f-panel-component__columns"">
+      <div>
+        <div class=""dfe-f-panel-component__col-label"">What your team needs to do</div>
+        <div>
+          <div class=""dfe-f-panel-component__step"">
+            <span class=""dfe-f-panel-component__step-num"">1</span>
+            <span>Identify which DDT Standards apply to your team and service</span>
+          </div>
+          <div class=""dfe-f-panel-component__step"">
+            <span class=""dfe-f-panel-component__step-num"">2</span>
+            <span>Assign ownership of each applicable standard to a named team member</span>
+          </div>
+          <div class=""dfe-f-panel-component__step"">
+            <span class=""dfe-f-panel-component__step-num"">3</span>
+            <span>Track compliance as part of your team's Definition of Done</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class=""dfe-f-panel-component__col-label"">What assessors and reviewers check</div>
+        <div>
+          <div class=""dfe-f-panel-component__bullet"">Team can demonstrate awareness of and compliance with applicable DDT Standards</div>
+          <div class=""dfe-f-panel-component__bullet"">Any exceptions or non-compliance are documented with approved remediation plans</div>
+        </div>
+      </div>
+    </div>
+    <div class=""dfe-f-panel-component__links"">
+      <a class=""dfe-f-panel-component__link dfe-f-panel-component__link--primary"" href=""https://standards.education.gov.uk"" rel=""noopener noreferrer"">Find and use standards ↗</a>
+      <a class=""dfe-f-panel-component__link"" href=""https://standards.education.gov.uk/profession"" rel=""noopener noreferrer"">Standards by profession</a>
+    </div>
+  </div>
+</div>";
+
+  var html2col = @"<div class=""dfe-f-panel-component dfe-f-panel-component--blue"">
+  <div class=""dfe-f-panel-component__header"">
+    <div class=""dfe-f-panel-component__header-main"">
+      <div class=""dfe-f-panel-component__tags"">
+        <span class=""dfe-f-panel-component__tag"">Mandatory</span>
+        <span class=""dfe-f-panel-component__tag"">Architecture / Standards</span>
+      </div>
+      <h3 class=""dfe-f-panel-component__title"">DDT Standards compliance</h3>
+      <p class=""dfe-f-panel-component__description"">When: From the point your team starts any delivery work in DfE digital, data or technology.</p>
+      <div class=""dfe-f-panel-component__phases"">
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--discovery"">Discovery</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--alpha"">Alpha</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--beta"">Beta</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--live"">Live</span>
+      </div>
+    </div>
+    <button class=""dfe-f-panel-component__toggle"" id=""gtog-ddts-compliance-2col"" aria-expanded=""false"" aria-controls=""gbody-ddts-compliance-2col"">
+      <span class=""dfe-f-panel-component__toggle-label"">Detail</span>
+      <svg class=""dfe-f-panel-component__toggle-icon"" width=""12"" height=""8"" viewBox=""0 0 12 8"" fill=""none"" aria-hidden=""true"" focusable=""false"">
+        <path d=""M1 1L6 6L11 1"" stroke=""#0b0c0c"" stroke-width=""2"" stroke-linecap=""round""></path>
+      </svg>
+    </button>
+  </div>
+  <div class=""dfe-f-panel-component__body"" id=""gbody-ddts-compliance-2col"">
+    <div class=""dfe-f-panel-component__columns"">
+      <div>
+        <div class=""dfe-f-panel-component__col-label"">What your team needs to do</div>
+        <div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">1</span><span>Identify which DDT Standards apply using the <a href=""https://standards.education.gov.uk/profession"" class=""govuk-link"">standards by profession</a> view</span></div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">2</span><span>Assign ownership to a <strong>named team member</strong></span></div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">3</span><span>Track compliance as part of your team's Definition of Done</span></div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">4</span><span>Raise non-compliance early — contact the DDT Standards team</span></div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">5</span><span>Review standards at the start of each new phase</span></div>
+        </div>
+      </div>
+      <div>
+        <div class=""dfe-f-panel-component__col-label"">What assessors and reviewers check</div>
+        <div>
+          <div class=""dfe-f-panel-component__bullet"">Team can demonstrate awareness of and compliance with applicable DDT Standards</div>
+          <div class=""dfe-f-panel-component__bullet"">Any exceptions or non-compliance are documented with <strong>approved remediation plans</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class=""dfe-f-panel-component__links"">
+      <a class=""dfe-f-panel-component__link dfe-f-panel-component__link--primary"" href=""https://standards.education.gov.uk"" rel=""noopener noreferrer"">Find and use standards ↗</a>
+      <a class=""dfe-f-panel-component__link"" href=""https://standards.education.gov.uk/profession"" rel=""noopener noreferrer"">Standards by profession</a>
+    </div>
+  </div>
+</div>";
+
+  var html1col = @"<div class=""dfe-f-panel-component dfe-f-panel-component--blue"">
+  <div class=""dfe-f-panel-component__header"">
+    <div class=""dfe-f-panel-component__header-main"">
+      <div class=""dfe-f-panel-component__tags"">
+        <span class=""dfe-f-panel-component__tag"">Mandatory</span>
+        <span class=""dfe-f-panel-component__tag"">Architecture / Standards</span>
+      </div>
+      <h3 class=""dfe-f-panel-component__title"">DDT Standards compliance</h3>
+      <p class=""dfe-f-panel-component__description"">When: From the point your team starts any delivery work in DfE digital, data or technology.</p>
+      <div class=""dfe-f-panel-component__phases"">
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--discovery"">Discovery</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--alpha"">Alpha</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--beta"">Beta</span>
+        <span class=""dfe-f-panel-component__phase dfe-f-panel-component__phase--live"">Live</span>
+      </div>
+    </div>
+    <button class=""dfe-f-panel-component__toggle"" id=""gtog-ddts-compliance-1col"" aria-expanded=""false"" aria-controls=""gbody-ddts-compliance-1col"">
+      <span class=""dfe-f-panel-component__toggle-label"">Detail</span>
+      <svg class=""dfe-f-panel-component__toggle-icon"" width=""12"" height=""8"" viewBox=""0 0 12 8"" fill=""none"" aria-hidden=""true"" focusable=""false"">
+        <path d=""M1 1L6 6L11 1"" stroke=""#0b0c0c"" stroke-width=""2"" stroke-linecap=""round""></path>
+      </svg>
+    </button>
+  </div>
+  <div class=""dfe-f-panel-component__body"" id=""gbody-ddts-compliance-1col"">
+    <div class=""dfe-f-panel-component__columns dfe-f-panel-component__columns--single"">
+      <div>
+        <div class=""dfe-f-panel-component__col-label"">What your team needs to do</div>
+        <div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">1</span><span>Identify which DDT Standards apply using the <a href=""https://standards.education.gov.uk/profession"" class=""govuk-link"">standards by profession</a> view</span></div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">2</span><span>Assign ownership to a <strong>named team member</strong></span></div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">3</span><span>Track compliance as part of your team's Definition of Done</span></div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">4</span><span>Raise non-compliance early — contact the DDT Standards team</span></div>
+          <div class=""dfe-f-panel-component__step""><span class=""dfe-f-panel-component__step-num"">5</span><span>Review standards at the start of each new phase</span></div>
+        </div>
+      </div>
+      <div>
+        <div class=""dfe-f-panel-component__col-label"">What assessors and reviewers check</div>
+        <div>
+          <div class=""dfe-f-panel-component__bullet"">Team can demonstrate awareness of and compliance with applicable DDT Standards</div>
+          <div class=""dfe-f-panel-component__bullet"">Any exceptions or non-compliance are documented with <strong>approved remediation plans</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class=""dfe-f-panel-component__links"">
+      <a class=""dfe-f-panel-component__link dfe-f-panel-component__link--primary"" href=""https://standards.education.gov.uk"" rel=""noopener noreferrer"">Find and use standards ↗</a>
+      <a class=""dfe-f-panel-component__link"" href=""https://standards.education.gov.uk/profession"" rel=""noopener noreferrer"">Standards by profession</a>
+    </div>
+  </div>
+</div>";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/components">Components</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Panel component</li>
+}
+
+@section Scripts {
+  <script src="/js/dfe-f-panel-container.js"></script>
+  <script src="/js/documentation.js"></script>
+}
+
+@* Helper: renders a three-tab code block (Razor / Markdown / HTML) *@
+@* Called inline — not a real partial, just a local macro pattern via sections *@
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Components</span>
+      <h1 class="govuk-heading-l doc-content__title">Panel component</h1>
+      <p class="doc-content__lead">A flexible card component for displaying requirements, standards, or guidance items — with optional tags, phase pills, expandable detail, and colour variants.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">The panel component can be used in three ways: as a <strong>Razor partial</strong> in views, as a <strong>shortcode</strong> in CMS markdown body content, or as raw <strong>HTML</strong>.</p>
+    </div>
+
+    <!-- ── Variant 1: Title + tags ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Variant 1 — Title and tags</h2>
+      <p class="govuk-body doc-section__description">The simplest variant. Shows a title with one or more tags. No toggle or expandable content.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel-component dfe-f-panel-component--blue">
+            <div class="dfe-f-panel-component__header">
+              <div class="dfe-f-panel-component__header-main">
+                <div class="dfe-f-panel-component__tags"><span class="dfe-f-panel-component__tag">Mandatory</span><span class="dfe-f-panel-component__tag">Architecture / Standards</span></div>
+                <h3 class="dfe-f-panel-component__title">DDT Standards compliance</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex1-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex1-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex1-html">HTML</button>
+          </div>
+          <div id="ex1-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(razor1))</code></pre>
+          </div>
+          <div id="ex1-markdown" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(md1))</code></pre>
+          </div>
+          <div id="ex1-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(html1))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Variant 2: Title + tags + description ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Variant 2 — Title, tags, and description</h2>
+      <p class="govuk-body doc-section__description">Adds a description line below the title — useful for a "when does this apply" trigger statement.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel-component dfe-f-panel-component--green">
+            <div class="dfe-f-panel-component__header">
+              <div class="dfe-f-panel-component__header-main">
+                <div class="dfe-f-panel-component__tags"><span class="dfe-f-panel-component__tag">Mandatory</span><span class="dfe-f-panel-component__tag">Accessibility</span></div>
+                <h3 class="dfe-f-panel-component__title">Accessibility requirements</h3>
+                <p class="dfe-f-panel-component__description">When: From the point your team starts any delivery work in DfE digital, data or technology.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex2-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex2-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex2-html">HTML</button>
+          </div>
+          <div id="ex2-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(razor2))</code></pre>
+          </div>
+          <div id="ex2-markdown" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(md2))</code></pre>
+          </div>
+          <div id="ex2-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(html2))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Variant 3: Full toggle ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Variant 3 — Full toggle panel</h2>
+      <p class="govuk-body doc-section__description">The full variant adds phase pills, an expandable detail section with numbered steps and assessor checks, and a links row.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel-component dfe-f-panel-component--blue">
+            <div class="dfe-f-panel-component__header">
+              <div class="dfe-f-panel-component__header-main">
+                <div class="dfe-f-panel-component__tags"><span class="dfe-f-panel-component__tag">Mandatory</span><span class="dfe-f-panel-component__tag">Architecture / Standards</span></div>
+                <h3 class="dfe-f-panel-component__title">DDT Standards compliance</h3>
+                <p class="dfe-f-panel-component__description">When: From the point your team starts any delivery work in DfE digital, data or technology. Applies throughout all phases and into live.</p>
+                <div class="dfe-f-panel-component__phases"><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--discovery">Discovery</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--alpha">Alpha</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--beta">Beta</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--live">Live</span></div>
+              </div>
+              <button class="dfe-f-panel-component__toggle" id="gtog-doc-example-1" aria-expanded="false" aria-controls="gbody-doc-example-1">
+                <span class="dfe-f-panel-component__toggle-label">Detail</span>
+                <svg class="dfe-f-panel-component__toggle-icon" width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true" focusable="false"><path d="M1 1L6 6L11 1" stroke="#0b0c0c" stroke-width="2" stroke-linecap="round"></path></svg>
+              </button>
+            </div>
+            <div class="dfe-f-panel-component__body" id="gbody-doc-example-1">
+              <div class="dfe-f-panel-component__columns">
+                <div>
+                  <div class="dfe-f-panel-component__col-label">What your team needs to do</div>
+                  <div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">1</span><span>Identify which DDT Standards apply to your team and service</span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">2</span><span>Assign ownership of each applicable standard to a named team member</span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">3</span><span>Track compliance as part of your team's Definition of Done</span></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="dfe-f-panel-component__col-label">What assessors and reviewers check</div>
+                  <div>
+                    <div class="dfe-f-panel-component__bullet">Team can demonstrate awareness of and compliance with applicable DDT Standards</div>
+                    <div class="dfe-f-panel-component__bullet">Any exceptions or non-compliance are documented with approved remediation plans</div>
+                  </div>
+                </div>
+              </div>
+              <div class="dfe-f-panel-component__links">
+                <a class="dfe-f-panel-component__link dfe-f-panel-component__link--primary" href="#" rel="noopener noreferrer">Find and use standards ↗</a>
+                <a class="dfe-f-panel-component__link" href="#" rel="noopener noreferrer">Standards by profession</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex3-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex3-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex3-html">HTML</button>
+          </div>
+          <div id="ex3-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(razor3))</code></pre>
+          </div>
+          <div id="ex3-markdown" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(md3))</code></pre>
+          </div>
+          <div id="ex3-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(html3))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Colour variants ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Colour variants</h2>
+      <p class="govuk-body doc-section__description">Seven colour options control the left border and tag colours. Pass the colour name as the <code class="doc-inline-code">colour</code> attribute.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel-component-list">
+            @foreach (var colour in new[] { "blue", "green", "orange", "red", "yellow", "grey", "black" })
+            {
+              <div class="dfe-f-panel-component dfe-f-panel-component--@colour" style="margin-bottom:8px">
+                <div class="dfe-f-panel-component__header">
+                  <div class="dfe-f-panel-component__header-main">
+                    <div class="dfe-f-panel-component__tags"><span class="dfe-f-panel-component__tag">@colour</span></div>
+                    <h3 class="dfe-f-panel-component__title">Colour variant: @colour</h3>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Colour</th><th>Use for</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">blue</code> (default)</td><td>General requirements, standards, architecture</td></tr>
+          <tr><td><code class="doc-inline-code">green</code></td><td>Accessibility, positive outcomes, completed items</td></tr>
+          <tr><td><code class="doc-inline-code">orange</code></td><td>Warnings, items needing attention</td></tr>
+          <tr><td><code class="doc-inline-code">red</code></td><td>Critical requirements, blockers, failures</td></tr>
+          <tr><td><code class="doc-inline-code">yellow</code></td><td>Cautions, in-progress items</td></tr>
+          <tr><td><code class="doc-inline-code">grey</code></td><td>Informational, optional, or low-priority items</td></tr>
+          <tr><td><code class="doc-inline-code">black</code></td><td>High-emphasis items</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Column layout ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Column layout</h2>
+      <p class="govuk-body doc-section__description">The expandable body supports one or two columns. By default, if both <code class="doc-inline-code">[steps]</code> and <code class="doc-inline-code">[checks]</code> are present the layout is 50/50. If only one is present, or <code class="doc-inline-code">columns="1"</code> is set, the content spans the full width. Step and check items support inline markdown — <strong>bold</strong>, <em>italic</em>, <code class="doc-inline-code">`code`</code>, and <code class="doc-inline-code">[links](url)</code>.</p>
+
+      <h3 class="govuk-heading-s">Two columns (default)</h3>
+      <p class="govuk-body">Both <code class="doc-inline-code">[steps]</code> and <code class="doc-inline-code">[checks]</code> present — renders side by side at 50/50.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel-component dfe-f-panel-component--blue">
+            <div class="dfe-f-panel-component__header">
+              <div class="dfe-f-panel-component__header-main">
+                <div class="dfe-f-panel-component__tags"><span class="dfe-f-panel-component__tag">Mandatory</span><span class="dfe-f-panel-component__tag">Architecture / Standards</span></div>
+                <h3 class="dfe-f-panel-component__title">DDT Standards compliance</h3>
+                <p class="dfe-f-panel-component__description">When: From the point your team starts any delivery work in DfE digital, data or technology.</p>
+                <div class="dfe-f-panel-component__phases"><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--discovery">Discovery</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--alpha">Alpha</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--beta">Beta</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--live">Live</span></div>
+              </div>
+              <button class="dfe-f-panel-component__toggle" id="gtog-col2-example" aria-expanded="true" aria-controls="gbody-col2-example">
+                <span class="dfe-f-panel-component__toggle-label">Close</span>
+                <svg class="dfe-f-panel-component__toggle-icon dfe-f-panel-component__toggle-icon--open" width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true" focusable="false"><path d="M1 1L6 6L11 1" stroke="#0b0c0c" stroke-width="2" stroke-linecap="round"></path></svg>
+              </button>
+            </div>
+            <div class="dfe-f-panel-component__body dfe-f-panel-component__body--visible" id="gbody-col2-example">
+              <div class="dfe-f-panel-component__columns">
+                <div>
+                  <div class="dfe-f-panel-component__col-label">What your team needs to do</div>
+                  <div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">1</span><span>Identify which DDT Standards apply using the <a href="https://standards.education.gov.uk/profession" class="govuk-link" rel="noopener noreferrer">standards by profession</a> view</span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">2</span><span>Assign ownership to a <strong>named team member</strong></span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">3</span><span>Track compliance as part of your team's Definition of Done and sprint ceremonies</span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">4</span><span>Raise non-compliance early — contact the DDT Standards team to agree an exception and remediation plan</span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">5</span><span>Review standards at the start of each new phase as new standards may become applicable</span></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="dfe-f-panel-component__col-label">What assessors and reviewers check</div>
+                  <div>
+                    <div class="dfe-f-panel-component__bullet">Team can demonstrate awareness of and compliance with applicable DDT Standards</div>
+                    <div class="dfe-f-panel-component__bullet">Any exceptions or non-compliance are documented with <strong>approved remediation plans</strong></div>
+                  </div>
+                </div>
+              </div>
+              <div class="dfe-f-panel-component__links">
+                <a class="dfe-f-panel-component__link dfe-f-panel-component__link--primary" href="https://standards.education.gov.uk" rel="noopener noreferrer">Find and use standards ↗</a>
+                <a class="dfe-f-panel-component__link" href="https://standards.education.gov.uk/profession" rel="noopener noreferrer">Standards by profession</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-col2-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-col2-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-col2-html">HTML</button>
+          </div>
+          <div id="ex-col2-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(razor2col))</code></pre>
+          </div>
+          <div id="ex-col2-markdown" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(md2col))</code></pre>
+          </div>
+          <div id="ex-col2-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(html2col))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="govuk-heading-s">Single column</h3>
+      <p class="govuk-body">Add <code class="doc-inline-code">columns="1"</code> to stack both blocks full-width. Omitting either <code class="doc-inline-code">[steps]</code> or <code class="doc-inline-code">[checks]</code> also triggers single-column automatically.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel-component dfe-f-panel-component--blue">
+            <div class="dfe-f-panel-component__header">
+              <div class="dfe-f-panel-component__header-main">
+                <div class="dfe-f-panel-component__tags"><span class="dfe-f-panel-component__tag">Mandatory</span><span class="dfe-f-panel-component__tag">Architecture / Standards</span></div>
+                <h3 class="dfe-f-panel-component__title">DDT Standards compliance</h3>
+                <p class="dfe-f-panel-component__description">When: From the point your team starts any delivery work in DfE digital, data or technology.</p>
+                <div class="dfe-f-panel-component__phases"><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--discovery">Discovery</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--alpha">Alpha</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--beta">Beta</span><span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--live">Live</span></div>
+              </div>
+              <button class="dfe-f-panel-component__toggle" id="gtog-col1-example" aria-expanded="true" aria-controls="gbody-col1-example">
+                <span class="dfe-f-panel-component__toggle-label">Close</span>
+                <svg class="dfe-f-panel-component__toggle-icon dfe-f-panel-component__toggle-icon--open" width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true" focusable="false"><path d="M1 1L6 6L11 1" stroke="#0b0c0c" stroke-width="2" stroke-linecap="round"></path></svg>
+              </button>
+            </div>
+            <div class="dfe-f-panel-component__body dfe-f-panel-component__body--visible" id="gbody-col1-example">
+              <div class="dfe-f-panel-component__columns dfe-f-panel-component__columns--single">
+                <div>
+                  <div class="dfe-f-panel-component__col-label">What your team needs to do</div>
+                  <div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">1</span><span>Identify which DDT Standards apply using the <a href="https://standards.education.gov.uk/profession" class="govuk-link" rel="noopener noreferrer">standards by profession</a> view</span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">2</span><span>Assign ownership to a <strong>named team member</strong></span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">3</span><span>Track compliance as part of your team's Definition of Done and sprint ceremonies</span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">4</span><span>Raise non-compliance early — contact the DDT Standards team to agree an exception and remediation plan</span></div>
+                    <div class="dfe-f-panel-component__step"><span class="dfe-f-panel-component__step-num">5</span><span>Review standards at the start of each new phase as new standards may become applicable</span></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="dfe-f-panel-component__col-label">What assessors and reviewers check</div>
+                  <div>
+                    <div class="dfe-f-panel-component__bullet">Team can demonstrate awareness of and compliance with applicable DDT Standards</div>
+                    <div class="dfe-f-panel-component__bullet">Any exceptions or non-compliance are documented with <strong>approved remediation plans</strong></div>
+                  </div>
+                </div>
+              </div>
+              <div class="dfe-f-panel-component__links">
+                <a class="dfe-f-panel-component__link dfe-f-panel-component__link--primary" href="https://standards.education.gov.uk" rel="noopener noreferrer">Find and use standards ↗</a>
+                <a class="dfe-f-panel-component__link" href="https://standards.education.gov.uk/profession" rel="noopener noreferrer">Standards by profession</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-col1-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-col1-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-col1-html">HTML</button>
+          </div>
+          <div id="ex-col1-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(razor1col))</code></pre>
+          </div>
+          <div id="ex-col1-markdown" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(md1col))</code></pre>
+          </div>
+          <div id="ex-col1-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(html1col))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="govuk-heading-s">Custom column labels</h3>
+      <p class="govuk-body">Override the default column headings using the <code class="doc-inline-code">label</code> attribute on <code class="doc-inline-code">[steps]</code> or <code class="doc-inline-code">[checks]</code>.</p>
+      <div class="doc-example">
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-labels-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-labels-razor">Razor</button>
+          </div>
+          <div id="ex-labels-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>[panel colour="blue" title="Custom labels"]
+  [steps label="What to build"]
+  1. Step one with **bold text**
+  2. Step two with a [link](https://example.com)
+  [/steps]
+  [checks label="How we'll measure success"]
+  - Metric one
+  - Metric two
+  [/checks]
+[/panel]</code></pre>
+          </div>
+          <div id="ex-labels-razor" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(@"@await Html.PartialAsync(""_DfeFPanelContainer"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"", ""Custom labels"" },
+    { ""Steps"", new[] { ""Step one with **bold text**"", ""Step two with a [link](https://example.com)"" } },
+    { ""StepsLabel"", ""What to build"" },
+    { ""Checks"", new[] { ""Metric one"", ""Metric two"" } },
+    { ""ChecksLabel"", ""How we'll measure success"" },
+    { ""Colour"", ""blue"" }
+})"))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-note">
+        <p class="govuk-body" style="margin:0">Step and check items support inline markdown: use <code class="doc-inline-code">**bold**</code>, <code class="doc-inline-code">*italic*</code>, <code class="doc-inline-code">`code`</code>, and <code class="doc-inline-code">[label](url)</code> links directly in your content.</p>
+      </div>
+    </section>
+
+    <!-- ── Phase pills ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Phase pills</h2>
+      <p class="govuk-body doc-section__description">Phase pills indicate which delivery phases a requirement applies to. Pass a comma-separated list to the <code class="doc-inline-code">phases</code> attribute.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel-component__phases" style="padding:0">
+            <span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--discovery">Discovery</span>
+            <span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--alpha">Alpha</span>
+            <span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--beta">Beta</span>
+            <span class="dfe-f-panel-component__phase dfe-f-panel-component__phase--live">Live</span>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-phases-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-phases-razor">Razor</button>
+          </div>
+          <div id="ex-phases-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>phases="Discovery,Alpha,Beta,Live"</code></pre>
+          </div>
+          <div id="ex-phases-razor" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>{ "Phases", new[] { "Discovery", "Alpha", "Beta", "Live" } }</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Parameters reference ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Parameters reference</h2>
+
+      <h3 class="govuk-heading-s">Razor partial parameters</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">Title</code></td><td>string</td><td>Yes</td><td>Card heading text</td></tr>
+          <tr><td><code class="doc-inline-code">Tags</code></td><td>(string, string)[]</td><td>No</td><td>Array of (label, modifier) tuples</td></tr>
+          <tr><td><code class="doc-inline-code">Description</code></td><td>string</td><td>No</td><td>Trigger / description text shown below the title</td></tr>
+          <tr><td><code class="doc-inline-code">Phases</code></td><td>string[]</td><td>No</td><td>Phase names: Discovery, Alpha, Beta, Live</td></tr>
+          <tr><td><code class="doc-inline-code">Steps</code></td><td>string[]</td><td>No</td><td>Numbered step items. Renders the steps column in the expandable body.</td></tr>
+          <tr><td><code class="doc-inline-code">StepsLabel</code></td><td>string</td><td>No</td><td>Override the steps column heading. Default: "What your team needs to do"</td></tr>
+          <tr><td><code class="doc-inline-code">Checks</code></td><td>string[]</td><td>No</td><td>Bullet check items. Renders the checks column in the expandable body.</td></tr>
+          <tr><td><code class="doc-inline-code">ChecksLabel</code></td><td>string</td><td>No</td><td>Override the checks column heading. Default: "What assessors and reviewers check"</td></tr>
+          <tr><td><code class="doc-inline-code">Columns</code></td><td>int</td><td>No</td><td>1 = single full-width column, 2 = 50/50 (default). Auto-detected if only one column has content.</td></tr>
+          <tr><td><code class="doc-inline-code">ToggleBodyHtml</code></td><td>string (HTML)</td><td>No</td><td>Raw HTML for the expandable body. Overrides Steps/Checks if set.</td></tr>
+          <tr><td><code class="doc-inline-code">Links</code></td><td>(string, string, bool)[]</td><td>No</td><td>Array of (label, href, isPrimary) tuples</td></tr>
+          <tr><td><code class="doc-inline-code">Colour</code></td><td>string</td><td>No</td><td>Colour variant. Default: blue</td></tr>
+          <tr><td><code class="doc-inline-code">Id</code></td><td>string</td><td>No</td><td>Used for aria-controls. Auto-generated if omitted.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="govuk-heading-s">CMS shortcode attributes</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>Attribute</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">title</code></td><td>Yes</td><td>Card heading text</td></tr>
+          <tr><td><code class="doc-inline-code">id</code></td><td>No</td><td>Unique ID for aria-controls. Auto-generated if omitted.</td></tr>
+          <tr><td><code class="doc-inline-code">colour</code></td><td>No</td><td>blue (default) | green | orange | red | yellow | grey | black</td></tr>
+          <tr><td><code class="doc-inline-code">tags</code></td><td>No</td><td>Comma-separated tag labels</td></tr>
+          <tr><td><code class="doc-inline-code">description</code></td><td>No</td><td>Trigger text shown below the title</td></tr>
+          <tr><td><code class="doc-inline-code">phases</code></td><td>No</td><td>Comma-separated: Discovery, Alpha, Beta, Live</td></tr>
+          <tr><td><code class="doc-inline-code">columns</code></td><td>No</td><td>"1" = single full-width column, "2" = 50/50 (default). Auto-detected if only one block present.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="govuk-heading-s">CMS shortcode inner blocks</h3>
+      <table class="doc-table">
+        <thead>
+          <tr><th>Block</th><th>Syntax</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">[steps]</code></td><td><code class="doc-inline-code">1. Item text</code></td><td>Numbered steps column. Default heading: "What your team needs to do". Override with <code class="doc-inline-code">label="..."</code>.</td></tr>
+          <tr><td><code class="doc-inline-code">[checks]</code></td><td><code class="doc-inline-code">- Item text</code></td><td>Bullet checks column. Default heading: "What assessors and reviewers check". Override with <code class="doc-inline-code">label="..."</code>.</td></tr>
+          <tr><td><code class="doc-inline-code">[links]</code></td><td><code class="doc-inline-code">Label | URL | primary</code></td><td>Links row. Third column (<code class="doc-inline-code">primary</code>) is optional — makes the link bold.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    </main>
+  </div>
+</div>

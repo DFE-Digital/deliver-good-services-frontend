@@ -1,0 +1,33 @@
+@{
+  ViewData["Title"] = "CMS – Configuration";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/configuration">Configuration</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">CMS</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Configuration</span>
+        <h1 class="govuk-heading-l doc-content__title">CMS configuration</h1>
+        <p class="doc-content__lead">How the frontend connects to the headless CMS. Use app settings or environment variables; never store URLs, tokens, or keys in code or documentation.</p>
+      </div>
+      <div class="doc-note doc-note--warning">
+        <p class="govuk-body" style="margin:0"><strong>Do not put API URLs, tokens, or secrets in documentation or source control.</strong> Use app settings (e.g. <code class="doc-inline-code">appsettings.Development.json</code> or user secrets) and environment variables or secure config for deployed environments.</p>
+      </div>
+      <section class="doc-section">
+        <h2 class="doc-section__title">Configuration structure</h2>
+        <p class="govuk-body">The frontend expects a <strong>CmsApi</strong> section with <strong>BaseUrl</strong> (CMS API base URL) and <strong>ApiToken</strong> (auth token). Copy the example config file and fill values locally only; use environment variables in production.</p>
+      </section>
+    </main>
+  </div>
+</div>

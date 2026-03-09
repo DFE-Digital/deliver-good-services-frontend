@@ -1,0 +1,26 @@
+@{
+  ViewData["Title"] = "Patterns";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Patterns</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Patterns</span>
+        <h1 class="govuk-heading-l doc-content__title">Patterns</h1>
+        <p class="doc-content__lead">Content and authoring patterns for the Service Manual.</p>
+      </div>
+      <p class="govuk-body">This section will cover recurring content structures and authoring patterns. For now, use <a href="/documentation/templates" class="govuk-link">Templates</a> for content types and <a href="/documentation/components" class="govuk-link">Components</a> for UI and markdown patterns.</p>
+    </main>
+  </div>
+</div>

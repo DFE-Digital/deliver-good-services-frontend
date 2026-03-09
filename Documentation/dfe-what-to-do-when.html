@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>What to do when – DfE Service Manual</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+:root{
+  --blue:#1D70B8;--bd:#0F3B5C;--bl:#EBF3FB;
+  --k:#0B0C0C;--m:#505a5f;--lt:#F3F2F1;--br:#b1b4b6;--brl:#E2E4E6;--bg:#F0F1F3;
+  --ex:#4338CA;--di:#1D70B8;--al:#BE185D;--be:#C2410C;--li:#15803D;
+  --td:#9333EA;--tb:#EA580C;--tr:#16A34A;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:InterVariable,Inter,sans-serif;margin:0;background:var(--bg);color:var(--k);line-height:1.5;font-size:14px}
+
+/* HEADER */
+.hdr{background:var(--blue)}
+.hdr-i{max-width:1240px;margin:0 auto;padding:0 24px;display:flex;align-items:stretch;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;padding:12px 0}
+.crest{width:32px;height:32px;background:#fff;display:grid;place-items:center;font-weight:900;font-size:11px;color:var(--blue);flex-shrink:0;letter-spacing:-.5px}
+.brand-txt strong{display:block;font-size:13px;font-weight:700;color:#fff;line-height:1.2}
+.brand-txt span{font-size:11px;color:rgba(255,255,255,.6)}
+.hnav{display:flex;align-items:center}
+.hnav a{display:flex;align-items:center;padding:0 11px;height:100%;color:rgba(255,255,255,.75);text-decoration:none;font-size:12px;font-weight:500;border-bottom:3px solid transparent;transition:.15s;white-space:nowrap}
+.hnav a:hover{color:#fff}
+
+/* SUBNAV */
+.snav{background:var(--lt);border-bottom:1px solid var(--brl)}
+.snav-i{max-width:1240px;margin:0 auto;padding:0 24px;display:flex;overflow-x:auto}
+.snav a{display:block;padding:10px 12px;font-size:12px;font-weight:500;color:var(--m);text-decoration:none;border-bottom:3px solid transparent;white-space:nowrap;transition:.12s}
+.snav a:hover{color:var(--bd)}
+.snav a.on{color:var(--bd);font-weight:700;border-bottom-color:var(--blue)}
+
+/* BREADCRUMB */
+.bc{max-width:1240px;margin:0 auto;padding:8px 24px}
+.bc ol{list-style:none;margin:0;padding:0;display:flex;gap:4px;flex-wrap:wrap}
+.bc li{font-size:11px;color:var(--m);display:flex;align-items:center;gap:4px}
+.bc li:not(:last-child)::after{content:'/';color:var(--br)}
+.bc a{color:var(--blue);text-decoration:underline}
+
+/* HERO */
+.hero{background:var(--bd);color:#fff;padding:32px 0 28px}
+.hero-i{max-width:1240px;margin:0 auto;padding:0 24px;display:flex;align-items:flex-end;gap:24px;justify-content:space-between}
+.hero-left{max-width:700px}
+.hero-ey{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;opacity:.5;margin-bottom:8px}
+.hero h1{font-size:32px;font-weight:800;line-height:1.08;letter-spacing:-.4px;margin:0 0 10px}
+.hero-sub{font-size:14px;opacity:.75;line-height:1.6;margin:0}
+.hero-right{flex-shrink:0;text-align:right}
+.hero-chips{display:flex;flex-direction:column;gap:3px;align-items:flex-end}
+.hero-chip{font-size:11px;color:rgba(255,255,255,.5)}
+.hero-chip strong{color:rgba(255,255,255,.75);font-weight:600}
+
+/* FILTER BAR */
+.fbar{background:#fff;border-bottom:1px solid var(--brl);position:sticky;top:0;z-index:300;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.fbar-i{max-width:1240px;margin:0 auto;padding:0 24px;display:flex;align-items:stretch;overflow-x:auto}
+
+/* Row 1: phase + track + view controls */
+.fbar-r1{display:flex;align-items:stretch;width:100%;min-height:42px;gap:0}
+.fg{display:flex;align-items:stretch;flex-shrink:0}
+.flbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--br);display:flex;align-items:center;padding:0 8px 0 0;white-space:nowrap}
+.fb{display:flex;align-items:center;gap:5px;padding:0 11px;font-size:12px;font-weight:600;color:var(--m);border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.12s;flex-shrink:0;height:100%}
+.fb:hover{color:var(--k)}
+.fb.on{border-bottom-color:currentColor;color:var(--k)}
+.fdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.fsep{width:1px;background:var(--brl);margin:9px 12px;flex-shrink:0}
+
+/* View controls pushed right */
+.fbar-right{margin-left:auto;display:flex;align-items:center;gap:6px;padding:8px 0;flex-shrink:0}
+.vbtn{display:flex;align-items:center;gap:4px;padding:4px 9px;font-size:11px;font-weight:700;border:1px solid var(--brl);background:#fff;color:var(--m);cursor:pointer;font-family:inherit;border-radius:2px;transition:.12s;white-space:nowrap}
+.vbtn:hover{border-color:var(--blue);color:var(--blue)}
+.vbtn.on{background:var(--k);border-color:var(--k);color:#fff}
+.lucid-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;font-size:11px;font-weight:700;background:var(--blue);color:#fff;border:none;cursor:pointer;font-family:inherit;border-radius:2px;text-decoration:none;transition:.12s;white-space:nowrap}
+.lucid-btn:hover{background:var(--bd)}
+
+/* Row 2: role chips — full width row */
+.fbar-r2{border-top:1px solid var(--brl);display:flex;align-items:center;padding:6px 0;gap:6px;overflow-x:auto;min-height:40px}
+.fbar-r2 .flbl{flex-shrink:0}
+.rc{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;font-size:11px;font-weight:600;border:1px solid var(--brl);background:#fff;color:var(--m);cursor:pointer;font-family:inherit;border-radius:20px;transition:.12s;white-space:nowrap;flex-shrink:0}
+.rc:hover{border-color:var(--rc,#999);color:var(--rc,#555)}
+.rc.on{border-color:var(--rc,#999);background:var(--rc,#999);color:#fff}
+.rc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.rc-all{display:inline-flex;align-items:center;padding:3px 9px;font-size:11px;font-weight:700;border:1px solid var(--brl);background:var(--k);color:#fff;cursor:pointer;font-family:inherit;border-radius:20px;flex-shrink:0}
+
+/* MAIN */
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px 80px}
+
+/* PHASE BLOCK */
+.pb{margin-top:24px;background:#fff;border:1px solid var(--brl);border-radius:3px;overflow:hidden}
+.pb.filtered-out{display:none}
+
+.ph-hd{display:flex;cursor:pointer;user-select:none;transition:background .12s}
+.ph-hd:hover{background:#FAFAFA}
+.ph-bar{width:4px;flex-shrink:0}
+.ph-body{flex:1;padding:14px 16px 12px}
+.ph-top{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
+.ph-tag{padding:2px 9px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#fff;border-radius:2px}
+.tpill{padding:2px 8px;font-size:10px;font-weight:700;border-radius:20px;color:#fff;flex-shrink:0}
+.tpill-off{background:#E5E7EB!important;color:#9CA3AF}
+.ph-cnt{font-size:10px;font-weight:700;background:var(--lt);padding:1px 7px;border-radius:20px;color:var(--m);display:none}
+.ph-tog-lbl{font-size:10px;font-weight:600;color:var(--br);margin-left:auto}
+.pb.collapsed .ph-tog-lbl::after{content:'Expand'}
+.ph-tog-lbl::after{content:'Collapse'}
+.ph-row{display:flex;align-items:center;gap:8px}
+.ph-title{font-size:16px;font-weight:800;color:var(--k);margin:0}
+.ph-chev{color:var(--m);display:flex;align-items:center;transition:transform .22s}
+.pb.collapsed .ph-chev{transform:rotate(-90deg)}
+.ph-sub{font-size:12px;color:var(--m);margin:4px 0 5px;line-height:1.5}
+.ph-dur{font-size:11px;color:var(--br);font-weight:600}
+
+.ph-acts{border-top:1px solid var(--brl)}
+.pb.collapsed .ph-acts{display:none}
+
+/* LIST VIEW HEADER */
+.list-hdr{display:none;background:var(--k);padding:0}
+.list-view .list-hdr{display:grid;grid-template-columns:4px 1fr 180px 200px 1fr}
+.list-hdr div{padding:6px 10px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:rgba(255,255,255,.45)}
+.list-hdr div:first-child{padding:0}
+
+/* ACTIVITY CARD */
+.ac-list{display:flex;flex-direction:column;gap:0}
+.card-view .ac-list{gap:8px;padding:10px}
+.ac{overflow:hidden;border-top:1px solid var(--brl);transition:box-shadow .12s}
+.card-view .ac{border:1px solid var(--brl);border-radius:2px;border-top:1px solid var(--brl)}
+.ac:first-child{border-top:none}
+.card-view .ac:first-child{border-top:1px solid var(--brl)}
+.card-view .ac:hover{box-shadow:0 1px 8px rgba(0,0,0,.08)}
+.ac.filtered-out{display:none}
+
+/* Card row */
+.ac-row{display:grid;grid-template-columns:4px 190px 1fr 36px;align-items:stretch;cursor:pointer;user-select:none;transition:background .1s;min-height:56px}
+.list-view .ac-row{display:none}
+.ac-row:hover{background:#FAFAFA}
+.ac-bar{}
+.ac-id{padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;border-right:1px solid var(--brl);background:#FAFAFA}
+.ac-badge{display:inline-block;padding:1px 5px;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#fff;border-radius:2px;width:fit-content}
+.ac-title{font-size:12px;font-weight:700;color:var(--k);line-height:1.3}
+.ac-meta{padding:10px 14px;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.ac-when{font-size:11px;color:var(--m)}
+.ac-when b{font-weight:700;color:var(--k)}
+.ac-profs{display:flex;gap:3px;flex-wrap:wrap}
+.ac-tog{display:flex;align-items:center;justify-content:center;color:var(--br);border-left:1px solid var(--brl);background:#FAFAFA;transition:.15s}
+.ac.open .ac-tog{background:var(--bl);color:var(--blue)}
+.ac.open .ac-tog svg{transform:rotate(180deg)}
+.ac-tog svg{transition:transform .2s}
+
+/* List row */
+.ac-list-row{display:none;grid-template-columns:4px 1fr 180px 200px 1fr;align-items:stretch}
+.list-view .ac-list-row{display:grid}
+.acl-badge{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#fff;display:flex;align-items:center;justify-content:center;writing-mode:vertical-lr;transform:rotate(180deg);padding:8px 4px;min-height:40px}
+.acl-title{padding:9px 10px;font-size:12px;font-weight:700;color:var(--k);line-height:1.3;display:flex;align-items:center}
+.acl-when{padding:9px 10px;font-size:11px;color:var(--m);display:flex;align-items:center;border-left:1px solid var(--brl)}
+.acl-who{padding:9px 10px;font-size:11px;color:var(--m);line-height:1.4;display:flex;align-items:center;border-left:1px solid var(--brl)}
+.acl-out{padding:9px 10px;font-size:11px;color:var(--m);line-height:1.4;display:flex;align-items:center;border-left:1px solid var(--brl)}
+
+/* Expanded body */
+.ac-body{display:none;border-top:2px solid var(--blue);background:#fff}
+.ac.open .ac-body{display:block}
+.list-view .ac-body{display:none!important}
+
+.ac-grid{display:grid;grid-template-columns:1fr 1fr 2fr;border-bottom:1px solid #EFEFEF}
+.ac-col{padding:14px 16px;border-right:1px solid #EFEFEF}
+.ac-col:last-child{border-right:none}
+.ac-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--br);margin-bottom:6px}
+.ac-col p{font-size:12px;line-height:1.6;color:var(--k);margin:0}
+.ac-why{background:#FFFEF5}
+.ac-why p{color:#3d3200}
+.how{list-style:none;margin:0;padding:0;counter-reset:h}
+.how li{counter-increment:h;display:flex;gap:7px;align-items:flex-start;margin-bottom:6px;font-size:12px;line-height:1.5}
+.how li:last-child{margin:0}
+.how li::before{content:counter(h);min-width:17px;height:17px;background:var(--blue);color:#fff;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.ac-foot{padding:8px 16px;display:flex;align-items:flex-start;gap:0;background:#FAFAFA;flex-wrap:wrap;border-top:1px solid #EFEFEF}
+.ac-fs{display:flex;align-items:flex-start;gap:6px;padding:4px 14px 4px 0;margin-right:14px;border-right:1px solid #ECECEC}
+.ac-fs:last-child{border-right:none;margin-right:0}
+.ac-fl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--br);flex-shrink:0;padding-top:2px}
+.ac-ft{display:flex;flex-wrap:wrap;gap:3px}
+.art{padding:2px 6px;font-size:10px;font-weight:600;background:var(--bl);border:1px solid #b8d6ef;color:var(--bd);border-radius:2px}
+.gl{font-size:11px;color:var(--blue);text-decoration:underline;font-weight:500}
+.gl:hover{color:var(--bd)}
+.gs{font-size:9px;color:var(--m);font-weight:400}
+
+/* EMPTY */
+.empty{text-align:center;padding:36px;color:var(--m);display:none;font-size:13px}
+.empty button{color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline;font-size:13px;font-family:inherit}
+
+/* LUCID MODAL */
+.mo{position:fixed;inset:0;background:rgba(11,12,12,.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.mo.open{display:flex}
+.mo-box{background:#fff;max-width:500px;width:100%;border-radius:3px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.mo-hd{background:var(--bd);color:#fff;padding:18px 20px;display:flex;align-items:flex-start;gap:10px}
+.mo-hd-icon{width:34px;height:34px;background:var(--blue);display:grid;place-items:center;border-radius:2px;flex-shrink:0;margin-top:1px}
+.mo-hd-txt h3{margin:0;font-size:16px;font-weight:800}
+.mo-hd-txt p{margin:3px 0 0;font-size:11px;opacity:.6}
+.mo-close{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.6);font-size:20px;cursor:pointer;line-height:1;padding:0;flex-shrink:0}
+.mo-close:hover{color:#fff}
+.mo-bd{padding:20px}
+.mo-bd p{font-size:13px;color:var(--m);line-height:1.6;margin:0 0 14px}
+.mo-steps{list-style:none;padding:0;margin:0 0 18px;counter-reset:ms}
+.mo-steps li{counter-increment:ms;display:flex;gap:9px;margin-bottom:10px;font-size:12px;line-height:1.5;color:var(--k);align-items:flex-start}
+.mo-steps li::before{content:counter(ms);min-width:20px;height:20px;background:var(--blue);color:#fff;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.mo-links{display:flex;flex-direction:column;gap:6px}
+.mo-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--brl);border-radius:2px;text-decoration:none;color:var(--k);transition:.12s}
+.mo-link:hover{border-color:var(--blue);background:var(--bl)}
+.mo-licon{width:28px;height:28px;border-radius:2px;display:grid;place-items:center;flex-shrink:0;font-size:13px}
+.mo-ltxt strong{display:block;font-size:12px;font-weight:700}
+.mo-ltxt span{font-size:11px;color:var(--m)}
+.mo-larr{margin-left:auto;color:var(--m);font-size:14px}
+
+:focus-visible{outline:3px solid #ffdd00;outline-offset:2px}
+@media(max-width:860px){
+  .ac-row{grid-template-columns:4px 1fr 32px}
+  .ac-id{display:none}
+  .hero-right{display:none}
+  .ac-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-i">
+    <a class="brand" href="#">
+      <div class="crest">DfE</div>
+      <div class="brand-txt"><strong>Department for Education</strong><span>Service Manual</span></div>
+    </a>
+    <nav class="hnav">
+      <a href="#">Standards</a><a href="#">Guidance</a><a href="#">Community</a><a href="#">Tools</a>
+    </nav>
+  </div>
+</header>
+
+<nav class="snav">
+  <div class="snav-i">
+    <a href="#">Overview</a>
+    <a href="#" class="on">Guidance hub</a>
+    <a href="#">Standards</a><a href="#">Assessments</a><a href="#">Accessibility</a><a href="#">Design system</a>
+  </div>
+</nav>
+
+<div class="bc"><ol>
+  <li><a href="#">Home</a></li><li><a href="#">Guidance hub</a></li><li>What to do when</li>
+</ol></div>
+
+<div class="hero">
+  <div class="hero-i">
+    <div class="hero-left">
+      <div class="hero-ey">Guidance hub</div>
+      <h1>What to do when</h1>
+      <p class="hero-sub">What to do, when to do it, why it matters and how to approach it — across every delivery phase and practice track. Filter by phase, track or DDaT profession role.</p>
+    </div>
+    <div class="hero-right">
+      <div class="hero-chips">
+        <span class="hero-chip"><strong>Updated</strong> March 2025</span>
+        <span class="hero-chip"><strong>Owner</strong> Delivery &amp; Design Practice</span>
+        <span class="hero-chip"><strong>Audience</strong> All DDaT professions</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="fbar" id="fbar">
+  <div class="fbar-i" style="flex-direction:column;gap:0">
+
+    <!-- Row 1: Phase + Track + View -->
+    <div class="fbar-r1">
+      <div class="fg">
+        <span class="flbl">Phase</span>
+        <button class="fb on" data-pf="all"       onclick="setPhase('all',this)">All</button>
+        <button class="fb" data-pf="explore"      onclick="setPhase('explore',this)"   style="color:var(--ex)"><span class="fdot" style="background:var(--ex)"></span>Explore</button>
+        <button class="fb" data-pf="discovery"    onclick="setPhase('discovery',this)" style="color:var(--di)"><span class="fdot" style="background:var(--di)"></span>Discovery</button>
+        <button class="fb" data-pf="alpha"        onclick="setPhase('alpha',this)"     style="color:var(--al)"><span class="fdot" style="background:var(--al)"></span>Alpha</button>
+        <button class="fb" data-pf="beta"         onclick="setPhase('beta',this)"      style="color:var(--be)"><span class="fdot" style="background:var(--be)"></span>Beta</button>
+        <button class="fb" data-pf="live"         onclick="setPhase('live',this)"      style="color:var(--li)"><span class="fdot" style="background:var(--li)"></span>Live</button>
+      </div>
+      <div class="fsep"></div>
+      <div class="fg">
+        <span class="flbl">Track</span>
+        <button class="fb on" data-tf="all"    onclick="setTrack('all',this)">All</button>
+        <button class="fb" data-tf="design"    onclick="setTrack('design',this)"  style="color:var(--td)"><span class="fdot" style="background:var(--td)"></span>Design</button>
+        <button class="fb" data-tf="build"     onclick="setTrack('build',this)"   style="color:var(--tb)"><span class="fdot" style="background:var(--tb)"></span>Build</button>
+        <button class="fb" data-tf="run"       onclick="setTrack('run',this)"     style="color:var(--tr)"><span class="fdot" style="background:var(--tr)"></span>Run</button>
+      </div>
+      <div class="fbar-right">
+        <button class="vbtn on" id="vbtn-card" onclick="setView('card')">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="currentColor"><rect x="0" y="0" width="4.5" height="4.5" rx="1"/><rect x="6.5" y="0" width="4.5" height="4.5" rx="1"/><rect x="0" y="6.5" width="4.5" height="4.5" rx="1"/><rect x="6.5" y="6.5" width="4.5" height="4.5" rx="1"/></svg>
+          Cards
+        </button>
+        <button class="vbtn" id="vbtn-list" onclick="setView('list')">
+          <svg width="11" height="11" viewBox="0 0 11 11" stroke="currentColor" stroke-width="1.8" fill="none"><line x1="0" y1="2.5" x2="11" y2="2.5"/><line x1="0" y1="5.5" x2="11" y2="5.5"/><line x1="0" y1="8.5" x2="11" y2="8.5"/></svg>
+          List
+        </button>
+        <div class="fsep" style="margin:0 4px"></div>
+        <button class="lucid-btn" onclick="openModal()">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="1.8"><path d="M1 10L10 1M7 1h3v3"/></svg>
+          Lucid board
+        </button>
+        <button class="vbtn" onclick="collapseAll()" title="Collapse all phases" style="padding:4px 7px">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 8l4-4 4 4"/><line x1="1" y1="11" x2="10" y2="11"/></svg>
+        </button>
+        <button class="vbtn" onclick="expandAll()" title="Expand all phases" style="padding:4px 7px">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 3l4 4 4-4"/><line x1="1" y1="0" x2="10" y2="0"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Row 2: Role chips -->
+    <div class="fbar-r2">
+      <span class="flbl" style="flex-shrink:0">Role</span>
+      <button class="rc-all on" id="rc-all" onclick="setRole('all',this)">All roles</button>
+      <button class="rc" data-role="pm" onclick="setRole('pm',this)" style="--rc:#2563EB"><span class="rc-dot" style="background:#2563EB"></span>Product manager</button>
+<button class="rc" data-role="dm" onclick="setRole('dm',this)" style="--rc:#D97706"><span class="rc-dot" style="background:#D97706"></span>Delivery manager</button>
+<button class="rc" data-role="ur" onclick="setRole('ur',this)" style="--rc:#7C3AED"><span class="rc-dot" style="background:#7C3AED"></span>User researcher</button>
+<button class="rc" data-role="sd" onclick="setRole('sd',this)" style="--rc:#DB2777"><span class="rc-dot" style="background:#DB2777"></span>Service designer</button>
+<button class="rc" data-role="id" onclick="setRole('id',this)" style="--rc:#BE185D"><span class="rc-dot" style="background:#BE185D"></span>Interaction designer</button>
+<button class="rc" data-role="cd" onclick="setRole('cd',this)" style="--rc:#16A34A"><span class="rc-dot" style="background:#16A34A"></span>Content designer</button>
+<button class="rc" data-role="ta" onclick="setRole('ta',this)" style="--rc:#059669"><span class="rc-dot" style="background:#059669"></span>Technical architect</button>
+<button class="rc" data-role="dev" onclick="setRole('dev',this)" style="--rc:#0D9488"><span class="rc-dot" style="background:#0D9488"></span>Developer</button>
+<button class="rc" data-role="ops" onclick="setRole('ops',this)" style="--rc:#EA580C"><span class="rc-dot" style="background:#EA580C"></span>Service operations</button>
+<button class="rc" data-role="pa" onclick="setRole('pa',this)" style="--rc:#475569"><span class="rc-dot" style="background:#475569"></span>Performance analyst</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="wrap" id="content">
+  <div id="empty-msg" class="empty">No activities match your filters. <button onclick="clearAll()">Clear all filters</button></div>
+<section class="pb" id="ph-explore" data-phase="explore">
+  <div class="ph-hd" onclick="togglePb(this.closest('.pb'))" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ')togglePb(this.closest('.pb'))">
+    <div class="ph-bar" style="background:#4338CA"></div>
+    <div class="ph-body">
+      <div class="ph-top">
+        <span class="ph-tag" style="background:#4338CA">Explore</span>
+        <span class="tpill tpill-off">Design</span><span class="tpill tpill-off">Build</span><span class="tpill tpill-off">Run</span>
+        <span class="ph-cnt" id="cnt-explore"></span>
+        <span class="ph-tog-lbl">Collapse</span>
+      </div>
+      <div class="ph-row">
+        <h2 class="ph-title">Explore</h2>
+        <div class="ph-chev"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <p class="ph-sub">Validate that a problem is real and worth solving before committing to a full Discovery.</p>
+      <span class="ph-dur">2–4 weeks · 1–3 people</span>
+    </div>
+  </div>
+  <div class="ph-acts">
+    <div class="list-hdr">
+    <div></div><div>Activity</div><div>When</div><div>Who</div><div>Outputs</div>
+  </div>
+    <div class="ac-list">
+<div class="ac" data-phase="explore" data-track="agile" data-roles="dm pm">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#4338CA"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#4338CA">Agile</span>
+      <span class="ac-title">Identify the problem space</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> First — before anything else</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F;white-space:nowrap">Delivery manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#4338CA">Agile</div>
+    <div class="acl-title">Identify the problem space</div>
+    <div class="acl-when">First — before anything else</div>
+    <div class="acl-who">Product manager (lead), Delivery manager</div>
+    <div class="acl-out">Problem statement · Stakeholder map</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Define the broad area of concern: who is affected, what is going wrong, and what policy or user need is driving this. A concise framing exercise, not a research project.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Without a shared problem framing, Discovery teams can spend weeks on the wrong question. This step is cheap; skipping it isn't.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Desk research — reports, policy docs, complaints data</li><li>3–5 informal stakeholder conversations</li><li>Write a 1-page problem framing statement</li><li>Map who will need to be involved in Discovery</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F">Delivery manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Problem statement</span><span class="art">Stakeholder map</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Problem framing<span class="gs"> DfE</span></a><a class="gl" href="#">Explore phase<span class="gs"> GDS</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="explore" data-track="agile" data-roles="da ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#4338CA"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#4338CA">Agile</span>
+      <span class="ac-title">Review existing evidence</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> In parallel with problem framing</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #CBD5E1;background:#F1F5F9;color:#1E293B;white-space:nowrap">Data analyst</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#4338CA">Agile</div>
+    <div class="acl-title">Review existing evidence</div>
+    <div class="acl-when">In parallel with problem framing</div>
+    <div class="acl-who">User researcher (lead), Data analyst</div>
+    <div class="acl-out">Evidence log · Gaps and unknowns list</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Gather previous reports, audits, complaints data, prior Discovery outputs and relevant policy documents relevant to the problem area.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>DfE has often explored similar problems before. This avoids repeating previous work and focuses Discovery on genuine unknowns.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Search DfE knowledge base and previous assessment reports</li><li>Review published GDS assessments in the area</li><li>Compile an evidence log: source, date, relevance, gaps</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #CBD5E1;background:#F1F5F9;color:#1E293B">Data analyst</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Evidence log</span><span class="art">Gaps and unknowns list</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Using existing research<span class="gs"> GDS</span></a><a class="gl" href="#">DfE knowledge base<span class="gs"> Confluence</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="explore" data-track="agile" data-roles="dm pm">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#4338CA"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#4338CA">Agile</span>
+      <span class="ac-title">Decide whether to proceed to Discovery</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> End of Explore — before committing a team</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F;white-space:nowrap">Delivery manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#4338CA">Agile</div>
+    <div class="acl-title">Decide whether to proceed to Discovery</div>
+    <div class="acl-when">End of Explore — before committing a team</div>
+    <div class="acl-who">Product manager (lead), Delivery manager</div>
+    <div class="acl-out">Explore wrap-up report · Decision record</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>A formal go/no-go recommendation on whether the problem warrants a full Discovery investment, presented to the SRO for sign-off.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>A Discovery team costs significant time and money. This gate ensures resources are directed at problems genuinely worth solving.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Compile evidence from problem framing and review</li><li>Present to SRO with indicative team and timeline</li><li>Agree a named product owner and initial budget</li><li>Record the decision and rationale formally</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F">Delivery manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Explore wrap-up report</span><span class="art">Decision record</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Explore checklist<span class="gs"> DfE</span></a></div></div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</section>
+<section class="pb" id="ph-discovery" data-phase="discovery">
+  <div class="ph-hd" onclick="togglePb(this.closest('.pb'))" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ')togglePb(this.closest('.pb'))">
+    <div class="ph-bar" style="background:#1D70B8"></div>
+    <div class="ph-body">
+      <div class="ph-top">
+        <span class="ph-tag" style="background:#1D70B8">Discovery</span>
+        <span class="tpill" style="background:#9333EA">Design</span><span class="tpill tpill-off">Build</span><span class="tpill tpill-off">Run</span>
+        <span class="ph-cnt" id="cnt-discovery"></span>
+        <span class="ph-tog-lbl">Collapse</span>
+      </div>
+      <div class="ph-row">
+        <h2 class="ph-title">Discovery</h2>
+        <div class="ph-chev"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <p class="ph-sub">Understand users and their needs. Identify constraints, map the landscape, decide whether and how a service should be built.</p>
+      <span class="ph-dur">8–12 weeks · 4–6 people</span>
+    </div>
+  </div>
+  <div class="ph-acts">
+    <div class="list-hdr">
+    <div></div><div>Activity</div><div>When</div><div>Who</div><div>Outputs</div>
+  </div>
+    <div class="ac-list">
+<div class="ac" data-phase="discovery" data-track="agile" data-roles="id pm ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#1D70B8"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#1D70B8">Agile</span>
+      <span class="ac-title">Conduct user research</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> From week 1 — ongoing throughout Discovery</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D;white-space:nowrap">Interaction designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#1D70B8">Agile</div>
+    <div class="acl-title">Conduct user research</div>
+    <div class="acl-when">From week 1 — ongoing throughout Discovery</div>
+    <div class="acl-who">User researcher (lead), Interaction designer, Product manager</div>
+    <div class="acl-out">Research plan · Findings report · User needs statements</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Qualitative research with real users and non-users to understand goals, pain points, mental models and context. Must include diverse participants and people with access needs.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Services that don't understand user needs fail. This is your primary tool for deciding what to build — or whether to build at all. Directly evidences Service Standard point 1.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Write a research plan: questions, methods, recruitment criteria</li><li>Recruit 8–10+ participants including those with access needs</li><li>Run semi-structured interviews or contextual enquiry</li><li>Run a synthesis workshop — identify themes, needs and insights</li><li>Share findings with the whole team, not just the researcher</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D">Interaction designer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Research plan</span><span class="art">Findings report</span><span class="art">User needs statements</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">User research standards<span class="gs"> DfE</span></a><a class="gl" href="#">Recruiting participants<span class="gs"> DfE</span></a><a class="gl" href="#">Writing a research plan<span class="gs"> GDS</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="discovery" data-track="design" data-roles="pm sd ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#9333EA"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#9333EA">Design</span>
+      <span class="ac-title">Map the current user journey</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> After initial research rounds — weeks 3–6</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F9A8D4;background:#FCE7F3;color:#831843;white-space:nowrap">Service designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#9333EA">Design</div>
+    <div class="acl-title">Map the current user journey</div>
+    <div class="acl-when">After initial research rounds — weeks 3–6</div>
+    <div class="acl-who">Service designer (lead), User researcher, Product manager</div>
+    <div class="acl-out">As-is journey map · Pain points log · Opportunity areas</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>A visual map of the steps users currently take: pain points, workarounds, emotional experience and the systems involved at each stage.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Makes the problem concrete and discussable. Exposes friction across the entire journey, including touchpoints outside the digital service.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Run a synthesis workshop in FigJam or Mural</li><li>Map stages, touchpoints, pain points and emotions</li><li>Include back-stage processes and actors</li><li>Validate the map with users in a follow-up research round</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F9A8D4;background:#FCE7F3;color:#831843">Service designer (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">As-is journey map</span><span class="art">Pain points log</span><span class="art">Opportunity areas</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Journey mapping<span class="gs"> DfE</span></a><a class="gl" href="#">Service blueprinting<span class="gs"> DfE</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="discovery" data-track="agile" data-roles="dm pm ta">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#1D70B8"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#1D70B8">Agile</span>
+      <span class="ac-title">Understand technical and policy constraints</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> In parallel with user research — weeks 2–8</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B;white-space:nowrap">Technical architect</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F;white-space:nowrap">Delivery manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#1D70B8">Agile</div>
+    <div class="acl-title">Understand technical and policy constraints</div>
+    <div class="acl-when">In parallel with user research — weeks 2–8</div>
+    <div class="acl-who">Technical architect (lead), Product manager, Delivery manager</div>
+    <div class="acl-out">Constraints map · Risks log · DPIA initial review</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Identify what is technically and legally feasible: existing systems, APIs, data sources, integration requirements, legislation and data protection constraints.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Solutions are only viable if they can be built within real constraints. Knowing these early shapes what to prototype in Alpha.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Workshops with architects, legal, policy and data colleagues</li><li>Map existing systems and integration dependencies</li><li>Identify data protection constraints — consult the SIRO</li><li>Document in a constraints and dependencies map</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B">Technical architect (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F">Delivery manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Constraints map</span><span class="art">Risks log</span><span class="art">DPIA initial review</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Technical constraints canvas<span class="gs"> DfE</span></a><a class="gl" href="#">DPIA guidance<span class="gs"> DfE Data</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="discovery" data-track="agile" data-roles="dm pm sd ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#1D70B8"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#1D70B8">Agile</span>
+      <span class="ac-title">Present Discovery findings</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> End of Discovery — before Alpha begins</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F9A8D4;background:#FCE7F3;color:#831843;white-space:nowrap">Service designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F;white-space:nowrap">Delivery manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#1D70B8">Agile</div>
+    <div class="acl-title">Present Discovery findings</div>
+    <div class="acl-when">End of Discovery — before Alpha begins</div>
+    <div class="acl-who">Product manager (lead), User researcher, Service designer, Delivery manager</div>
+    <div class="acl-out">Discovery report · Decision to proceed · Alpha scope proposal</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>A written report and presentation: user needs, pain points, constraints and a recommendation on whether and how to proceed into Alpha.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Creates a shared, documented foundation for Alpha and satisfies an assessment panel. Without this, Alpha teams lack clarity and often repeat Discovery work.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Complete the DfE Discovery report template</li><li>Present to senior stakeholders — get formal sign-off</li><li>Publish to team wiki and notify assessment programme</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F9A8D4;background:#FCE7F3;color:#831843">Service designer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F">Delivery manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Discovery report</span><span class="art">Decision to proceed</span><span class="art">Alpha scope proposal</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Discovery report template<span class="gs"> DfE</span></a><a class="gl" href="#">Assessment readiness<span class="gs"> DfE</span></a><a class="gl" href="#">Service Standard point 1<span class="gs"> GDS</span></a></div></div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</section>
+<section class="pb" id="ph-alpha" data-phase="alpha">
+  <div class="ph-hd" onclick="togglePb(this.closest('.pb'))" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ')togglePb(this.closest('.pb'))">
+    <div class="ph-bar" style="background:#BE185D"></div>
+    <div class="ph-body">
+      <div class="ph-top">
+        <span class="ph-tag" style="background:#BE185D">Alpha</span>
+        <span class="tpill" style="background:#9333EA">Design</span><span class="tpill" style="background:#EA580C">Build</span><span class="tpill tpill-off">Run</span>
+        <span class="ph-cnt" id="cnt-alpha"></span>
+        <span class="ph-tog-lbl">Collapse</span>
+      </div>
+      <div class="ph-row">
+        <h2 class="ph-title">Alpha</h2>
+        <div class="ph-chev"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <p class="ph-sub">Test riskiest assumptions with prototypes. Explore multiple design approaches. Design and Build tracks run in parallel.</p>
+      <span class="ph-dur">8–12 weeks · 5–8 people</span>
+    </div>
+  </div>
+  <div class="ph-acts">
+    <div class="list-hdr">
+    <div></div><div>Activity</div><div>When</div><div>Who</div><div>Outputs</div>
+  </div>
+    <div class="ac-list">
+<div class="ac" data-phase="alpha" data-track="agile" data-roles="cd dev id ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#BE185D"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#BE185D">Agile</span>
+      <span class="ac-title">Create and test prototypes</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Core activity — iterative throughout Alpha sprints</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D;white-space:nowrap">Interaction designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #86EFAC;background:#DCFCE7;color:#14532D;white-space:nowrap">Content designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A;white-space:nowrap">Developer</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#BE185D">Agile</div>
+    <div class="acl-title">Create and test prototypes</div>
+    <div class="acl-when">Core activity — iterative throughout Alpha sprints</div>
+    <div class="acl-who">Interaction designer (lead), User researcher, Content designer, Developer</div>
+    <div class="acl-out">Prototype (iterated) · Usability test findings · Design decision log</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Quick, throwaway prototypes to test whether design concepts work for real users. Fast experiments to validate or kill assumptions before investing in a full build.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Failing fast in Alpha is cheap. Testing assumptions here prevents expensive redesigns in Beta. Each round should either confirm a decision or change it.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Identify the riskiest assumptions from Discovery first</li><li>Build with GOV.UK Prototype Kit or Figma — whichever is faster</li><li>Run usability testing with at least 5 participants per round</li><li>Synthesise findings, update the design, iterate next sprint</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D">Interaction designer (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #86EFAC;background:#DCFCE7;color:#14532D">Content designer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A">Developer</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Prototype (iterated)</span><span class="art">Usability test findings</span><span class="art">Design decision log</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">GOV.UK Prototype Kit<span class="gs"> GDS</span></a><a class="gl" href="#">Usability testing guide<span class="gs"> DfE</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="alpha" data-track="build" data-roles="dev pm ta">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#EA580C"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#EA580C">Build</span>
+      <span class="ac-title">Technical architecture spike</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Early Alpha — weeks 1–4, alongside design</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B;white-space:nowrap">Technical architect</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A;white-space:nowrap">Developer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#EA580C">Build</div>
+    <div class="acl-title">Technical architecture spike</div>
+    <div class="acl-when">Early Alpha — weeks 1–4, alongside design</div>
+    <div class="acl-who">Technical architect (lead), Developer, Product manager</div>
+    <div class="acl-out">Architecture Decision Records · Technical options paper</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Time-boxed experiments to explore viable technical approaches: hosting, data models, integration patterns, build vs buy decisions before the Beta build begins.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Committing to an architecture in Beta without spiking leads to expensive rework. A spike costs one sprint. Rework costs months.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>List the top 3–5 technical unknowns from the Discovery constraints map</li><li>Time-box each spike to a maximum of one sprint</li><li>Document findings as Architecture Decision Records</li><li>Produce a technical options paper for DfE architecture review</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B">Technical architect (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A">Developer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Architecture Decision Records</span><span class="art">Technical options paper</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">ADR template<span class="gs"> DfE</span></a><a class="gl" href="#">Tech code of practice<span class="gs"> CDDO</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="alpha" data-track="design" data-roles="cd id sd">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#9333EA"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#9333EA">Design</span>
+      <span class="ac-title">Define the service design</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Mid-to-late Alpha — toward Beta handover</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F9A8D4;background:#FCE7F3;color:#831843;white-space:nowrap">Service designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D;white-space:nowrap">Interaction designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #86EFAC;background:#DCFCE7;color:#14532D;white-space:nowrap">Content designer</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#9333EA">Design</div>
+    <div class="acl-title">Define the service design</div>
+    <div class="acl-when">Mid-to-late Alpha — toward Beta handover</div>
+    <div class="acl-who">Service designer (lead), Interaction designer, Content designer</div>
+    <div class="acl-out">Annotated Figma designs · To-be service blueprint · Content prototype</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Document the tested end-to-end service design: user flow, key screens, content design, interaction patterns and how it fits the wider service landscape.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Gives the Beta engineering team a tested, agreed design to build from. Without this, design intent is lost in handover.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Finalise Figma files with annotated designs, flows and component notes</li><li>Document the to-be service blueprint including back-stage processes</li><li>Hold a design handover session with the Beta engineering team</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F9A8D4;background:#FCE7F3;color:#831843">Service designer (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D">Interaction designer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #86EFAC;background:#DCFCE7;color:#14532D">Content designer</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Annotated Figma designs</span><span class="art">To-be service blueprint</span><span class="art">Content prototype</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Design handover guidance<span class="gs"> DfE</span></a><a class="gl" href="#">DfE design patterns<span class="gs"> DfE Design System</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="alpha" data-track="agile" data-roles="dm id pm ta ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#BE185D"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#BE185D">Agile</span>
+      <span class="ac-title">Alpha service assessment</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Final 2 weeks of Alpha</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D;white-space:nowrap">Interaction designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B;white-space:nowrap">Technical architect</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#BE185D">Agile</div>
+    <div class="acl-title">Alpha service assessment</div>
+    <div class="acl-when">Final 2 weeks of Alpha</div>
+    <div class="acl-who">Product manager (lead), User researcher, Interaction designer, Technical architect, Delivery manager</div>
+    <div class="acl-out">Self-assessment · Alpha assessment report · Beta kick-off plan</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>An evidence-based assessment against the Service Standard at Alpha level. The panel confirms readiness to commit the investment required for Beta.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>A quality gate protecting users and taxpayers. A successful Alpha assessment gives approval to proceed into Beta, where substantial public investment is committed.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Complete the Alpha self-assessment checklist</li><li>Prepare a show-and-tell using prototype and research as evidence</li><li>Brief all team leads — each presents their specialist area</li><li>Book via DfE assessment programme at least 3 weeks ahead</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D">Interaction designer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B">Technical architect</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F">Delivery manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Self-assessment</span><span class="art">Alpha assessment report</span><span class="art">Beta kick-off plan</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Alpha assessment guidance<span class="gs"> DfE</span></a><a class="gl" href="#">Service Standard<span class="gs"> GDS</span></a><a class="gl" href="#">Book an assessment<span class="gs"> DfE</span></a></div></div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</section>
+<section class="pb" id="ph-beta" data-phase="beta">
+  <div class="ph-hd" onclick="togglePb(this.closest('.pb'))" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ')togglePb(this.closest('.pb'))">
+    <div class="ph-bar" style="background:#C2410C"></div>
+    <div class="ph-body">
+      <div class="ph-top">
+        <span class="ph-tag" style="background:#C2410C">Beta</span>
+        <span class="tpill" style="background:#9333EA">Design</span><span class="tpill" style="background:#EA580C">Build</span><span class="tpill" style="background:#16A34A">Run</span>
+        <span class="ph-cnt" id="cnt-beta"></span>
+        <span class="ph-tog-lbl">Collapse</span>
+      </div>
+      <div class="ph-row">
+        <h2 class="ph-title">Beta</h2>
+        <div class="ph-chev"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <p class="ph-sub">Build and test a working service with real users. All three practice tracks are fully active.</p>
+      <span class="ph-dur">Private 12–24 wks, then ongoing · 8–12 people</span>
+    </div>
+  </div>
+  <div class="ph-acts">
+    <div class="list-hdr">
+    <div></div><div>Activity</div><div>When</div><div>Who</div><div>Outputs</div>
+  </div>
+    <div class="ac-list">
+<div class="ac" data-phase="beta" data-track="build" data-roles="dev ta">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#EA580C"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#EA580C">Build</span>
+      <span class="ac-title">Set up CI/CD pipeline and environments</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Sprint 1 — before any feature work begins</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A;white-space:nowrap">Developer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B;white-space:nowrap">Technical architect</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#EA580C">Build</div>
+    <div class="acl-title">Set up CI/CD pipeline and environments</div>
+    <div class="acl-when">Sprint 1 — before any feature work begins</div>
+    <div class="acl-who">Developer (lead), Technical architect</div>
+    <div class="acl-out">CI/CD pipeline config · Environment docs · Deployment runbook</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>An automated build, test and deployment pipeline enabling every code change to be verified and deployed safely to dev, staging and production environments.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Manual deployments slow teams, introduce errors and make safe iteration impossible. A pipeline from day one lets the team focus on features, not deployments.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Set up GitHub Actions or Azure DevOps with build, test, deploy stages</li><li>Create dev, staging and production environments with access controls</li><li>Require all automated tests to pass before merging to main</li><li>Document pipeline configuration and environment structure</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A">Developer (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B">Technical architect</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">CI/CD pipeline config</span><span class="art">Environment docs</span><span class="art">Deployment runbook</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">DfE hosting standards<span class="gs"> DfE</span></a><a class="gl" href="#">CI/CD guidance<span class="gs"> DfE Engineering</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="beta" data-track="design" data-roles="cd dev id ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#9333EA"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#9333EA">Design</span>
+      <span class="ac-title">Continuous accessibility testing</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Every sprint — built into the definition of done</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D;white-space:nowrap">Interaction designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A;white-space:nowrap">Developer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #86EFAC;background:#DCFCE7;color:#14532D;white-space:nowrap">Content designer</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#9333EA">Design</div>
+    <div class="acl-title">Continuous accessibility testing</div>
+    <div class="acl-when">Every sprint — built into the definition of done</div>
+    <div class="acl-who">Interaction designer (lead), User researcher, Developer, Content designer</div>
+    <div class="acl-out">WCAG audit report · Accessibility statement · Known issues log</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Automated and manual accessibility checks against WCAG 2.2 AA on every component or flow — part of the sprint workflow, not bolted on at the end.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>A legal requirement under PSBAR. Retrofitting accessibility is significantly more expensive than building it in. All users must be able to access government services.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Integrate axe-core into the CI pipeline for automated checks on every PR</li><li>Test manually with NVDA/JAWS on Windows, VoiceOver on iOS each sprint</li><li>Include users with access needs in regular usability research rounds</li><li>Book a full WCAG audit before public Beta launch</li><li>Publish an accessibility statement from day one of public Beta</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D">Interaction designer (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A">Developer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #86EFAC;background:#DCFCE7;color:#14532D">Content designer</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">WCAG audit report</span><span class="art">Accessibility statement</span><span class="art">Known issues log</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">DfE accessibility standards<span class="gs"> DfE</span></a><a class="gl" href="#">Accessibility regulations<span class="gs"> GDS</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="beta" data-track="run" data-roles="dm ops pm sd">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#16A34A"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#16A34A">Run</span>
+      <span class="ac-title">Design the support model</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> During private Beta — before any public launch</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FDBA74;background:#FFEDD5;color:#7C2D12;white-space:nowrap">Service operations</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F9A8D4;background:#FCE7F3;color:#831843;white-space:nowrap">Service designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F;white-space:nowrap">Delivery manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#16A34A">Run</div>
+    <div class="acl-title">Design the support model</div>
+    <div class="acl-when">During private Beta — before any public launch</div>
+    <div class="acl-who">Service operations (lead), Product manager, Service designer, Delivery manager</div>
+    <div class="acl-out">Support model document · SLA definition · Tier response runbook</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Define how users get help: helpdesk channels, self-service, escalation paths, out-of-hours cover and SLA commitments across all severity levels.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>A service without adequate support erodes trust. The support model must be in place and tested before the service is exposed to the public.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Run a service blueprint workshop with ops, service desk and product</li><li>Define tier-1 (self-service), tier-2 (helpdesk) and tier-3 (team) processes</li><li>Agree SLAs and escalation criteria with the product owner</li><li>Test the support model with real users during private Beta</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FDBA74;background:#FFEDD5;color:#7C2D12">Service operations (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F9A8D4;background:#FCE7F3;color:#831843">Service designer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F">Delivery manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Support model document</span><span class="art">SLA definition</span><span class="art">Tier response runbook</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Support model template<span class="gs"> DfE</span></a><a class="gl" href="#">Operating a live service<span class="gs"> GDS</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="beta" data-track="agile" data-roles="dm id pm ta ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#C2410C"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#C2410C">Agile</span>
+      <span class="ac-title">Beta service assessment</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Before moving from private to public Beta, or to Live</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D;white-space:nowrap">Interaction designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B;white-space:nowrap">Technical architect</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#C2410C">Agile</div>
+    <div class="acl-title">Beta service assessment</div>
+    <div class="acl-when">Before moving from private to public Beta, or to Live</div>
+    <div class="acl-who">Product manager (lead), User researcher, Interaction designer, Technical architect, Delivery manager</div>
+    <div class="acl-out">Beta assessment report · Conditions (if applicable) · Recommendation to proceed</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Full evidence-based assessment against all 14 Service Standard points. Panel interrogates the team's approach and evidence.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Ensures only services meeting the standard go to the public at scale. The gating mechanism protecting users and providing accountability for taxpayer investment.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Complete a full self-assessment against all 14 Service Standard points</li><li>Prepare a live demonstration of the working service</li><li>All team leads must attend and present their evidence</li><li>Book via DfE assessment programme at least 4 weeks ahead</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D">Interaction designer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B">Technical architect</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F">Delivery manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Beta assessment report</span><span class="art">Conditions (if applicable)</span><span class="art">Recommendation to proceed</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Beta assessment guidance<span class="gs"> DfE</span></a><a class="gl" href="#">14 Service Standard points<span class="gs"> GDS</span></a></div></div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</section>
+<section class="pb" id="ph-live" data-phase="live">
+  <div class="ph-hd" onclick="togglePb(this.closest('.pb'))" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' ')togglePb(this.closest('.pb'))">
+    <div class="ph-bar" style="background:#15803D"></div>
+    <div class="ph-body">
+      <div class="ph-top">
+        <span class="ph-tag" style="background:#15803D">Live</span>
+        <span class="tpill" style="background:#9333EA">Design</span><span class="tpill tpill-off">Build</span><span class="tpill" style="background:#16A34A">Run</span>
+        <span class="ph-cnt" id="cnt-live"></span>
+        <span class="ph-tog-lbl">Collapse</span>
+      </div>
+      <div class="ph-row">
+        <h2 class="ph-title">Live</h2>
+        <div class="ph-chev"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <p class="ph-sub">Service in production for all users. Run owns operations; Design continues iterating. Major changes return to Alpha.</p>
+      <span class="ph-dur">Ongoing · Sustained team</span>
+    </div>
+  </div>
+  <div class="ph-acts">
+    <div class="list-hdr">
+    <div></div><div>Activity</div><div>When</div><div>Who</div><div>Outputs</div>
+  </div>
+    <div class="ac-list">
+<div class="ac" data-phase="live" data-track="run" data-roles="ops pa">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#16A34A"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#16A34A">Run</span>
+      <span class="ac-title">Monitor service health and performance</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Continuous — from day one of Live</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FDBA74;background:#FFEDD5;color:#7C2D12;white-space:nowrap">Service operations</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #CBD5E1;background:#F1F5F9;color:#1E293B;white-space:nowrap">Performance analyst</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#16A34A">Run</div>
+    <div class="acl-title">Monitor service health and performance</div>
+    <div class="acl-when">Continuous — from day one of Live</div>
+    <div class="acl-who">Service operations (lead), Performance analyst</div>
+    <div class="acl-out">Monitoring dashboard · Alert runbook · Monthly performance report</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Real-time monitoring of uptime, error rates, response times, journey completion and support ticket volumes — with defined alerting thresholds.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Problems in Live can affect thousands of users in minutes. Fast detection means fast resolution. Without monitoring, issues go undetected.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Set up dashboards covering the 4 service KPIs (Grafana, Azure Monitor)</li><li>Define alert thresholds with on-call escalation paths</li><li>Publish a public-facing performance dashboard — required for Live assessment</li><li>Review monitoring coverage after every significant incident</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FDBA74;background:#FFEDD5;color:#7C2D12">Service operations (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #CBD5E1;background:#F1F5F9;color:#1E293B">Performance analyst</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Monitoring dashboard</span><span class="art">Alert runbook</span><span class="art">Monthly performance report</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Performance monitoring standard<span class="gs"> DfE</span></a><a class="gl" href="#">Measuring performance<span class="gs"> GDS</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="live" data-track="run" data-roles="dev ops pm">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#16A34A"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#16A34A">Run</span>
+      <span class="ac-title">Incident management</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> When an incident occurs — follow the defined playbook</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FDBA74;background:#FFEDD5;color:#7C2D12;white-space:nowrap">Service operations</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A;white-space:nowrap">Developer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#16A34A">Run</div>
+    <div class="acl-title">Incident management</div>
+    <div class="acl-when">When an incident occurs — follow the defined playbook</div>
+    <div class="acl-who">Service operations (lead), Developer, Product manager</div>
+    <div class="acl-out">Incident log · Status communications · Post-incident review</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>A structured process for detecting, classifying, resolving and learning from service incidents — P1 (critical) through to P4 (minor).</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Without clear ownership and process, incidents drag on, communications fail and the same issues recur. A defined process reduces time-to-resolution.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Assign an incident lead immediately — they own comms and coordination</li><li>Classify severity (P1–P4) and follow the appropriate SLA</li><li>Communicate status to stakeholders proactively via the status page</li><li>Schedule a post-incident review within 5 working days of resolution</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FDBA74;background:#FFEDD5;color:#7C2D12">Service operations (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #5EEAD4;background:#CCFBF1;color:#134E4A">Developer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Incident log</span><span class="art">Status communications</span><span class="art">Post-incident review</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Incident management playbook<span class="gs"> DfE</span></a><a class="gl" href="#">PIR template<span class="gs"> DfE</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="live" data-track="design" data-roles="id pa pm ur">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#9333EA"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#9333EA">Design</span>
+      <span class="ac-title">Iterate from analytics and user feedback</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Ongoing — regular sprint activity throughout Live</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D;white-space:nowrap">Interaction designer</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95;white-space:nowrap">User researcher</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #CBD5E1;background:#F1F5F9;color:#1E293B;white-space:nowrap">Performance analyst</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#9333EA">Design</div>
+    <div class="acl-title">Iterate from analytics and user feedback</div>
+    <div class="acl-when">Ongoing — regular sprint activity throughout Live</div>
+    <div class="acl-who">Interaction designer, User researcher, Performance analyst, Product manager</div>
+    <div class="acl-out">Monthly analytics report · Improvement backlog · Research findings</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>Review analytics, user feedback, support tickets and survey data to identify where users are struggling, then design improvements based on evidence.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Meeting user needs is an ongoing commitment. Services that aren't actively improved degrade as needs, policy and technology evolve.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Monthly analytics review — completion rates, drop-off, error patterns</li><li>Quarterly user research to validate analytics findings</li><li>Maintain a prioritised improvement backlog with evidence links</li><li>Significant redesigns should trigger a new Alpha — not a Live hotfix</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #F0ABCA;background:#FDF2F8;color:#9D174D">Interaction designer</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #C4B5FD;background:#EDE9FE;color:#4C1D95">User researcher</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #CBD5E1;background:#F1F5F9;color:#1E293B">Performance analyst</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Monthly analytics report</span><span class="art">Improvement backlog</span><span class="art">Research findings</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Analytics guidance<span class="gs"> DfE</span></a><a class="gl" href="#">Continuous improvement<span class="gs"> DfE</span></a></div></div>
+    </div>
+  </div>
+</div>
+<div class="ac" data-phase="live" data-track="agile" data-roles="dm ops pm ta">
+  <div class="ac-row" onclick="toggleAc(this.closest('.ac'))" tabindex="0" role="button" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAc(this.closest('.ac'))}">
+    <div class="ac-bar" style="background:#15803D"></div>
+    <div class="ac-id">
+      <span class="ac-badge" style="background:#15803D">Agile</span>
+      <span class="ac-title">Annual service review</span>
+    </div>
+    <div class="ac-meta">
+      <span class="ac-when"><b>When:</b> Once per year, or when context changes significantly</span>
+      <div class="ac-profs"><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A;white-space:nowrap">Product manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F;white-space:nowrap">Delivery manager</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B;white-space:nowrap">Technical architect</span><span style="padding:1px 6px;font-size:10px;font-weight:600;border-radius:2px;border:1px solid #FDBA74;background:#FFEDD5;color:#7C2D12;white-space:nowrap">Service operations</span></div>
+    </div>
+    <div class="ac-tog">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+  <div class="ac-list-row">
+    <div class="acl-badge" style="background:#15803D">Agile</div>
+    <div class="acl-title">Annual service review</div>
+    <div class="acl-when">Once per year, or when context changes significantly</div>
+    <div class="acl-who">Product manager (lead), Delivery manager, Technical architect, Service operations</div>
+    <div class="acl-out">Annual review report · Decision record · Next-year roadmap</div>
+  </div>
+  <div class="ac-body">
+    <div class="ac-grid">
+      <div class="ac-col">
+        <div class="ac-lbl">What</div>
+        <p>A formal annual review against current user needs, policy objectives, technology health, accessibility compliance and total cost of ownership.</p>
+      </div>
+      <div class="ac-col ac-why">
+        <div class="ac-lbl">Why it matters</div>
+        <p>Prevents technical debt accumulation and ensures continued fitness for purpose. Identifies when a new Beta cycle is needed — or when the service should be retired.</p>
+      </div>
+      <div class="ac-col" style="grid-column:span 2">
+        <div class="ac-lbl">How</div>
+        <ol class="how"><li>Use the DfE annual review template across all review dimensions</li><li>Include performance data, incident history and user satisfaction scores</li><li>Present findings and a recommendation to SLT: continue, rebuild or retire</li></ol>
+      </div>
+    </div>
+    <div class="ac-foot">
+      <div class="ac-fs"><span class="ac-fl">Who</span><div class="ac-ft"><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #93C5FD;background:#DBEAFE;color:#1E3A8A">Product manager (lead)</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FCD34D;background:#FEF3C7;color:#78350F">Delivery manager</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #6EE7B7;background:#D1FAE5;color:#064E3B">Technical architect</span><span style="display:inline-flex;align-items:center;padding:2px 8px;font-size:11px;font-weight:600;border-radius:2px;border:1px solid #FDBA74;background:#FFEDD5;color:#7C2D12">Service operations</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Outputs</span><div class="ac-ft"><span class="art">Annual review report</span><span class="art">Decision record</span><span class="art">Next-year roadmap</span></div></div>
+      <div class="ac-fs"><span class="ac-fl">Guidance</span><div class="ac-ft"><a class="gl" href="#">Annual review template<span class="gs"> DfE</span></a><a class="gl" href="#">Retiring a service<span class="gs"> DfE</span></a></div></div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- LUCID MODAL -->
+<div class="mo" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="mo-box">
+    <div class="mo-hd">
+      <div class="mo-hd-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" stroke-width="1.8">
+          <rect x="1" y="1" width="7" height="7" rx="1"/><rect x="10" y="1" width="7" height="7" rx="1"/>
+          <rect x="1" y="10" width="7" height="7" rx="1"/><rect x="10" y="10" width="7" height="7" rx="1"/>
+        </svg>
+      </div>
+      <div class="mo-hd-txt">
+        <h3>Lucid board template</h3>
+        <p>Reusable delivery planning resource for DfE teams</p>
+      </div>
+      <button class="mo-close" onclick="closeModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="mo-bd">
+      <p>The DfE "What to do when" Lucid board maps all phases, tracks and activities into a visual workspace. Copy it for your team, run planning workshops, or embed it in your project space.</p>
+      <ul class="mo-steps">
+        <li>Click <strong>Open template</strong> below to view the Lucid board</li>
+        <li>In Lucid, click <strong>Use this template</strong> to copy it to your account</li>
+        <li>Share with your team and customise for your service and phase</li>
+        <li>Embed the board in Confluence or your SharePoint project space</li>
+      </ul>
+      <div class="mo-links">
+        <a class="mo-link" href="https://lucid.app/lucidchart/create" target="_blank" rel="noopener">
+          <div class="mo-licon" style="background:#FFF3E0">📊</div>
+          <div class="mo-ltxt"><strong>DfE delivery planning board</strong><span>lucid.app — view and copy the template</span></div>
+          <span class="mo-larr">↗</span>
+        </a>
+        <a class="mo-link" href="https://lucid.app/lucidchart/create" target="_blank" rel="noopener">
+          <div class="mo-licon" style="background:#E8F4FD">🗂</div>
+          <div class="mo-ltxt"><strong>Phase planning workshop</strong><span>Facilitated workshop format — 2 hours</span></div>
+          <span class="mo-larr">↗</span>
+        </a>
+        <a class="mo-link" href="https://lucid.app/lucidchart/create" target="_blank" rel="noopener">
+          <div class="mo-licon" style="background:#F0FDF4">🏊</div>
+          <div class="mo-ltxt"><strong>Team onboarding swimlane view</strong><span>Walk new team members through phases</span></div>
+          <span class="mo-larr">↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let aPhase='all',aTrack='all',aRole='all',aView='card';
+
+function toggleAc(ac){
+  const open=ac.classList.toggle('open');
+  ac.querySelector('.ac-row')?.setAttribute('aria-expanded',open);
+}
+
+function togglePb(pb){
+  pb.classList.toggle('collapsed');
+}
+function collapseAll(){document.querySelectorAll('.pb:not(.filtered-out)').forEach(p=>p.classList.add('collapsed'))}
+function expandAll(){document.querySelectorAll('.pb').forEach(p=>p.classList.remove('collapsed'))}
+
+function applyFilters(){
+  let total=0;
+  document.querySelectorAll('.pb').forEach(pb=>{
+    const phase=pb.dataset.phase;
+    const phaseOk=aPhase==='all'||aPhase===phase;
+    let vis=0;
+    pb.querySelectorAll('.ac').forEach(ac=>{
+      const track=ac.dataset.track;
+      const roles=(ac.dataset.roles||'').split(' ');
+      const tOk=aTrack==='all'||track===aTrack||track==='agile';
+      const rOk=aRole==='all'||roles.includes(aRole);
+      const show=phaseOk&&tOk&&rOk;
+      ac.classList.toggle('filtered-out',!show);
+      if(show)vis++;
+    });
+    total+=vis;
+    pb.classList.toggle('filtered-out',!phaseOk||vis===0);
+    const badge=document.getElementById('cnt-'+phase);
+    if(badge){
+      if(vis>0&&(aTrack!=='all'||aRole!=='all')){badge.textContent=vis+' activit'+(vis===1?'y':'ies');badge.style.display='';}
+      else{badge.style.display='none';}
+    }
+  });
+  document.getElementById('empty-msg').style.display=total===0?'block':'none';
+}
+
+function setPhase(p,btn){
+  aPhase=p;
+  document.querySelectorAll('[data-pf]').forEach(b=>b.classList.toggle('on',b.dataset.pf===p));
+  if(p!=='all'){
+    const el=document.getElementById('ph-'+p);
+    if(el){
+      el.classList.remove('collapsed');
+      const off=document.getElementById('fbar').offsetHeight+12;
+      window.scrollTo({top:el.getBoundingClientRect().top+scrollY-off,behavior:'smooth'});
+    }
+  }
+  applyFilters();
+}
+
+function setTrack(t,btn){
+  aTrack=t;
+  document.querySelectorAll('[data-tf]').forEach(b=>b.classList.toggle('on',b.dataset.tf===t));
+  applyFilters();
+}
+
+function setRole(r,el){
+  aRole=r;
+  document.getElementById('rc-all').classList.toggle('on',r==='all');
+  document.querySelectorAll('.rc').forEach(c=>c.classList.toggle('on',c.dataset.role===r));
+  applyFilters();
+}
+
+function setView(v){
+  aView=v;
+  document.getElementById('vbtn-card').classList.toggle('on',v==='card');
+  document.getElementById('vbtn-list').classList.toggle('on',v==='list');
+  const c=document.getElementById('content');
+  if(v==='list'){c.classList.add('list-view');c.classList.remove('card-view');document.querySelectorAll('.ac.open').forEach(a=>a.classList.remove('open'));}
+  else{c.classList.add('card-view');c.classList.remove('list-view');}
+}
+
+function clearAll(){
+  aPhase='all';aTrack='all';aRole='all';
+  document.querySelectorAll('[data-pf]').forEach(b=>b.classList.toggle('on',b.dataset.pf==='all'));
+  document.querySelectorAll('[data-tf]').forEach(b=>b.classList.toggle('on',b.dataset.tf==='all'));
+  setRole('all',null);
+}
+
+function openModal(){document.getElementById('modal').classList.add('open');document.body.style.overflow='hidden'}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+// scroll spy
+const spy=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting&&aPhase==='all'){
+      const id=e.target.id.replace('ph-','');
+      document.querySelectorAll('[data-pf]:not([data-pf="all"])').forEach(b=>b.classList.toggle('on',b.dataset.pf===id));
+      document.querySelector('[data-pf="all"]').classList.remove('on');
+    }
+  });
+},{rootMargin:'-70px 0px -55% 0px'});
+document.querySelectorAll('.pb').forEach(pb=>spy.observe(pb));
+
+setView('card');
+applyFilters();
+</script>
+</body>
+</html>

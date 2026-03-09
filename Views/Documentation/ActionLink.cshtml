@@ -1,0 +1,125 @@
+@using ServiceManual.Helpers
+@{
+  ViewData["Title"] = "Action link – Documentation";
+
+  var mdExample = @"[actionLink]
+[Go to NHS 111 online](https://www.nhs.uk/nhs-services/urgent-and-emergency-care-services/when-to-call-111/)
+[/actionLink]";
+
+  var htmlExample = @"<div class=""dfe-f-action-link govuk-!-margin-bottom-0"">
+  <span class=""dfe-f-action-link__icon"">
+    <svg class=""dfe-f-action-link__svg"" xmlns=""http://www.w3.org/2000/svg"" focusable=""false"" aria-hidden=""true"" viewBox=""0 0 27 27"">
+      <circle class=""dfe-f-action-link__icon-circle"" cx=""13.5"" cy=""13.5"" r=""13.5""/>
+      <g class=""dfe-f-action-link__icon-arrow"">
+        <path d=""m17.701 13.526-3.827-3.828L14.973 8.6l4.926 4.926-4.926 4.926-1.099-1.099 3.827-3.827Z""/>
+        <path d=""M8.363 12.749h9.762v1.554H8.363v-1.554Z""/>
+      </g>
+    </svg>
+  </span>
+  <span class=""dfe-f-action-link__link-wrapper"">
+    <a class=""govuk-link dfe-f-action-link__link"" href=""https://www.nhs.uk/nhs-services/urgent-and-emergency-care-services/when-to-call-111/"">Go to NHS 111 online</a>
+  </span>
+</div>";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/components">Components</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Action link</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Components</span>
+      <h1 class="govuk-heading-l doc-content__title">Action link</h1>
+      <p class="doc-content__lead">A prominent link with a right-arrow icon for primary actions, such as starting a service or going to an external tool. Based on the <a href="https://components.publishing.service.gov.uk/component-guide/action_link/default/preview" class="govuk-link" rel="noopener noreferrer">GOV.UK action link component</a>.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">Use the <code class="doc-inline-code">[actionLink]</code> shortcode in CMS markdown. The body must contain a single markdown link <code class="doc-inline-code">[Link text](url)</code>. The link is rendered with bold text and an arrow icon.</p>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Default</h2>
+      <p class="govuk-body doc-section__description">One action link. Use for a single primary call to action (e.g. start a service, open a tool).</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="govuk-body govuk-!-margin-bottom-0">
+            <div class="dfe-f-action-link govuk-!-margin-bottom-0">
+              <span class="dfe-f-action-link__icon">
+                <svg class="dfe-f-action-link__svg" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" viewBox="0 0 27 27">
+                  <circle class="dfe-f-action-link__icon-circle" cx="13.5" cy="13.5" r="13.5"/>
+                  <g class="dfe-f-action-link__icon-arrow">
+                    <path d="m17.701 13.526-3.827-3.828L14.973 8.6l4.926 4.926-4.926 4.926-1.099-1.099 3.827-3.827Z"/>
+                    <path d="M8.363 12.749h9.762v1.554H8.363v-1.554Z"/>
+                  </g>
+                </svg>
+              </span>
+              <span class="dfe-f-action-link__link-wrapper">
+                <a class="govuk-link dfe-f-action-link__link" href="#">Go to NHS 111 online</a>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-actionlink-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-actionlink-html">HTML</button>
+          </div>
+          <div id="ex-actionlink-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(mdExample))</code></pre>
+          </div>
+          <div id="ex-actionlink-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlExample))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Rendered from markdown</h2>
+      <p class="govuk-body doc-section__description">The same shortcode as above, rendered through the markdown pipeline.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="govuk-body">
+            @Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForBody(mdExample))
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Quick reference</h2>
+      <table class="doc-table">
+        <thead>
+          <tr><th>Syntax</th><th>Behaviour</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code class="doc-inline-code">[actionLink]</code><br><code class="doc-inline-code">[Link text](url)</code><br><code class="doc-inline-code">[/actionLink]</code></td>
+            <td>Renders a single action link with bold text and a right-arrow icon. Use for one primary call to action. The inner content must be exactly one markdown link.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    </main>
+  </div>
+</div>

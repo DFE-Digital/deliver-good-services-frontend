@@ -1,0 +1,32 @@
+@{
+  ViewData["Title"] = "Publishing";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Publishing</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Publishing</span>
+        <h1 class="govuk-heading-l doc-content__title">Publishing</h1>
+        <p class="doc-content__lead">How code and content move through environments and when to promote.</p>
+      </div>
+      <div class="doc-card-grid">
+        <a href="/documentation/publishing/lifecycle" class="doc-card">
+          <span class="doc-card__category">Publishing</span>
+          <h3 class="doc-card__title">Code and content lifecycle</h3>
+          <p class="doc-card__description">Local → Dev → Test → Production. Code deploys through the pipeline; content promotes only between non-production environments.</p>
+        </a>
+      </div>
+    </main>
+  </div>
+</div>

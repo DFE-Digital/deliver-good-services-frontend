@@ -1,0 +1,44 @@
+@{
+  ViewData["Title"] = "Redirector – Templates";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/templates">Templates</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Redirector</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Templates</span>
+        <h1 class="govuk-heading-l doc-content__title">Redirector</h1>
+        <p class="doc-content__lead">Short URLs that point to a destination. Use when a link is used in many places and the destination may change — update it once and all references use the new target.</p>
+      </div>
+      <section class="doc-section">
+        <h2 class="doc-section__title">When to use</h2>
+        <p class="govuk-body">Use a <strong>Redirector</strong> when you have a link that appears in lots of places (e.g. “Apply here”, “Policy page”, “Feedback form”) and the target URL might change. Instead of editing every page that contains that link, you create one redirector entry with a short URL (e.g. <code class="doc-inline-code">/go/apply</code>). Content authors link to the short URL. When the destination changes, you update only the redirector; all pages that link to it will send users to the new destination. That saves time and avoids broken or outdated links.</p>
+      </section>
+      <section class="doc-section">
+        <h2 class="doc-section__title">Fields</h2>
+        <table class="govuk-table doc-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>title</td><td>String</td><td>Optional. Human-readable label (e.g. “Apply for X”).</td></tr>
+            <tr><td>shortURL</td><td>String</td><td>Required, unique. Short path (e.g. <code class="doc-inline-code">apply</code> or <code class="doc-inline-code">policy</code>). Regex-constrained. Used in the published URL.</td></tr>
+            <tr><td>urlToRedirectTo</td><td>String</td><td>Full destination URL. Update this when the target moves; all references to the short URL will then point here.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <div class="doc-note">
+        <p class="govuk-body" style="margin:0"><strong>Example:</strong> Create a redirector with shortURL <code class="doc-inline-code">design-system</code> and urlToRedirectTo <code class="doc-inline-code">https://design-system.service.gov.uk</code>. Use the link <code class="doc-inline-code">/go/design-system</code> (or whatever path the frontend uses) in body content. If the design system URL changes, edit only the redirector; no need to update every guide that links to it.</p>
+      </div>
+    </main>
+  </div>
+</div>

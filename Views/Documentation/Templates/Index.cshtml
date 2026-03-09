@@ -1,0 +1,32 @@
+@{
+  ViewData["Title"] = "Templates";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Templates</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Templates</span>
+        <h1 class="govuk-heading-l doc-content__title">Templates</h1>
+        <p class="doc-content__lead">CMS content types that define how guidance and pages are structured and rendered. Choose the right template for each kind of content.</p>
+      </div>
+      <div class="doc-card-grid">
+        <a href="/documentation/templates/collection" class="doc-card"><span class="doc-card__category">Templates</span><h3 class="doc-card__title">Collection</h3><p class="doc-card__description">Topic or category that groups detailed guides and single-page guides with optional body and sections.</p></a>
+        <a href="/documentation/templates/detailed-guide" class="doc-card"><span class="doc-card__category">Templates</span><h3 class="doc-card__title">Detailed guide</h3><p class="doc-card__description">Multi-page guide with a list of pages; belongs to a collection and can show phase-specific content.</p></a>
+        <a href="/documentation/templates/detailed-guide-page" class="doc-card"><span class="doc-card__category">Templates</span><h3 class="doc-card__title">Detailed guide page</h3><p class="doc-card__description">A single page within a detailed guide — body, optional before-contents, related content, and nav options.</p></a>
+        <a href="/documentation/templates/single-page-guide" class="doc-card"><span class="doc-card__category">Templates</span><h3 class="doc-card__title">Single page guide</h3><p class="doc-card__description">One-page guidance with body, review dates, phase tags, and optional collection membership.</p></a>
+        <a href="/documentation/templates/redirector" class="doc-card"><span class="doc-card__category">Templates</span><h3 class="doc-card__title">Redirector</h3><p class="doc-card__description">Short URLs that point to a destination. Change the destination once and all references update — no need to edit many pages.</p></a>
+      </div>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+@{
+  ViewData["Title"] = "Collection – Templates";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/templates">Templates</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Collection</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Templates</span>
+        <h1 class="govuk-heading-l doc-content__title">Collection</h1>
+        <p class="doc-content__lead">A collection groups detailed guides and single-page guides under a topic or category. It can have an intro body, sections, and related content.</p>
+      </div>
+      <section class="doc-section">
+        <h2 class="doc-section__title">When to use</h2>
+        <p class="govuk-body">Use a <strong>Collection</strong> when you have a set of related guidance that should appear under one heading (e.g. “Getting started”, “Standards”). The collection has its own landing page and lists the guides and single-page guides that belong to it. Add phase tags, user needs, and related content as needed.</p>
+      </section>
+      <section class="doc-section">
+        <h2 class="doc-section__title">Fields</h2>
+        <table class="govuk-table doc-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>title</td><td>String (max 70)</td><td>Required, unique. Shown as the collection heading.</td></tr>
+            <tr><td>metaDescription</td><td>Text (max 240)</td><td>Required. SEO and preview description.</td></tr>
+            <tr><td>slug</td><td>UID (from title)</td><td>Required. URL path.</td></tr>
+            <tr><td>body</td><td>Rich text</td><td>Optional intro content (markdown).</td></tr>
+            <tr><td>phaseTag</td><td>Relation (Tags phase)</td><td>Optional. Phase tags for the collection.</td></tr>
+            <tr><td>sections</td><td>Component (collection.section)</td><td>Repeatable. Structure for grouping content.</td></tr>
+            <tr><td>relatedContent</td><td>Component (content.related-content)</td><td>Repeatable. Links and related items.</td></tr>
+            <tr><td>userNeeds</td><td>Component (content.user-need)</td><td>Repeatable. User needs addressed.</td></tr>
+            <tr><td>detailed_guides</td><td>Relation (Detailed guide)</td><td>One-to-many. Guides in this collection (mapped from guide side).</td></tr>
+            <tr><td>single_page_guides</td><td>Relation (Single page guide)</td><td>One-to-many. Single-page guides in this collection.</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>

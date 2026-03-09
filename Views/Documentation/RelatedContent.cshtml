@@ -1,0 +1,263 @@
+@{
+  ViewData["Title"] = "Related content – Documentation";
+
+  var htmlBasic = @"<aside class=""dfe-f-related-content"" aria-label=""Related content"">
+  <div class=""dfe-f-related-content__section"">
+    <h2 class=""dfe-f-related-content__section-title"">Related content</h2>
+    <div class=""dfe-f-related-content__section-body"">
+      <ul class=""govuk-list"">
+        <li><a class=""govuk-link"" href=""/guidance/..."">Link one</a></li>
+        <li><a class=""govuk-link"" href=""/guidance/..."">Link two</a></li>
+      </ul>
+    </div>
+  </div>
+</aside>";
+
+  var htmlCollection = @"<aside class=""dfe-f-related-content"" aria-label=""Related content"">
+  <div class=""dfe-f-related-content__section"">
+    <h2 class=""dfe-f-related-content__section-title"">Collection</h2>
+    <div class=""dfe-f-related-content__section-body"">
+      <p class=""govuk-body-s"">
+        <a class=""govuk-link"" href=""/guidance/collections/my-collection"">My collection title</a>
+      </p>
+    </div>
+  </div>
+</aside>";
+
+  var htmlFull = @"<aside class=""dfe-f-related-content"" aria-label=""Related content"">
+
+  <div class=""dfe-f-related-content__section"">
+    <h2 class=""dfe-f-related-content__section-title"">Contents</h2>
+    <nav aria-label=""Guide contents"">
+      <ul class=""dfe-f-guide-nav__list"">
+        <li class=""dfe-f-guide-nav__item"">
+          <a href=""/guidance/guides/my-guide/page-one"">Page one</a>
+        </li>
+        <li class=""dfe-f-guide-nav__item dfe-f-guide-nav__item--current"">
+          <a href=""/guidance/guides/my-guide/page-two"" aria-current=""page"">Page two</a>
+        </li>
+        <li class=""dfe-f-guide-nav__item"">
+          <a href=""/guidance/guides/my-guide/page-three"">Page three</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class=""dfe-f-related-content__section"">
+    <h2 class=""dfe-f-related-content__section-title"">Collection</h2>
+    <div class=""dfe-f-related-content__section-body"">
+      <p class=""govuk-body-s"">
+        <a class=""govuk-link"" href=""/guidance/collections/my-collection"">My collection title</a>
+      </p>
+    </div>
+  </div>
+
+  <div class=""dfe-f-related-content__section"">
+    <h2 class=""dfe-f-related-content__section-title"">Related content</h2>
+    <div class=""dfe-f-related-content__section-body"">
+      <ul class=""govuk-list"">
+        <li><a class=""govuk-link"" href=""/guidance/..."">Link one</a></li>
+        <li><a class=""govuk-link"" href=""/guidance/..."">Link two</a></li>
+      </ul>
+    </div>
+  </div>
+
+</aside>";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/components">Components</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Related content</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Components</span>
+      <h1 class="govuk-heading-l doc-content__title">Related content</h1>
+      <p class="doc-content__lead">A right-hand sidebar showing related links, collection membership, and guide page navigation. Used on detailed guide pages, guide index pages, and single-page guidance.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">The related content sidebar is driven by data in the CMS. It appears automatically when a page has related content items, a collection, or sibling guide pages. The sidebar is always one-third width on desktop, with the main content taking two-thirds.</p>
+    </div>
+
+    <!-- ── Basic related content ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Related content</h2>
+      <p class="govuk-body doc-section__description">The simplest form — a section with a heading and a list of links. Each section in the sidebar is separated by a grey rule. The sidebar has a blue top border.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <aside class="dfe-f-related-content" aria-label="Related content" style="max-width:280px">
+            <div class="dfe-f-related-content__section">
+              <h2 class="dfe-f-related-content__section-title">Related content</h2>
+              <div class="dfe-f-related-content__section-body">
+                <ul class="govuk-list">
+                  <li><a class="govuk-link" href="#">Check if you need a UK visa</a></li>
+                  <li><a class="govuk-link" href="#">How to apply for a visa</a></li>
+                  <li><a class="govuk-link" href="#">Entering the UK: exemptions</a></li>
+                </ul>
+              </div>
+            </div>
+          </aside>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-basic-html">HTML</button>
+          </div>
+          <div id="ex-basic-html" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlBasic))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Collection section ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Collection</h2>
+      <p class="govuk-body doc-section__description">When a page belongs to a collection, a "Collection" section is shown in the sidebar with a link to the collection page. This is populated automatically from the CMS relationship.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <aside class="dfe-f-related-content" aria-label="Related content" style="max-width:280px">
+            <div class="dfe-f-related-content__section">
+              <h2 class="dfe-f-related-content__section-title">Collection</h2>
+              <div class="dfe-f-related-content__section-body">
+                <p class="govuk-body-s"><a class="govuk-link" href="#">Assurance and service assessments</a></p>
+              </div>
+            </div>
+          </aside>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-collection-html">HTML</button>
+          </div>
+          <div id="ex-collection-html" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlCollection))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Guide contents nav ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Guide contents in the sidebar</h2>
+      <p class="govuk-body doc-section__description">On detailed guide pages, the guide's page list appears at the top of the sidebar as a "Contents" section. The current page is highlighted with a blue left border and bold text. Other pages are shown as links.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <aside class="dfe-f-related-content" aria-label="Related content" style="max-width:280px">
+            <div class="dfe-f-related-content__section">
+              <h2 class="dfe-f-related-content__section-title">Contents</h2>
+              <nav aria-label="Guide contents">
+                <ul class="dfe-f-guide-nav__list">
+                  <li class="dfe-f-guide-nav__item">
+                    <a href="#">What an eVisa is</a>
+                  </li>
+                  <li class="dfe-f-guide-nav__item dfe-f-guide-nav__item--current">
+                    <a href="#" aria-current="page">Set up a UKVI account</a>
+                  </li>
+                  <li class="dfe-f-guide-nav__item">
+                    <a href="#">Get an eVisa if you have settlement</a>
+                  </li>
+                  <li class="dfe-f-guide-nav__item">
+                    <a href="#">Travel with your eVisa</a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </aside>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-nav-html">HTML</button>
+          </div>
+          <div id="ex-nav-html" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlFull))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Full sidebar example ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Full sidebar example</h2>
+      <p class="govuk-body doc-section__description">When all three sections are present — guide contents, collection, and related content — they stack vertically, each separated by a grey rule. The order is always: Contents → Collection → Related content.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <aside class="dfe-f-related-content" aria-label="Related content" style="max-width:280px">
+            <div class="dfe-f-related-content__section">
+              <h2 class="dfe-f-related-content__section-title">Contents</h2>
+              <nav aria-label="Guide contents">
+                <ul class="dfe-f-guide-nav__list">
+                  <li class="dfe-f-guide-nav__item"><a href="#">What an eVisa is</a></li>
+                  <li class="dfe-f-guide-nav__item dfe-f-guide-nav__item--current"><a href="#" aria-current="page">Set up a UKVI account</a></li>
+                  <li class="dfe-f-guide-nav__item"><a href="#">Travel with your eVisa</a></li>
+                </ul>
+              </nav>
+            </div>
+            <div class="dfe-f-related-content__section">
+              <h2 class="dfe-f-related-content__section-title">Collection</h2>
+              <div class="dfe-f-related-content__section-body">
+                <p class="govuk-body-s"><a class="govuk-link" href="#">Assurance and service assessments</a></p>
+              </div>
+            </div>
+            <div class="dfe-f-related-content__section">
+              <h2 class="dfe-f-related-content__section-title">Related content</h2>
+              <div class="dfe-f-related-content__section-body">
+                <ul class="govuk-list">
+                  <li><a class="govuk-link" href="#">Check if you need a UK visa</a></li>
+                  <li><a class="govuk-link" href="#">How to apply for a visa</a></li>
+                </ul>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CSS reference ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">CSS class reference</h2>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Class</th><th>Element</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">dfe-f-related-content</code></td><td><code class="doc-inline-code">&lt;aside&gt;</code></td><td>The sidebar container. Blue 5px top border, padding-top.</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-related-content__section</code></td><td><code class="doc-inline-code">&lt;div&gt;</code></td><td>A section within the sidebar. Grey bottom border separates sections.</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-related-content__section-title</code></td><td><code class="doc-inline-code">&lt;h2&gt;</code></td><td>Section heading. 14px bold, dark text.</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-related-content__section-body</code></td><td><code class="doc-inline-code">&lt;div&gt;</code></td><td>Section body content. 16px text.</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-guide-nav__list</code></td><td><code class="doc-inline-code">&lt;ul&gt;</code></td><td>The guide page list inside a Contents section.</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-guide-nav__item</code></td><td><code class="doc-inline-code">&lt;li&gt;</code></td><td>A guide page item. Grey em-dash before each item, 16px link text.</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-guide-nav__item--current</code></td><td><code class="doc-inline-code">&lt;li&gt;</code></td><td>The active page. Bold dark text, no underline.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    </main>
+  </div>
+</div>

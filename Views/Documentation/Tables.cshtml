@@ -1,0 +1,257 @@
+@{
+  ViewData["Title"] = "Tables – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/styles">Styles</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Tables</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Styles</span>
+      <h1 class="govuk-heading-l doc-content__title">Tables</h1>
+      <p class="doc-content__lead">Markdown tables are automatically rendered with GOV.UK Frontend table classes.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">Only use tables for genuinely tabular data — information with a clear relationship between rows and columns. Do not use tables for layout or lists of items that could be better presented as a bullet list.</p>
+    </div>
+
+    <!-- ── Basic table ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Basic table</h2>
+      <p class="govuk-body doc-section__description">Use pipe characters to define columns and a separator row of dashes below the header. Column widths are set automatically.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <table class="govuk-table">
+            <thead class="govuk-table__head">
+              <tr class="govuk-table__row">
+                <th class="govuk-table__header">Name</th>
+                <th class="govuk-table__header">Role</th>
+                <th class="govuk-table__header">Phase</th>
+              </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+              <tr class="govuk-table__row">
+                <td class="govuk-table__cell">Jane Smith</td>
+                <td class="govuk-table__cell">Lead designer</td>
+                <td class="govuk-table__cell">Beta</td>
+              </tr>
+              <tr class="govuk-table__row">
+                <td class="govuk-table__cell">John Doe</td>
+                <td class="govuk-table__cell">Developer</td>
+                <td class="govuk-table__cell">Alpha</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-table-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-table-html">HTML</button>
+          </div>
+          <div id="ex-table-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>| Name       | Role          | Phase |
+|------------|---------------|-------|
+| Jane Smith | Lead designer | Beta  |
+| John Doe   | Developer     | Alpha |</code></pre>
+          </div>
+          <div id="ex-table-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;table class="govuk-table"&gt;
+  &lt;thead class="govuk-table__head"&gt;
+    &lt;tr class="govuk-table__row"&gt;
+      &lt;th class="govuk-table__header"&gt;Name&lt;/th&gt;
+      &lt;th class="govuk-table__header"&gt;Role&lt;/th&gt;
+      &lt;th class="govuk-table__header"&gt;Phase&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody class="govuk-table__body"&gt;
+    &lt;tr class="govuk-table__row"&gt;
+      &lt;td class="govuk-table__cell"&gt;Jane Smith&lt;/td&gt;
+      &lt;td class="govuk-table__cell"&gt;Lead designer&lt;/td&gt;
+      &lt;td class="govuk-table__cell"&gt;Beta&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Column alignment ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Column alignment</h2>
+      <p class="govuk-body doc-section__description">Add colons to the separator row to control alignment. Left is the default.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <table class="govuk-table">
+            <thead class="govuk-table__head">
+              <tr class="govuk-table__row">
+                <th class="govuk-table__header" style="text-align:left">Left</th>
+                <th class="govuk-table__header" style="text-align:center">Centre</th>
+                <th class="govuk-table__header" style="text-align:right">Right</th>
+              </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+              <tr class="govuk-table__row">
+                <td class="govuk-table__cell" style="text-align:left">Alpha</td>
+                <td class="govuk-table__cell" style="text-align:center">Beta</td>
+                <td class="govuk-table__cell" style="text-align:right">Live</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-align-markdown">Markdown</button>
+          </div>
+          <div id="ex-align-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>| Left  | Centre | Right |
+|:------|:------:|------:|
+| Alpha | Beta   | Live  |</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Separator syntax</th><th>Alignment</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">|---|</code> or <code class="doc-inline-code">|:---|</code></td><td>Left (default)</td></tr>
+          <tr><td><code class="doc-inline-code">|:---:|</code></td><td>Centre</td></tr>
+          <tr><td><code class="doc-inline-code">|---:|</code></td><td>Right</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Sortable table ── -->
+    <section class="doc-section" id="sortable-table">
+      <h2 class="doc-section__title">Sortable table</h2>
+      <p class="govuk-body doc-section__description">Add <code class="doc-inline-code">{sortable}</code> on the line immediately before a markdown table to make every column sortable. Click any column header to sort; click again to reverse. The table degrades gracefully if JavaScript is unavailable.</p>
+
+      <div class="doc-note" style="margin-bottom:20px">
+        <p class="govuk-body" style="margin:0">Only use sortable tables when the order of rows is genuinely meaningful to users and they have a reason to re-order them — for example, a list of standards by name, phase, or status. Do not use sorting as a substitute for well-structured content.</p>
+      </div>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div data-module="dfe-sortable-table">
+            <table class="govuk-table">
+              <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                  <th class="govuk-table__header">Name</th>
+                  <th class="govuk-table__header">Role</th>
+                  <th class="govuk-table__header">Phase</th>
+                  <th class="govuk-table__header">Score</th>
+                </tr>
+              </thead>
+              <tbody class="govuk-table__body">
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell">Jane Smith</td>
+                  <td class="govuk-table__cell">Lead designer</td>
+                  <td class="govuk-table__cell">Beta</td>
+                  <td class="govuk-table__cell">92</td>
+                </tr>
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell">John Doe</td>
+                  <td class="govuk-table__cell">Developer</td>
+                  <td class="govuk-table__cell">Alpha</td>
+                  <td class="govuk-table__cell">74</td>
+                </tr>
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell">Alex Brown</td>
+                  <td class="govuk-table__cell">Delivery manager</td>
+                  <td class="govuk-table__cell">Live</td>
+                  <td class="govuk-table__cell">88</td>
+                </tr>
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell">Sam Taylor</td>
+                  <td class="govuk-table__cell">User researcher</td>
+                  <td class="govuk-table__cell">Discovery</td>
+                  <td class="govuk-table__cell">61</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-sort-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-sort-html">HTML</button>
+          </div>
+          <div id="ex-sort-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>{sortable}
+| Name       | Role             | Phase     | Score |
+|------------|------------------|-----------|-------|
+| Jane Smith | Lead designer    | Beta      | 92    |
+| John Doe   | Developer        | Alpha     | 74    |
+| Alex Brown | Delivery manager | Live      | 88    |
+| Sam Taylor | User researcher  | Discovery | 61    |</code></pre>
+          </div>
+          <div id="ex-sort-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;div data-module="dfe-sortable-table"&gt;
+  &lt;table class="govuk-table"&gt;
+    &lt;thead class="govuk-table__head"&gt;
+      &lt;tr class="govuk-table__row"&gt;
+        &lt;th class="govuk-table__header"&gt;Name&lt;/th&gt;
+        &lt;th class="govuk-table__header"&gt;Role&lt;/th&gt;
+        &lt;th class="govuk-table__header"&gt;Phase&lt;/th&gt;
+        &lt;th class="govuk-table__header"&gt;Score&lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody class="govuk-table__body"&gt;
+      &lt;tr class="govuk-table__row"&gt;
+        &lt;td class="govuk-table__cell"&gt;Jane Smith&lt;/td&gt;
+        &lt;td class="govuk-table__cell"&gt;Lead designer&lt;/td&gt;
+        &lt;td class="govuk-table__cell"&gt;Beta&lt;/td&gt;
+        &lt;td class="govuk-table__cell"&gt;92&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="govuk-heading-s" style="margin-top:24px">Accessibility</h3>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Each column header becomes a <code class="doc-inline-code">&lt;button&gt;</code> — fully keyboard operable with Tab, Enter, and Space.</li>
+        <li><code class="doc-inline-code">aria-sort="ascending"</code> or <code class="doc-inline-code">aria-sort="descending"</code> is set on the active column header so screen readers announce the current sort state.</li>
+        <li>A visually hidden live region announces the sort action (e.g. <em>"Table sorted by Name, ascending"</em>) after each click.</li>
+        <li>The sort direction indicator (chevron) is marked <code class="doc-inline-code">aria-hidden="true"</code> — it is purely decorative.</li>
+        <li>Focus styles use the GOV.UK yellow highlight, meeting WCAG 2.2 AA contrast requirements.</li>
+      </ul>
+
+      <h3 class="govuk-heading-s" style="margin-top:24px">Numeric columns</h3>
+      <p class="govuk-body">Columns where the majority of cells contain numbers are sorted numerically (so 10 sorts after 9, not after 1). All other columns sort alphabetically using locale-aware comparison.</p>
+    </section>
+
+    </main>
+  </div>
+</div>

@@ -1,0 +1,604 @@
+@{
+  ViewData["Title"] = "Cards – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/components">Components</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Cards</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+@{
+  // ── Code example strings ──────────────────────────────────────────────────
+
+  // ── Metric card — basic ───────────────────────────────────────────────────
+  var metricRazor = @"@await Html.PartialAsync(""_DfeFMetric"", new ViewDataDictionary(ViewData)
+{
+    { ""Num"",    ""23"" },
+    { ""Label"",  ""Total requests"" },
+    { ""Change"", ""6 new this month"" },
+    { ""Colour"", ""grey"" }
+})";
+
+  var metricMarkdown = @"[metric num=""23"" label=""Total requests"" change=""6 new this month"" colour=""grey""]";
+
+  var metricHtml = @"<div class=""dfe-f-metric dfe-f-metric--grey"">
+  <div class=""dfe-f-metric__num"">23</div>
+  <div class=""dfe-f-metric__label"">Total requests</div>
+  <div class=""dfe-f-metric__change"">6 new this month</div>
+</div>";
+
+  // ── Metric card — change variant ──────────────────────────────────────────
+  var metricChangeRazor = @"@await Html.PartialAsync(""_DfeFMetric"", new ViewDataDictionary(ViewData)
+{
+    { ""Num"",           ""2"" },
+    { ""Label"",         ""Awaiting triage"" },
+    { ""Change"",        ""Action required"" },
+    { ""ChangeVariant"", ""negative"" },
+    { ""Colour"",        ""red"" }
+})";
+
+  var metricChangeMarkdown = @"[metric num=""2"" label=""Awaiting triage"" change=""Action required"" change-variant=""negative"" colour=""red""]";
+
+  var metricChangeHtml = @"<div class=""dfe-f-metric dfe-f-metric--red"">
+  <div class=""dfe-f-metric__num"">2</div>
+  <div class=""dfe-f-metric__label"">Awaiting triage</div>
+  <div class=""dfe-f-metric__change dfe-f-metric__change--negative"">Action required</div>
+</div>";
+
+  // ── Metric card — grid ────────────────────────────────────────────────────
+  var metricGridRazor = @"<div class=""dfe-f-metric-grid"">
+  @await Html.PartialAsync(""_DfeFMetric"", new ViewDataDictionary(ViewData)
+  {
+      { ""Num"",           ""12"" },
+      { ""Label"",         ""Approved this quarter"" },
+      { ""Change"",        ""↑ 3 vs last quarter"" },
+      { ""ChangeVariant"", ""positive"" },
+      { ""Colour"",        ""green"" }
+  })
+  @await Html.PartialAsync(""_DfeFMetric"", new ViewDataDictionary(ViewData)
+  {
+      { ""Num"",           ""2"" },
+      { ""Label"",         ""Awaiting triage"" },
+      { ""Change"",        ""Action required"" },
+      { ""ChangeVariant"", ""negative"" },
+      { ""Colour"",        ""red"" }
+  })
+  @await Html.PartialAsync(""_DfeFMetric"", new ViewDataDictionary(ViewData)
+  {
+      { ""Num"",           ""5"" },
+      { ""Label"",         ""In review"" },
+      { ""Change"",        ""2 approaching deadline"" },
+      { ""ChangeVariant"", ""warning"" },
+      { ""Colour"",        ""orange"" }
+  })
+</div>";
+
+  var metricGridMarkdown = @"[metric-grid]
+[metric num=""12"" label=""Approved this quarter"" change=""↑ 3 vs last quarter"" change-variant=""positive"" colour=""green""]
+[metric num=""2""  label=""Awaiting triage""       change=""Action required""      change-variant=""negative"" colour=""red""]
+[metric num=""5""  label=""In review""             change=""2 approaching deadline"" change-variant=""warning"" colour=""orange""]
+[/metric-grid]";
+
+  var metricGridHtml = metricGridMarkdown;
+
+  // ── Stat card — basic ─────────────────────────────────────────────────────
+  var statRazor = @"@await Html.PartialAsync(""_DfeFStatCard"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"",    ""Strategic alignment"" },
+    { ""Stat"",     ""11.2"" },
+    { ""Meta"",     ""avg / 15 · High alignment"" },
+    { ""Progress"", 75 },
+    { ""Colour"",   ""blue"" }
+})";
+
+  var statMarkdown = @"[stat-card title=""Strategic alignment"" stat=""11.2"" meta=""avg / 15 · High alignment"" progress=""75"" colour=""blue""]";
+
+  var statHtml = statMarkdown;
+
+  // ── Stat card — with link ─────────────────────────────────────────────────
+  var statLinkRazor = @"@await Html.PartialAsync(""_DfeFStatCard"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"",    ""Urgency"" },
+    { ""Stat"",     ""5.8"" },
+    { ""Meta"",     ""avg / 10 · Some urgency"" },
+    { ""Progress"", 58 },
+    { ""Link"",     ""/reports/urgency"" },
+    { ""LinkText"", ""View urgency report"" },
+    { ""Colour"",   ""orange"" }
+})";
+
+  var statLinkMarkdown = @"[stat-card title=""Urgency"" stat=""5.8"" meta=""avg / 10 · Some urgency"" progress=""58"" link=""/reports/urgency"" link-text=""View urgency report"" colour=""orange""]";
+
+  var statLinkHtml = statLinkMarkdown;
+
+  // ── Stat card — grid ──────────────────────────────────────────────────────
+  var statGridRazor = @"<div class=""dfe-f-stat-card-grid"">
+  @await Html.PartialAsync(""_DfeFStatCard"", new ViewDataDictionary(ViewData)
+  {
+      { ""Title"",    ""Strategic alignment"" },
+      { ""Stat"",     ""11.2"" },
+      { ""Meta"",     ""avg / 15 · High alignment"" },
+      { ""Progress"", 75 },
+      { ""Colour"",   ""blue"" }
+  })
+  @await Html.PartialAsync(""_DfeFStatCard"", new ViewDataDictionary(ViewData)
+  {
+      { ""Title"",    ""Urgency"" },
+      { ""Stat"",     ""5.8"" },
+      { ""Meta"",     ""avg / 10 · Some urgency"" },
+      { ""Progress"", 58 },
+      { ""Colour"",   ""orange"" }
+  })
+  @await Html.PartialAsync(""_DfeFStatCard"", new ViewDataDictionary(ViewData)
+  {
+      { ""Title"",    ""Funding"" },
+      { ""Stat"",     ""11.4"" },
+      { ""Meta"",     ""avg / 22 · Partial"" },
+      { ""Progress"", 52 },
+      { ""Colour"",   ""green"" }
+  })
+  @await Html.PartialAsync(""_DfeFStatCard"", new ViewDataDictionary(ViewData)
+  {
+      { ""Title"",    ""RICE score"" },
+      { ""Stat"",     ""22.1"" },
+      { ""Meta"",     ""avg / 42 · Medium"" },
+      { ""Progress"", 53 },
+      { ""Colour"",   ""teal"" }
+  })
+</div>";
+
+  var statGridMarkdown = @"[stat-card-grid]
+[stat-card title=""Strategic alignment"" stat=""11.2"" meta=""avg / 15 · High alignment"" progress=""75"" colour=""blue""]
+[stat-card title=""Urgency""             stat=""5.8""  meta=""avg / 10 · Some urgency""   progress=""58"" colour=""orange""]
+[stat-card title=""Funding""             stat=""11.4"" meta=""avg / 22 · Partial""         progress=""52"" colour=""green""]
+[stat-card title=""RICE score""          stat=""22.1"" meta=""avg / 42 · Medium""          progress=""53"" colour=""teal""]
+[/stat-card-grid]";
+
+  var statGridHtml = statGridMarkdown;
+
+  // ── Stat card — title only ────────────────────────────────────────────────
+  var statTitleRazor = @"@await Html.PartialAsync(""_DfeFStatCard"", new ViewDataDictionary(ViewData)
+{
+    { ""Title"",    ""Pipeline summary"" },
+    { ""Meta"",     ""Last updated 20 Feb 2026"" },
+    { ""Link"",     ""/pipeline"" },
+    { ""LinkText"", ""View full pipeline"" },
+    { ""Colour"",   ""purple"" }
+})";
+
+  var statTitleMarkdown = @"[stat-card title=""Pipeline summary"" meta=""Last updated 20 Feb 2026"" link=""/pipeline"" link-text=""View full pipeline"" colour=""purple""]";
+
+  var statTitleHtml = statTitleMarkdown;
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Components</span>
+      <h1 class="govuk-heading-l doc-content__title">Cards</h1>
+      <p class="doc-content__lead">Two card components for displaying metrics and scored statistics: <strong>Metric card</strong> for pipeline counts and status, and <strong>Stat card</strong> for scored values with optional progress bars.</p>
+      <p class="govuk-body">Use the Razor partials in templates or the markdown shortcodes in CMS body content. For GOV.UK-style link cards with a chevron, see <a href="/documentation/chevron-cards" class="govuk-link">Chevron cards</a>.</p>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Chevron cards</h2>
+      <p class="govuk-body">Documentation and all variants (with/without heading, external links, 2- and 3-column layout) are on the dedicated page: <a href="/documentation/chevron-cards" class="govuk-link">Chevron cards</a>.</p>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         METRIC CARD
+    ══════════════════════════════════════════════════════ -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Metric card</h2>
+      <p class="govuk-body doc-section__description">
+        A compact card for displaying a single large number with a label and optional change/status line.
+        A coloured left border indicates status or category. Use in a <code class="doc-inline-code">dfe-f-metric-grid</code> for responsive rows.
+      </p>
+
+      <!-- Basic metric -->
+      <h3 class="govuk-heading-s">Basic metric</h3>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-metric-grid" style="max-width:600px">
+            <div class="dfe-f-metric dfe-f-metric--grey">
+              <div class="dfe-f-metric__num">23</div>
+              <div class="dfe-f-metric__label">Total requests</div>
+              <div class="dfe-f-metric__change">6 new this month</div>
+            </div>
+            <div class="dfe-f-metric dfe-f-metric--blue">
+              <div class="dfe-f-metric__num">4</div>
+              <div class="dfe-f-metric__label">Awaiting review</div>
+              <div class="dfe-f-metric__change dfe-f-metric__change--warning">2 &gt;5 days old</div>
+            </div>
+            <div class="dfe-f-metric dfe-f-metric--green">
+              <div class="dfe-f-metric__num">9</div>
+              <div class="dfe-f-metric__label">Triaged &amp; closed</div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true"  data-target="mc-basic-razor">Razor</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="mc-basic-md">Markdown</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="mc-basic-html">HTML</button>
+          </div>
+          <div id="mc-basic-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricRazor))</code></pre>
+          </div>
+          <div id="mc-basic-md" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricMarkdown))</code></pre>
+          </div>
+          <div id="mc-basic-html" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricHtml))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metric with change variant -->
+      <h3 class="govuk-heading-s">With change variant</h3>
+      <p class="govuk-body">The <code class="doc-inline-code">ChangeVariant</code> parameter colours the change line: <code class="doc-inline-code">positive</code> (green), <code class="doc-inline-code">negative</code> (red), <code class="doc-inline-code">warning</code> (orange).</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-metric-grid" style="max-width:600px">
+            <div class="dfe-f-metric dfe-f-metric--green">
+              <div class="dfe-f-metric__num">12</div>
+              <div class="dfe-f-metric__label">Approved this quarter</div>
+              <div class="dfe-f-metric__change dfe-f-metric__change--positive">↑ 3 vs last quarter</div>
+            </div>
+            <div class="dfe-f-metric dfe-f-metric--red">
+              <div class="dfe-f-metric__num">2</div>
+              <div class="dfe-f-metric__label">Awaiting triage</div>
+              <div class="dfe-f-metric__change dfe-f-metric__change--negative">Action required</div>
+            </div>
+            <div class="dfe-f-metric dfe-f-metric--orange">
+              <div class="dfe-f-metric__num">5</div>
+              <div class="dfe-f-metric__label">In review</div>
+              <div class="dfe-f-metric__change dfe-f-metric__change--warning">2 approaching deadline</div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true"  data-target="mc-change-razor">Razor</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="mc-change-md">Markdown</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="mc-change-html">HTML</button>
+          </div>
+          <div id="mc-change-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricChangeRazor))</code></pre>
+          </div>
+          <div id="mc-change-md" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricChangeMarkdown))</code></pre>
+          </div>
+          <div id="mc-change-html" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricChangeHtml))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metric grid -->
+      <h3 class="govuk-heading-s">Grid layout</h3>
+      <p class="govuk-body">Wrap multiple metric cards in <code class="doc-inline-code">dfe-f-metric-grid</code> for a responsive auto-fit row.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-metric-grid">
+            <div class="dfe-f-metric dfe-f-metric--green">
+              <div class="dfe-f-metric__num">12</div>
+              <div class="dfe-f-metric__label">Approved this quarter</div>
+              <div class="dfe-f-metric__change dfe-f-metric__change--positive">↑ 3 vs last quarter</div>
+            </div>
+            <div class="dfe-f-metric dfe-f-metric--red">
+              <div class="dfe-f-metric__num">2</div>
+              <div class="dfe-f-metric__label">Awaiting triage</div>
+              <div class="dfe-f-metric__change dfe-f-metric__change--negative">Action required</div>
+            </div>
+            <div class="dfe-f-metric dfe-f-metric--orange">
+              <div class="dfe-f-metric__num">5</div>
+              <div class="dfe-f-metric__label">In review</div>
+              <div class="dfe-f-metric__change dfe-f-metric__change--warning">2 approaching deadline</div>
+            </div>
+            <div class="dfe-f-metric dfe-f-metric--grey">
+              <div class="dfe-f-metric__num">23</div>
+              <div class="dfe-f-metric__label">Total requests</div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true"  data-target="mc-grid-razor">Razor</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="mc-grid-md">Markdown</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="mc-grid-html">HTML</button>
+          </div>
+          <div id="mc-grid-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricGridRazor))</code></pre>
+          </div>
+          <div id="mc-grid-md" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricGridMarkdown))</code></pre>
+          </div>
+          <div id="mc-grid-html" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(metricGridHtml))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- All colour variants -->
+      <h3 class="govuk-heading-s">Colour variants</h3>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-metric-grid">
+            @foreach (var v in new[] { "blue","green","orange","red","yellow","grey","black","teal","purple" })
+            {
+              <div class="dfe-f-metric dfe-f-metric--@v">
+                <div class="dfe-f-metric__num">42</div>
+                <div class="dfe-f-metric__label">@v</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Parameters table -->
+      <h3 class="govuk-heading-s" style="margin-top:24px">Parameters</h3>
+      <table class="doc-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">Num</code></td><td>string</td><td>Yes</td><td>The large number or stat to display</td></tr>
+          <tr><td><code class="doc-inline-code">Label</code></td><td>string</td><td>Yes</td><td>Descriptive label below the number</td></tr>
+          <tr><td><code class="doc-inline-code">Change</code></td><td>string</td><td>No</td><td>Optional change or status line</td></tr>
+          <tr><td><code class="doc-inline-code">ChangeVariant</code></td><td>string</td><td>No</td><td><code class="doc-inline-code">positive</code> | <code class="doc-inline-code">negative</code> | <code class="doc-inline-code">warning</code></td></tr>
+          <tr><td><code class="doc-inline-code">Colour</code></td><td>string</td><td>No</td><td>blue | green | orange | red | yellow | grey | black | teal | purple (default: grey)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         STAT CARD
+    ══════════════════════════════════════════════════════ -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Stat card</h2>
+      <p class="govuk-body doc-section__description">
+        A card for displaying a scored or calculated metric with a title, large stat, meta description, optional progress bar, and optional link.
+        The accent colour is applied to the title underline, the stat number, and the progress bar fill.
+        Use in a <code class="doc-inline-code">dfe-f-stat-card-grid</code> for responsive rows.
+      </p>
+
+      <!-- Stat card grid -->
+      <h3 class="govuk-heading-s">Grid layout</h3>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-stat-card-grid">
+            <div class="dfe-f-stat-card dfe-f-stat-card--blue">
+              <h3 class="dfe-f-stat-card__title">Strategic alignment</h3>
+              <div class="dfe-f-stat-card__stat">11.2</div>
+              <div class="dfe-f-stat-card__meta">avg / 15 · High alignment</div>
+              <div class="dfe-f-stat-card__progress"><div class="dfe-f-stat-card__progress-fill" style="width:75%"></div></div>
+            </div>
+            <div class="dfe-f-stat-card dfe-f-stat-card--orange">
+              <h3 class="dfe-f-stat-card__title">Urgency</h3>
+              <div class="dfe-f-stat-card__stat">5.8</div>
+              <div class="dfe-f-stat-card__meta">avg / 10 · Some urgency</div>
+              <div class="dfe-f-stat-card__progress"><div class="dfe-f-stat-card__progress-fill" style="width:58%"></div></div>
+            </div>
+            <div class="dfe-f-stat-card dfe-f-stat-card--green">
+              <h3 class="dfe-f-stat-card__title">Funding</h3>
+              <div class="dfe-f-stat-card__stat">11.4</div>
+              <div class="dfe-f-stat-card__meta">avg / 22 · Partial</div>
+              <div class="dfe-f-stat-card__progress"><div class="dfe-f-stat-card__progress-fill" style="width:52%"></div></div>
+            </div>
+            <div class="dfe-f-stat-card dfe-f-stat-card--teal">
+              <h3 class="dfe-f-stat-card__title">RICE score</h3>
+              <div class="dfe-f-stat-card__stat">22.1</div>
+              <div class="dfe-f-stat-card__meta">avg / 42 · Medium</div>
+              <div class="dfe-f-stat-card__progress"><div class="dfe-f-stat-card__progress-fill" style="width:53%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true"  data-target="sc-grid-razor">Razor</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="sc-grid-md">Markdown</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="sc-grid-html">HTML</button>
+          </div>
+          <div id="sc-grid-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statGridRazor))</code></pre>
+          </div>
+          <div id="sc-grid-md" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statGridMarkdown))</code></pre>
+          </div>
+          <div id="sc-grid-html" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statGridHtml))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single stat card with progress -->
+      <h3 class="govuk-heading-s">Single card with progress bar</h3>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-stat-card-grid" style="max-width:320px">
+            <div class="dfe-f-stat-card dfe-f-stat-card--blue">
+              <h3 class="dfe-f-stat-card__title">Strategic alignment</h3>
+              <div class="dfe-f-stat-card__stat">11.2</div>
+              <div class="dfe-f-stat-card__meta">avg / 15 · High alignment</div>
+              <div class="dfe-f-stat-card__progress"><div class="dfe-f-stat-card__progress-fill" style="width:75%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true"  data-target="sc-single-razor">Razor</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="sc-single-md">Markdown</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="sc-single-html">HTML</button>
+          </div>
+          <div id="sc-single-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statRazor))</code></pre>
+          </div>
+          <div id="sc-single-md" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statMarkdown))</code></pre>
+          </div>
+          <div id="sc-single-html" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statHtml))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat card with link -->
+      <h3 class="govuk-heading-s">With link</h3>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-stat-card-grid" style="max-width:320px">
+            <div class="dfe-f-stat-card dfe-f-stat-card--orange">
+              <h3 class="dfe-f-stat-card__title">Urgency</h3>
+              <div class="dfe-f-stat-card__stat">5.8</div>
+              <div class="dfe-f-stat-card__meta">avg / 10 · Some urgency</div>
+              <div class="dfe-f-stat-card__progress"><div class="dfe-f-stat-card__progress-fill" style="width:58%"></div></div>
+              <a class="dfe-f-stat-card__link" href="#">View urgency report</a>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true"  data-target="sc-link-razor">Razor</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="sc-link-md">Markdown</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="sc-link-html">HTML</button>
+          </div>
+          <div id="sc-link-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statLinkRazor))</code></pre>
+          </div>
+          <div id="sc-link-md" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statLinkMarkdown))</code></pre>
+          </div>
+          <div id="sc-link-html" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statLinkHtml))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat card — title and meta only -->
+      <h3 class="govuk-heading-s">Title and meta only</h3>
+      <p class="govuk-body">Omit <code class="doc-inline-code">Stat</code> and <code class="doc-inline-code">Progress</code> to render a simpler card with just a title, meta text, and optional link.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-stat-card-grid" style="max-width:320px">
+            <div class="dfe-f-stat-card dfe-f-stat-card--purple">
+              <h3 class="dfe-f-stat-card__title">Pipeline summary</h3>
+              <div class="dfe-f-stat-card__meta">Last updated 20 Feb 2026</div>
+              <a class="dfe-f-stat-card__link" href="#">View full pipeline</a>
+            </div>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true"  data-target="sc-title-razor">Razor</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="sc-title-md">Markdown</button>
+            <button class="doc-tab"                 role="tab" aria-selected="false" data-target="sc-title-html">HTML</button>
+          </div>
+          <div id="sc-title-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statTitleRazor))</code></pre>
+          </div>
+          <div id="sc-title-md" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statTitleMarkdown))</code></pre>
+          </div>
+          <div id="sc-title-html" class="doc-tab-panel doc-example__code">
+            <pre><code>@Html.Raw(Html.Encode(statTitleHtml))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- All colour variants -->
+      <h3 class="govuk-heading-s">Colour variants</h3>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-stat-card-grid">
+            @foreach (var v in new[] { "blue","green","orange","red","yellow","grey","black","teal","purple" })
+            {
+              <div class="dfe-f-stat-card dfe-f-stat-card--@v">
+                <h3 class="dfe-f-stat-card__title">@v</h3>
+                <div class="dfe-f-stat-card__stat">42</div>
+                <div class="dfe-f-stat-card__meta">Example stat</div>
+                <div class="dfe-f-stat-card__progress"><div class="dfe-f-stat-card__progress-fill" style="width:60%"></div></div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Parameters table -->
+      <h3 class="govuk-heading-s" style="margin-top:24px">Parameters</h3>
+      <table class="doc-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">Title</code></td><td>string</td><td>Yes</td><td>Card heading — shown with accent underline</td></tr>
+          <tr><td><code class="doc-inline-code">Stat</code></td><td>string</td><td>No</td><td>Large stat value, e.g. "11.2"</td></tr>
+          <tr><td><code class="doc-inline-code">Meta</code></td><td>string</td><td>No</td><td>Sub-label, e.g. "avg / 15 · High alignment"</td></tr>
+          <tr><td><code class="doc-inline-code">Progress</code></td><td>int (0–100)</td><td>No</td><td>Percentage fill for the progress bar. Omit to hide the bar.</td></tr>
+          <tr><td><code class="doc-inline-code">Link</code></td><td>string</td><td>No</td><td>URL for an optional footer link</td></tr>
+          <tr><td><code class="doc-inline-code">LinkText</code></td><td>string</td><td>No</td><td>Link label (default: "View details")</td></tr>
+          <tr><td><code class="doc-inline-code">Colour</code></td><td>string</td><td>No</td><td>blue | green | orange | red | yellow | grey | black | teal | purple (default: teal)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         CSS CLASSES REFERENCE
+    ══════════════════════════════════════════════════════ -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">CSS class reference</h2>
+
+      <h3 class="govuk-heading-s">Metric card</h3>
+      <table class="doc-table">
+        <thead><tr><th>Class</th><th>Element</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">dfe-f-metric</code></td><td>Container</td><td>Base card with left border</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-metric--{colour}</code></td><td>Container</td><td>Colour variant modifier</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-metric__num</code></td><td>div</td><td>Large number (42px, bold)</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-metric__label</code></td><td>div</td><td>Descriptive label</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-metric__change</code></td><td>div</td><td>Change / status line</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-metric__change--positive</code></td><td>Modifier</td><td>Green change text</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-metric__change--negative</code></td><td>Modifier</td><td>Red change text</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-metric__change--warning</code></td><td>Modifier</td><td>Orange change text</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-metric-grid</code></td><td>Wrapper</td><td>Responsive auto-fit grid for metric rows</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="govuk-heading-s" style="margin-top:24px">Stat card</h3>
+      <table class="doc-table">
+        <thead><tr><th>Class</th><th>Element</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card</code></td><td>Container</td><td>Base card</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card--{colour}</code></td><td>Container</td><td>Colour variant — sets <code class="doc-inline-code">--sc-accent</code></td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card__title</code></td><td>h3</td><td>Heading with accent underline</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card__stat</code></td><td>div</td><td>Large stat number (36px, accent colour)</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card__meta</code></td><td>div</td><td>Sub-label / context text</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card__progress</code></td><td>div</td><td>Progress bar track</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card__progress-fill</code></td><td>div</td><td>Progress bar fill — set <code class="doc-inline-code">width</code> inline</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card__link</code></td><td>a</td><td>Footer link</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-f-stat-card-grid</code></td><td>Wrapper</td><td>Responsive auto-fit grid for stat card rows</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    </main>
+  </div>
+</div>

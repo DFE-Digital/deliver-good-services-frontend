@@ -139,6 +139,58 @@ namespace ServiceManual.Services
             }
         }
 
+        public async Task<JobSpecification?> GetJobSpecificationBySlugAsync(string slug)
+        {
+            try
+            {
+                var url = $"api/job-specifications/by-slug/{Uri.EscapeDataString(slug)}";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for job specification slug '{Slug}'", response.StatusCode, slug);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiJobSpecification>>(json, JsonOptions);
+
+                var item = result?.Data?.FirstOrDefault();
+                if (item is null)
+                    return null;
+
+                return new JobSpecification
+                {
+                    Title = item.Title ?? string.Empty,
+                    Slug = item.Slug ?? string.Empty,
+                    Grade = item.Grade,
+                    RoleDescription = item.RoleDescription,
+                    Skills = item.Skills,
+                    EnableWordDocDownload = item.EnableWordDocDownload,
+                    Profession = item.Profession != null
+                        ? new JobSpecificationProfession
+                        {
+                            Title = item.Profession.Title,
+                            Slug = item.Profession.Slug
+                        }
+                        : null,
+                    SiblingJobSpecifications = (item.SiblingJobSpecifications ?? [])
+                        .Select(s => new JobSpecificationSibling
+                        {
+                            Title = s.Title ?? string.Empty,
+                            Slug = s.Slug ?? string.Empty,
+                            Grade = s.Grade
+                        })
+                        .ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching job specification for slug '{Slug}'", slug);
+                return null;
+            }
+        }
+
         public async Task<DetailedGuide?> GetDetailedGuideBySlugAsync(string slug)
         {
             try
@@ -691,6 +743,50 @@ namespace ServiceManual.Services
             }
         }
 
+        public async Task<PathRedirect?> GetPathRedirectByOldPathAsync(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return null;
+            var normalizedPath = path.Trim();
+            if (!normalizedPath.StartsWith("/", StringComparison.Ordinal))
+                normalizedPath = "/" + normalizedPath;
+            // Try with leading slash first, then without (CMS may store oldPath either way)
+            var pathsToTry = new[] { normalizedPath, normalizedPath.TrimStart('/') };
+            foreach (var pathToTry in pathsToTry.Distinct())
+            {
+                try
+                {
+                    var url = "api/redirect-301s?filters[oldPath][$eq]=" + Uri.EscapeDataString(pathToTry) +
+                              "&publicationState=live";
+                    var response = await _httpClient.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var body = await response.Content.ReadAsStringAsync();
+                        _logger.LogWarning(
+                            "CMS API returned {StatusCode} for path redirect '{Path}'. If 403, enable Public find permission for '301 Redirects' in Strapi. Response: {Response}",
+                            response.StatusCode, pathToTry, body.Length > 200 ? body[..200] + "..." : body);
+                        continue;
+                    }
+                    var json = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiRedirect301>>(json, JsonOptions);
+                    var item = result?.Data?.FirstOrDefault();
+                    if (item == null || string.IsNullOrWhiteSpace(item.NewPath))
+                        continue;
+                    return new PathRedirect
+                    {
+                        OldPath = item.OldPath ?? normalizedPath,
+                        NewPath = item.NewPath!.Trim(),
+                        UseInterimPage = item.UseInterimPage
+                    };
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error fetching path redirect for '{Path}'", pathToTry);
+                }
+            }
+            return null;
+        }
+
         private async Task AddListAsync(List<ContentIndexItem> items, string endpoint, string fields, int pageSize,
             string contentType, Func<StrapiContentListItem, string> urlSelector, Func<StrapiContentListItem, string?> slugSelector,
             Func<StrapiContentListItem, string?>? indexSlug = null)
@@ -830,6 +926,7 @@ namespace ServiceManual.Services
                 "detailed_guide" => "Guidance",
                 "detailed_guide_page" => "Guidance",
                 "single_page_guide" => "Guidance",
+                "job_specification" => "Job description",
                 "external_link" => "External link",
                 _ => null
             };
@@ -848,6 +945,16 @@ namespace ServiceManual.Services
             public string? ShortURL { get; set; }
             [JsonPropertyName("urlToRedirectTo")]
             public string? UrlToRedirectTo { get; set; }
+        }
+
+        private class StrapiRedirect301
+        {
+            [JsonPropertyName("oldPath")]
+            public string? OldPath { get; set; }
+            [JsonPropertyName("newPath")]
+            public string? NewPath { get; set; }
+            [JsonPropertyName("useInterimPage")]
+            public bool UseInterimPage { get; set; }
         }
 
         private class StrapiSingleTypeResponse<T>
@@ -1240,6 +1347,32 @@ namespace ServiceManual.Services
             public string? Url { get; set; }
             [JsonPropertyName("newTab")]
             public bool NewTab { get; set; }
+        }
+
+        private class StrapiJobSpecification
+        {
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+            public string? Grade { get; set; }
+            public string? RoleDescription { get; set; }
+            public string? Skills { get; set; }
+            public bool EnableWordDocDownload { get; set; }
+            public StrapiJobSpecificationProfession? Profession { get; set; }
+            [JsonPropertyName("siblingJobSpecifications")]
+            public List<StrapiJobSpecificationSibling>? SiblingJobSpecifications { get; set; }
+        }
+
+        private class StrapiJobSpecificationProfession
+        {
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+        }
+
+        private class StrapiJobSpecificationSibling
+        {
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+            public string? Grade { get; set; }
         }
 
         private class StrapiDetailedGuidePageRef

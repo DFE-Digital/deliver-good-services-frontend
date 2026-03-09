@@ -6,6 +6,7 @@ namespace ServiceManual.Services
     {
         Task<SinglePageGuide?> GetSinglePageGuideBySlugAsync(string slug);
         Task<Collection?> GetCollectionBySlugAsync(string slug);
+        Task<JobSpecification?> GetJobSpecificationBySlugAsync(string slug);
         Task<DetailedGuide?> GetDetailedGuideBySlugAsync(string slug);
         Task<DetailedGuidePage?> GetDetailedGuidePageBySlugAsync(string guideSlug, string pageSlug);
         Task<List<NavigationItem>> GetNavigationAsync();
@@ -18,5 +19,8 @@ namespace ServiceManual.Services
 
         /// <summary>Looks up a published redirect by short URL. Returns the URL to redirect to, or null if not found.</summary>
         Task<string?> GetRedirectUrlByShortUrlAsync(string shortUrl);
+
+        /// <summary>Looks up a published 301 redirect by old path. Returns the redirect rule, or null if not found.</summary>
+        Task<PathRedirect?> GetPathRedirectByOldPathAsync(string path);
     }
 }

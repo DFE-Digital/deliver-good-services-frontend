@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Content has moved";
+    var newPath = ViewBag.NewPath as string ?? "/";
+    var redirectSeconds = 15;
+}
+<meta http-equiv="refresh" content="@Html.Raw(redirectSeconds + ";url=" + newPath)" />
+@section Scripts {
+    <script>
+        (function () {
+            var seconds = @redirectSeconds;
+            var el = document.getElementById('countdown');
+            if (el) {
+                var t = setInterval(function () {
+                    seconds--;
+                    el.textContent = seconds;
+                    if (seconds <= 0) clearInterval(t);
+                }, 1000);
+            }
+        })();
+    </script>
+}
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <h1 class="govuk-heading-xl govuk-!-margin-top-7">This page has moved</h1>
+        <p class="govuk-body-l">
+            The content you were looking for has moved. If you've bookmarked this page, please update your bookmarks to the new page when it loads.
+        </p>
+
+        <div class="govuk-notification-banner govuk-notification-banner--success" role="alert" aria-labelledby="notification-banner-title" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="notification-banner-title">Redirecting you to the new location</h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+              
+                <p class="govuk-body govuk-!-margin-bottom-0">
+                    You will be taken to the new page automatically in <strong id="countdown" aria-live="polite">@redirectSeconds</strong> seconds.
+                </p>
+            </div>
+        </div>
+
+        <div class="govuk-button-group govuk-!-margin-top-6">
+            <a href="@newPath" class="govuk-button">Go to the new page now</a>
+        </div>
+       
+    </div>
+</div>

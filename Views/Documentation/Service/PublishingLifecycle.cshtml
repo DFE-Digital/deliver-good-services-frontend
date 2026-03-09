@@ -1,0 +1,157 @@
+@{
+  ViewData["Title"] = "Publishing lifecycle – Service documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/service">Service documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Publishing lifecycle</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-layout">
+  @await Html.PartialAsync("~/Views/Documentation/Service/_ServiceDocLayout.cshtml")
+
+  <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Service</span>
+      <h1 class="govuk-heading-l doc-content__title">Code and content publishing lifecycle</h1>
+      <p class="doc-content__lead">How code and content move through Local, Dev, Test, and Production — and when to promote content vs keep it environment-specific.</p>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Overview</h2>
+      <p class="govuk-body">The service has four environments. <strong>Code</strong> (frontend and CMS application) is deployed along a pipeline. <strong>Content</strong> is managed in the CMS: in Local, Dev, and Test you can promote content between environments to seed or sync; in Production, content is created and edited only in Production so live data is never overwritten by a transfer.</p>
+    </section>
+
+    <!-- Code flow -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Code flow</h2>
+      <p class="govuk-body">Application code (frontend and CMS) moves in one direction through the pipeline.</p>
+
+      <figure class="lifecycle-flow" aria-labelledby="lifecycle-code-caption">
+        <figcaption id="lifecycle-code-caption" class="lifecycle-flow__caption-top">Code pipeline — deploy in order</figcaption>
+        <div class="lifecycle-flow__track">
+          <div class="lifecycle-flow__node lifecycle-flow__node--local">
+            <span class="lifecycle-flow__node-num" aria-hidden="true">1</span>
+            <span class="lifecycle-flow__node-label">Local</span>
+            <p class="lifecycle-flow__node-desc">Build and develop. Local CMS and DB.</p>
+            <span class="lifecycle-flow__node-connector" aria-hidden="true"></span>
+          </div>
+          <div class="lifecycle-flow__node lifecycle-flow__node--dev">
+            <span class="lifecycle-flow__node-num" aria-hidden="true">2</span>
+            <span class="lifecycle-flow__node-label">Dev</span>
+            <p class="lifecycle-flow__node-desc">Deploy. Validate models with content.</p>
+            <span class="lifecycle-flow__node-connector" aria-hidden="true"></span>
+          </div>
+          <div class="lifecycle-flow__node lifecycle-flow__node--test">
+            <span class="lifecycle-flow__node-num" aria-hidden="true">3</span>
+            <span class="lifecycle-flow__node-label">Test</span>
+            <p class="lifecycle-flow__node-desc">Deploy. Editors draft and test content.</p>
+            <span class="lifecycle-flow__node-connector" aria-hidden="true"></span>
+          </div>
+          <div class="lifecycle-flow__node lifecycle-flow__node--prod">
+            <span class="lifecycle-flow__node-num" aria-hidden="true">4</span>
+            <span class="lifecycle-flow__node-label">Production</span>
+            <p class="lifecycle-flow__node-desc">Deploy. Live site; content only in Prod.</p>
+          </div>
+        </div>
+      </figure>
+
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Local</strong> — You develop against a local CMS and database. Use this to build features and test schema changes.</li>
+        <li><strong>Dev</strong> — Code is deployed (e.g. via CI). Dev uses a remote CMS/DB. Use it to confirm models and schema work with real config.</li>
+        <li><strong>Test</strong> — Same codebase as production (or release candidate). Used by editors to draft and preview content before it goes live.</li>
+        <li><strong>Production</strong> — Live service. Code is deployed only after sign-off from Test. Content here is the source of truth for the live site.</li>
+      </ul>
+    </section>
+
+    <!-- Content flow -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Content flow</h2>
+      <p class="govuk-body">Content in the CMS is handled differently from code. Promoting content <em>replaces</em> the target environment’s data, so we only promote between non-live environments.</p>
+
+      <figure class="lifecycle-flow" aria-labelledby="lifecycle-content-caption">
+        <figcaption id="lifecycle-content-caption" class="lifecycle-flow__caption-top">Content — where to promote and where not to</figcaption>
+        <div class="lifecycle-flow__zones">
+          <div class="lifecycle-flow__zone lifecycle-flow__zone--promote">
+            <p class="lifecycle-flow__zone-title">Promotion zone</p>
+            <div class="lifecycle-flow__pills">
+              <span class="lifecycle-flow__pill lifecycle-flow__pill--local">Local</span>
+              <span class="lifecycle-flow__pill lifecycle-flow__pill--dev">Dev</span>
+              <span class="lifecycle-flow__pill lifecycle-flow__pill--test">Test</span>
+            </div>
+            <p class="lifecycle-flow__zone-caption">Promote content between these (e.g. Local → Dev, Dev ↔ Test). Replacing data is acceptable.</p>
+          </div>
+          <div class="lifecycle-flow__barrier">
+            <span class="lifecycle-flow__barrier-line" aria-hidden="true"></span>
+            <span class="lifecycle-flow__barrier-label">Never promote into Prod</span>
+          </div>
+          <div class="lifecycle-flow__zone lifecycle-flow__zone--prod">
+            <p class="lifecycle-flow__zone-title">Live content</p>
+            <div class="lifecycle-flow__pills">
+              <span class="lifecycle-flow__pill lifecycle-flow__pill--prod">Production</span>
+            </div>
+            <p class="lifecycle-flow__zone-caption">Content is created and edited only in Production. Do not import or transfer content from Test.</p>
+          </div>
+        </div>
+      </figure>
+
+      <h3 class="govuk-heading-s">When to promote content</h3>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Local → Dev</strong> — To seed or refresh Dev with your local content (e.g. after model or content changes). Use the CMS transfer tool from the project (see CMS docs).</li>
+        <li><strong>Dev ↔ Test</strong> — To sync staging content or copy test data between Dev and Test. Both are non-live, so replacing data is acceptable.</li>
+        <li><strong>Test → Production</strong> — Do <strong>not</strong> promote content. Production content is created and maintained only in the Production CMS. That keeps live content under explicit editorial control and avoids overwriting it with test data.</li>
+      </ul>
+    </section>
+
+    <!-- Summary table -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Summary</h2>
+      <table class="govuk-table doc-table">
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">Environment</th>
+            <th scope="col" class="govuk-table__header">Code</th>
+            <th scope="col" class="govuk-table__header">Content</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell"><strong>Local</strong></td>
+            <td class="govuk-table__cell">Develop and run locally</td>
+            <td class="govuk-table__cell">Seed data; can promote out to Dev</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell"><strong>Dev</strong></td>
+            <td class="govuk-table__cell">Deployed from repo; test models</td>
+            <td class="govuk-table__cell">Test content; can promote to/from Local and Test</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell"><strong>Test</strong></td>
+            <td class="govuk-table__cell">Deployed; mirrors prod code</td>
+            <td class="govuk-table__cell">Editors draft and test; can promote to/from Dev only</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <td class="govuk-table__cell"><strong>Production</strong></td>
+            <td class="govuk-table__cell">Deployed after sign-off</td>
+            <td class="govuk-table__cell">Created and edited only in Prod; never import from Test</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">CMS transfer</h2>
+      <p class="govuk-body">The CMS supports a transfer command that streams data from one instance to another. It <strong>replaces</strong> all content and assets on the destination. Use it only for Local → Dev or Dev ↔ Test. Configuration (URLs and tokens) is set per environment and is not stored in code or documentation.</p>
+    </section>
+  </main>
+</div>

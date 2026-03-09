@@ -2,14 +2,93 @@
    Documentation site styles
    ============================================================ */
 
-/* ── Layout ── */
+/* ── Doc page wrapper (section nav + grid) ── */
+.doc-wrapper {
+  padding-bottom: 48px;
+}
+
+/* ── Top-level section nav (Styles | Components | Patterns | …) ── */
+.doc-sections {
+  border-bottom: 2px solid #b1b4b6;
+  margin-bottom: 0;
+  padding: 0 0 0 0;
+  background: #f8f8f8;
+}
+
+.doc-sections__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.doc-sections__item {
+  margin: 0;
+}
+
+.doc-sections__link {
+  display: block;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b0c0c;
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.doc-sections__link:hover {
+  background: #eee;
+  color: #1d70b8;
+}
+
+.doc-sections__link--active {
+  border-bottom-color: #1d70b8;
+  color: #1d70b8;
+  background: #fff;
+}
+
+.doc-sections__link:focus {
+  outline: 3px solid #ffdd00;
+  outline-offset: 2px;
+}
+
+/* ── Layout (section nav full width, then side nav + content) ── */
 .doc-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
-  gap: 40px;
+  grid-auto-rows: auto 1fr;
+  gap: 0 40px;
   align-items: start;
-  padding-top: 30px;
+  padding-top: 0;
   padding-bottom: 60px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.doc-sections {
+  grid-column: 1 / -1;
+  margin-left: -24px;
+  margin-right: -24px;
+  margin-bottom: 0;
+}
+
+.doc-layout > .doc-nav {
+  padding-top: 24px;
+}
+
+.doc-layout > .doc-content {
+  padding-top: 24px;
 }
 
 @media (max-width: 768px) {
@@ -456,4 +535,476 @@
 /* When a tab panel IS the code block, remove its top margin */
 .doc-tab-panel.doc-example__code {
   margin-top: 0;
+}
+
+/* ── Lifecycle diagram (clean pipeline + content zones) ── */
+.lifecycle-diagram {
+  margin: 28px 0;
+}
+
+.lifecycle-diagram__pipeline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  justify-content: space-between;
+}
+
+.lifecycle-diagram__step {
+  flex: 1;
+  min-width: 140px;
+  max-width: 220px;
+  padding: 20px 16px;
+  background: #fff;
+  border: 1px solid #b1b4b6;
+  border-left-width: 4px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.lifecycle-diagram__step + .lifecycle-diagram__step::before {
+  content: "→";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+  color: #505a5f;
+  z-index: 1;
+  background: #fff;
+  padding: 0 2px;
+}
+
+.lifecycle-diagram__step-num {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 50%;
+  margin-bottom: 8px;
+}
+
+.lifecycle-diagram__step-name {
+  display: block;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.lifecycle-diagram__step-desc {
+  display: block;
+  font-size: 0.8125rem;
+  color: #505a5f;
+  line-height: 1.35;
+}
+
+.lifecycle-diagram__step--local { border-left-color: #912b58; }
+.lifecycle-diagram__step--local .lifecycle-diagram__step-num { background: #912b58; }
+.lifecycle-diagram__step--dev  { border-left-color: #1d70b8; }
+.lifecycle-diagram__step--dev .lifecycle-diagram__step-num { background: #1d70b8; }
+.lifecycle-diagram__step--test { border-left-color: #00703c; }
+.lifecycle-diagram__step--test .lifecycle-diagram__step-num { background: #00703c; }
+.lifecycle-diagram__step--prod { border-left-color: #0b0c0c; }
+.lifecycle-diagram__step--prod .lifecycle-diagram__step-num { background: #0b0c0c; }
+
+@media (max-width: 768px) {
+  .lifecycle-diagram__pipeline {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .lifecycle-diagram__step { max-width: none; }
+  .lifecycle-diagram__step + .lifecycle-diagram__step::before {
+    content: "↓";
+    left: 50%;
+    top: -10px;
+    transform: translateX(-50%);
+  }
+}
+
+.lifecycle-diagram__zones {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 0;
+  border: 1px solid #b1b4b6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.lifecycle-diagram__zone {
+  flex: 1;
+  min-width: 200px;
+  padding: 20px;
+  background: #f8f8f8;
+}
+
+.lifecycle-diagram__zone--prod {
+  background: #fff;
+  border-left: 3px solid #0b0c0c;
+}
+
+.lifecycle-diagram__zone-title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 4px;
+}
+
+.lifecycle-diagram__zone-envs {
+  font-size: 1.125rem;
+  color: #1d70b8;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.lifecycle-diagram__zone-note {
+  font-size: 0.875rem;
+  color: #505a5f;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.lifecycle-diagram__divider {
+  width: 2px;
+  min-width: 2px;
+  background: repeating-linear-gradient(to bottom, #d4351c 0, #d4351c 4px, transparent 4px, transparent 10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+}
+
+.lifecycle-diagram__divider-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #d4351c;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .lifecycle-diagram__zones { flex-direction: column; }
+  .lifecycle-diagram__divider {
+    width: 100%;
+    height: 2px;
+    background: repeating-linear-gradient(to right, #d4351c 0, #d4351c 4px, transparent 4px, transparent 10px);
+  }
+  .lifecycle-diagram__divider-label {
+    writing-mode: horizontal-tb;
+    transform: none;
+    padding: 8px 0;
+  }
+}
+
+/* ── Publishing lifecycle flow (legacy / alternate) ── */
+.lifecycle-flow {
+  margin: 32px 0;
+}
+
+.lifecycle-flow__caption-top {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #505a5f;
+  margin: 0 0 16px;
+  letter-spacing: 0.02em;
+}
+
+/* Code pipeline: horizontal track with numbered nodes and connecting line */
+.lifecycle-flow__track {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  margin: 0 -12px;
+}
+
+.lifecycle-flow__track::before {
+  content: "";
+  position: absolute;
+  top: 36px;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  background: #b1b4b6;
+  z-index: 0;
+}
+
+@media (max-width: 768px) {
+  .lifecycle-flow__track {
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+  }
+  .lifecycle-flow__track::before {
+    top: 0;
+    left: 50%;
+    right: auto;
+    width: 2px;
+    height: 100%;
+    min-height: 120px;
+    transform: translateX(-50%);
+  }
+}
+
+.lifecycle-flow__node {
+  flex: 1;
+  min-width: 0;
+  max-width: 220px;
+  position: relative;
+  z-index: 1;
+  margin: 0 12px;
+  background: #fff;
+  border: 2px solid #b1b4b6;
+  border-radius: 6px;
+  padding: 20px 16px;
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.05);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.lifecycle-flow__node:hover {
+  box-shadow: 0 4px 0 0 rgba(0,0,0,0.08);
+}
+
+@media (max-width: 768px) {
+  .lifecycle-flow__node {
+    max-width: 100%;
+    width: 100%;
+    margin: 12px 0;
+  }
+}
+
+.lifecycle-flow__node-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.lifecycle-flow__node-label {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #0b0c0c;
+}
+
+.lifecycle-flow__node-desc {
+  font-size: 0.875rem;
+  color: #505a5f;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Node accent colours (left border + number circle) */
+.lifecycle-flow__node--local {
+  border-left-width: 4px;
+  border-left-color: #912b58;
+}
+.lifecycle-flow__node--local .lifecycle-flow__node-num { background: #912b58; }
+
+.lifecycle-flow__node--dev {
+  border-left-width: 4px;
+  border-left-color: #1d70b8;
+}
+.lifecycle-flow__node--dev .lifecycle-flow__node-num { background: #1d70b8; }
+
+.lifecycle-flow__node--test {
+  border-left-width: 4px;
+  border-left-color: #00703c;
+}
+.lifecycle-flow__node--test .lifecycle-flow__node-num { background: #00703c; }
+
+.lifecycle-flow__node--prod {
+  border-left-width: 4px;
+  border-left-color: #0b0c0c;
+}
+.lifecycle-flow__node--prod .lifecycle-flow__node-num { background: #0b0c0c; }
+
+/* Connector arrow between nodes (desktop) */
+.lifecycle-flow__node-connector {
+  position: absolute;
+  top: 35px;
+  right: -14px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #505a5f;
+  border-right: 2px solid #505a5f;
+  transform: rotate(45deg);
+  z-index: 2;
+  background: #fff;
+  border-radius: 0 2px 0 0;
+}
+
+.lifecycle-flow__node:last-child .lifecycle-flow__node-connector {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .lifecycle-flow__node-connector {
+    top: auto;
+    bottom: -20px;
+    right: 50%;
+    margin-right: -6px;
+    transform: rotate(135deg);
+  }
+  .lifecycle-flow__node:last-child .lifecycle-flow__node-connector {
+    display: none;
+  }
+}
+
+/* Content flow: two zones with a barrier */
+.lifecycle-flow__zones {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+@media (max-width: 768px) {
+  .lifecycle-flow__zones {
+    flex-direction: column;
+  }
+}
+
+.lifecycle-flow__zone {
+  flex: 1;
+  min-width: 260px;
+  padding: 24px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+}
+
+.lifecycle-flow__zone--promote {
+  background: #f3f2f1;
+  border-color: #b1b4b6;
+}
+
+.lifecycle-flow__zone--prod {
+  background: #fff;
+  border-color: #0b0c0c;
+  border-width: 2px;
+  position: relative;
+}
+
+.lifecycle-flow__zone-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #505a5f;
+  margin: 0 0 16px;
+}
+
+.lifecycle-flow__zone--prod .lifecycle-flow__zone-title {
+  color: #0b0c0c;
+}
+
+.lifecycle-flow__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.lifecycle-flow__pill {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.lifecycle-flow__pill--local { background: #912b58; }
+.lifecycle-flow__pill--dev  { background: #1d70b8; }
+.lifecycle-flow__pill--test { background: #00703c; }
+.lifecycle-flow__pill--prod { background: #0b0c0c; }
+
+.lifecycle-flow__zone-caption {
+  font-size: 0.875rem;
+  color: #505a5f;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.lifecycle-flow__zone--prod .lifecycle-flow__zone-caption {
+  color: #0b0c0c;
+}
+
+/* Barrier between zones */
+.lifecycle-flow__barrier {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+
+.lifecycle-flow__barrier-line {
+  width: 2px;
+  height: 60px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #d4351c 0,
+    #d4351c 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+@media (max-width: 768px) {
+  .lifecycle-flow__barrier {
+    flex-direction: row;
+    padding: 16px 0;
+  }
+  .lifecycle-flow__barrier-line {
+    width: 60px;
+    height: 2px;
+    background: repeating-linear-gradient(
+      to right,
+      #d4351c 0,
+      #d4351c 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+}
+
+.lifecycle-flow__barrier-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #d4351c;
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .lifecycle-flow__barrier-label {
+    margin-top: 0;
+    margin-left: 12px;
+  }
+}
+
+/* Single prod pill in its zone */
+.lifecycle-flow__zone--prod .lifecycle-flow__pills {
+  margin-bottom: 12px;
 }

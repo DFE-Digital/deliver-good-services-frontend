@@ -1,0 +1,218 @@
+@{
+  ViewData["Title"] = "Links – Documentation";
+
+  // ── Markdown examples ────────────────────────────────────────────────────────
+
+  var mdStandard = @"[View the GOV.UK Design System](https://design-system.service.gov.uk)";
+
+  var mdNewTab = @"[View the GOV.UK Design System](https://design-system.service.gov.uk){new-tab}";
+
+  var mdNewTabCustom = @"[Access the staff Intranet](https://intranet.dfe.gov.uk){new-tab ""opens on Intranet""}";
+
+  var mdMultiple = @"[GOV.UK Design System](https://design-system.service.gov.uk){new-tab}
+
+[DfE Intranet](https://intranet.dfe.gov.uk){new-tab ""opens on Intranet""}
+
+[Standards by profession](https://standards.education.gov.uk/profession){new-tab ""opens on DfE Standards""}";
+
+  // ── HTML output examples ─────────────────────────────────────────────────────
+
+  var htmlStandard = @"<a href=""https://design-system.service.gov.uk"" class=""govuk-link"">View the GOV.UK Design System</a>";
+
+  var htmlNewTab = @"<a href=""https://design-system.service.gov.uk"" class=""govuk-link"" target=""_blank"" rel=""noopener noreferrer"">
+  View the GOV.UK Design System
+  <span class=""govuk-visually-hidden"">(link opens in new tab)</span>
+</a>";
+
+  var htmlNewTabCustom = @"<a href=""https://intranet.dfe.gov.uk"" class=""govuk-link"" target=""_blank"" rel=""noopener noreferrer"">
+  Access the staff Intranet
+  <span class=""dfe-link-suffix"">(opens on Intranet)</span>
+</a>";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/styles">Styles</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Links</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Styles</span>
+      <h1 class="govuk-heading-l doc-content__title">Links</h1>
+      <p class="doc-content__lead">Standard markdown links, links that open in a new tab, and links with visible supplementary text — all using simple markdown syntax.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">All links automatically receive the <code class="doc-inline-code">govuk-link</code> class. Use the <code class="doc-inline-code">{new-tab}</code> modifier to open a link in a new tab — this also adds a visually hidden screen reader notice. Always include <code class="doc-inline-code">rel="noopener noreferrer"</code> — this is added automatically.</p>
+    </div>
+
+    <!-- ── Standard link ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Standard link</h2>
+      <p class="govuk-body doc-section__description">Standard markdown link syntax. Opens in the same tab.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <p class="govuk-body"><a href="#" class="govuk-link">View the GOV.UK Design System</a></p>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-std-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-std-html">HTML</button>
+          </div>
+          <div id="ex-std-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(mdStandard))</code></pre>
+          </div>
+          <div id="ex-std-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlStandard))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── New tab link ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Link that opens in a new tab</h2>
+      <p class="govuk-body doc-section__description">Add <code class="doc-inline-code">{new-tab}</code> immediately after the closing parenthesis. A visually hidden <em>(link opens in new tab)</em> notice is automatically appended for screen reader users — you do not need to add it manually.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <p class="govuk-body">
+            <a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">
+              View the GOV.UK Design System
+              <span class="govuk-visually-hidden">(link opens in new tab)</span>
+            </a>
+          </p>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-newtab-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-newtab-html">HTML</button>
+          </div>
+          <div id="ex-newtab-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(mdNewTab))</code></pre>
+          </div>
+          <div id="ex-newtab-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlNewTab))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── New tab with custom suffix ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Link with custom suffix text</h2>
+      <p class="govuk-body doc-section__description">Add <code class="doc-inline-code">{new-tab "your text"}</code> to open in a new tab and show a visible suffix — useful when the destination needs context, such as an Intranet or third-party tool. The suffix is wrapped in a <code class="doc-inline-code">dfe-link-suffix</code> span and displayed in a smaller, muted style.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <p class="govuk-body">
+            <a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">
+              Access the staff Intranet <span class="dfe-link-suffix">(opens on Intranet)</span>
+            </a>
+          </p>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-suffix-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-suffix-html">HTML</button>
+          </div>
+          <div id="ex-suffix-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(mdNewTabCustom))</code></pre>
+          </div>
+          <div id="ex-suffix-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlNewTabCustom))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Multiple links ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Multiple links example</h2>
+      <p class="govuk-body doc-section__description">You can mix standard and modified links freely in the same content.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <p class="govuk-body">
+            <a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">GOV.UK Design System <span class="govuk-visually-hidden">(link opens in new tab)</span></a>
+          </p>
+          <p class="govuk-body">
+            <a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">DfE Intranet <span class="dfe-link-suffix">(opens on Intranet)</span></a>
+          </p>
+          <p class="govuk-body">
+            <a href="#" class="govuk-link" target="_blank" rel="noopener noreferrer">Standards by profession <span class="dfe-link-suffix">(opens on DfE Standards)</span></a>
+          </p>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-multi-markdown">Markdown</button>
+          </div>
+          <div id="ex-multi-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(mdMultiple))</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Quick reference ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Quick reference</h2>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Syntax</th><th>Behaviour</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code class="doc-inline-code">[text](url)</code></td>
+            <td>Standard link. Opens in same tab. Gets <code class="doc-inline-code">govuk-link</code> class automatically.</td>
+          </tr>
+          <tr>
+            <td><code class="doc-inline-code">[text](url){new-tab}</code></td>
+            <td>Opens in new tab. Adds <code class="doc-inline-code">target="_blank" rel="noopener noreferrer"</code> and a visually hidden <em>(link opens in new tab)</em> notice for screen readers.</td>
+          </tr>
+          <tr>
+            <td><code class="doc-inline-code">[text](url){new-tab "suffix"}</code></td>
+            <td>Opens in new tab with a visible <code class="doc-inline-code">dfe-link-suffix</code> span appended. Use for links to Intranet, third-party tools, or other contexts that need labelling.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Accessibility note ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Accessibility</h2>
+      <p class="govuk-body">Opening links in a new tab can be disorienting for users, particularly those using screen readers or with cognitive disabilities. Only use <code class="doc-inline-code">{new-tab}</code> when there is a clear user need — for example, when leaving the page would cause the user to lose unsaved work, or when linking to an Intranet resource that cannot open in the same context.</p>
+      <p class="govuk-body">When you do open a link in a new tab, always inform the user. The <code class="doc-inline-code">{new-tab}</code> modifier does this automatically with a visually hidden screen reader notice. If the destination needs visible context (such as "opens on Intranet"), use <code class="doc-inline-code">{new-tab "your text"}</code> instead.</p>
+      <p class="govuk-body">This meets <a href="https://www.w3.org/WAI/WCAG22/Understanding/on-request.html" class="govuk-link" rel="noopener noreferrer">WCAG 2.2 Success Criterion 3.2.5 — Change on Request</a> and the <a href="https://design-system.service.gov.uk/styles/links/" class="govuk-link" rel="noopener noreferrer">GOV.UK Design System links guidance</a>.</p>
+    </section>
+
+    </main>
+  </div>
+</div>

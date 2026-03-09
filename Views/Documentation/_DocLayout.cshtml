@@ -1,0 +1,3 @@
+@* Documentation layout: section nav (full width) + side nav (in grid). Use with: <div class="doc-wrapper">@this partial, then <main class="doc-content">...</main></div> inside doc-layout. *@
+@await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+@await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")

@@ -1,0 +1,55 @@
+@{
+  ViewData["Title"] = "Template guidance – Service documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/service">Service documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Template guidance</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-layout">
+  @await Html.PartialAsync("~/Views/Documentation/Service/_ServiceDocLayout.cshtml")
+
+  <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Service</span>
+      <h1 class="govuk-heading-l doc-content__title">Template guidance</h1>
+      <p class="doc-content__lead">How pages and templates are structured, which layout to use, and conventions for views and partials.</p>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Layout</h2>
+      <p class="govuk-body">The service uses a single main layout (<code class="doc-inline-code">_Layout.cshtml</code>) that includes the header, secondary navigation, breadcrumbs (when defined), and main content area. Views define <code class="doc-inline-code">Breadcrumbs</code>, <code class="doc-inline-code">Styles</code>, and <code class="doc-inline-code">Scripts</code> sections as needed. No configuration or secrets are passed from views; data comes from controllers and models.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Documentation pages</h2>
+      <p class="govuk-body">Documentation and service-documentation pages use a two-column layout: a sidebar nav partial plus main content. The sidebar is different for the main Documentation section vs the Service documentation subsection, so service docs have their own layout partial (<code class="doc-inline-code">_ServiceDocLayout.cshtml</code>) and shared doc CSS/JS.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Content from the CMS</h2>
+      <p class="govuk-body">Pages that render CMS content (e.g. detailed guides, single-page guidance, collections) use controller actions that fetch data from the CMS API and pass models to the view. Templates receive only the data they need (e.g. title, body HTML, related content). API URLs and tokens are never passed into views.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Conventions</h2>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Use the shared layout unless a page has a special requirement (e.g. documentation layout).</li>
+        <li>Set <code class="doc-inline-code">ViewData["Title"]</code> for the page title; the layout appends the site name.</li>
+        <li>Define breadcrumbs in the <code class="doc-inline-code">Breadcrumbs</code> section for consistent navigation.</li>
+        <li>Use design-system partials and CSS classes (GOV.UK and service-specific) so components match the design documentation.</li>
+      </ul>
+    </section>
+  </main>
+</div>

@@ -1212,11 +1212,20 @@ blockquote.govuk-inset-text {
     color: #ffffff;
 }
 
-.homepage-hero .govuk-body-l {
+.homepage-hero .govuk-body-l,
+.homepage-hero__intro {
     font-size: 24px;
     line-height: 1.5;
     color: #ffffff;
     opacity: 0.95;
+}
+
+.homepage-hero__meta {
+    color: #ffffff;
+    opacity: 0.9;
+    font-size: 19px;
+    margin-top: 8px;
+    margin-bottom: 0;
 }
 
 /* Content page hero - for non-homepage pages */
@@ -3579,3 +3588,11 @@ a:focus-visible {
     fill: var(--govuk-colour-blue-shade-50);
 }
 
+.govuk-warning-text__icon {
+    background-color: var(--govuk-colour-red);
+    border-color: var(--govuk-colour-red);
+}
+
+.govuk-warning-text__text {
+    color: var(--govuk-colour-red);
+}

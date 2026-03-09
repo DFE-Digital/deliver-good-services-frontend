@@ -1,0 +1,50 @@
+@{
+  ViewData["Title"] = "Detailed guide page – Templates";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/templates">Templates</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Detailed guide page</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Templates</span>
+        <h1 class="govuk-heading-l doc-content__title">Detailed guide page</h1>
+        <p class="doc-content__lead">A single page within a detailed guide. Contains the main body, optional “before contents” block, related content, and options for hiding the contents list or page nav.</p>
+      </div>
+      <section class="doc-section">
+        <h2 class="doc-section__title">When to use</h2>
+        <p class="govuk-body">Each page of a <strong>Detailed guide</strong> is a <strong>Detailed guide page</strong>. Add pages via the guide’s relation or from the Detailed guide page content type. Use <em>beforeContents</em> for intro text that appears above the “Contents” list. Use <em>hideContents</em> or <em>hideTitleAndDescription</em> when the design for that page should differ. Link to professions or hide the guide pages nav per page if your schema supports it.</p>
+      </section>
+      <section class="doc-section">
+        <h2 class="doc-section__title">Fields</h2>
+        <table class="govuk-table doc-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>title</td><td>String</td><td>Required, unique. Page title.</td></tr>
+            <tr><td>slug</td><td>UID (from title)</td><td>URL segment for this page.</td></tr>
+            <tr><td>metaDescription</td><td>Text (max 240)</td><td>Required.</td></tr>
+            <tr><td>beforeContents</td><td>Rich text</td><td>Optional. Content shown above the contents list.</td></tr>
+            <tr><td>body</td><td>Rich text</td><td>Required. Main page content (markdown).</td></tr>
+            <tr><td>detailed_guide</td><td>Relation (Detailed guide)</td><td>Many-to-one. The guide this page belongs to.</td></tr>
+            <tr><td>relatedContent</td><td>Component (content.related-content)</td><td>Repeatable.</td></tr>
+            <tr><td>userNeeds</td><td>Component (content.user-need)</td><td>Repeatable.</td></tr>
+            <tr><td>hideContents</td><td>Boolean</td><td>Default false. Hide the contents list on this page.</td></tr>
+            <tr><td>hideTitleAndDescription</td><td>Boolean</td><td>Hide title and description block.</td></tr>
+            <tr><td>professionsApplicable</td><td>Relation (Tags profession)</td><td>Optional. Professions this page applies to.</td></tr>
+            <tr><td>hideGuidePagesNav</td><td>Boolean</td><td>Default false. Hide the list of guide pages in the sidebar.</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>

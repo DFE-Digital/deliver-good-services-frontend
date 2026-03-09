@@ -1,0 +1,70 @@
+@{
+  ViewData["Title"] = "Typography – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/styles">Styles</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Typography</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Styles</span>
+      <h1 class="govuk-heading-l doc-content__title">Typography</h1>
+      <p class="doc-content__lead">GOV.UK Frontend typography conventions used across the Service Manual — headings, body text, lists, links, and more.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">The Service Manual uses <a href="https://design-system.service.gov.uk/styles/typography/" class="govuk-link" rel="noopener noreferrer">GOV.UK Frontend typography</a> throughout. In CMS markdown content, standard markdown syntax is automatically converted to the correct GOV.UK classes.</p>
+    </div>
+
+    <div class="doc-card-grid" style="margin-top:24px">
+      <a href="/documentation/styles/headings" class="doc-card">
+        <span class="doc-card__category">Styles</span>
+        <h3 class="doc-card__title">Headings</h3>
+        <p class="doc-card__description">Heading sizes, body text, bold, italic, and lists — and how markdown maps to GOV.UK classes.</p>
+      </a>
+      <a href="/documentation/styles/links" class="doc-card">
+        <span class="doc-card__category">Styles</span>
+        <h3 class="doc-card__title">Links</h3>
+        <p class="doc-card__description">Standard links, new-tab links, and links with visible suffix text.</p>
+      </a>
+      <a href="/documentation/styles/inset-text" class="doc-card">
+        <span class="doc-card__category">Styles</span>
+        <h3 class="doc-card__title">Inset text</h3>
+        <p class="doc-card__description">Blockquotes, warning panels, and information callouts.</p>
+      </a>
+      <a href="/documentation/styles/tables" class="doc-card">
+        <span class="doc-card__category">Styles</span>
+        <h3 class="doc-card__title">Tables</h3>
+        <p class="doc-card__description">Markdown tables with GOV.UK styling and column alignment options.</p>
+      </a>
+      <a href="/documentation/styles/horizontal-rule" class="doc-card">
+        <span class="doc-card__category">Styles</span>
+        <h3 class="doc-card__title">Horizontal rule</h3>
+        <p class="doc-card__description">Section breaks using the GOV.UK section break component.</p>
+      </a>
+      <a href="/documentation/styles/colour" class="doc-card">
+        <span class="doc-card__category">Styles</span>
+        <h3 class="doc-card__title">Colour</h3>
+        <p class="doc-card__description">The GOV.UK colour palette, text colours, backgrounds, component accents, and phase colours.</p>
+      </a>
+    </div>
+
+    </main>
+  </div>
+</div>

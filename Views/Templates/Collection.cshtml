@@ -91,8 +91,9 @@
                                     @foreach (var link in guidanceItems)
                                     {
                                         var subText = link.ContentType;
+                                        var linkHref = link.Url + (subText == "Job description" && !string.IsNullOrEmpty(collection.Slug) ? "?collection=" + Uri.EscapeDataString(collection.Slug) : "");
                                         <li class="dfe-f-guide-list__item">
-                                            <a class="govuk-link dfe-f-guide-list__item-title" href="@link.Url" target="@(link.OpenInNewTab ? "_blank" : null)" rel="@(link.OpenInNewTab ? "noopener noreferrer" : null)">
+                                            <a class="govuk-link dfe-f-guide-list__item-title" href="@linkHref" target="@(link.OpenInNewTab ? "_blank" : null)" rel="@(link.OpenInNewTab ? "noopener noreferrer" : null)">
                                                 @link.Title
                                                 @if (link.OpenInNewTab)
                                                 {

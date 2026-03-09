@@ -27,7 +27,6 @@
   <a href="#main-content" class="govuk-skip-link">Skip to main content</a>
   
   @await Html.PartialAsync("_Header")
-  @await Html.PartialAsync("_SecondaryNavigation")
 
   @* When Masthead is defined (e.g. lifecycle/phase), breadcrumbs live inside the masthead – do not render a separate breadcrumb bar *@
   @if (IsSectionDefined("Breadcrumbs") && !IsSectionDefined("Masthead"))
@@ -59,7 +58,7 @@
 
   @RenderSection("Masthead", required: false)
 
-  <main class="govuk-main-wrapper @(ViewBag.IsStandardDetailPage == true ? "standard-detail-page" : "")" id="main-content" role="main">
+  <main class="govuk-main-wrapper" id="main-content" role="main">
     @if (IsSectionDefined("Masthead"))
     {
       <div class="content-wrapper">

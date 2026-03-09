@@ -1,0 +1,48 @@
+@{
+  ViewData["Title"] = "Detailed guide – Templates";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/templates">Templates</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Detailed guide</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Templates</span>
+        <h1 class="govuk-heading-l doc-content__title">Detailed guide</h1>
+        <p class="doc-content__lead">A multi-page guide made up of detailed guide pages. It belongs to a collection and can be filtered by delivery phase.</p>
+      </div>
+      <section class="doc-section">
+        <h2 class="doc-section__title">When to use</h2>
+        <p class="govuk-body">Use a <strong>Detailed guide</strong> when the guidance spans multiple pages (e.g. a process with steps). The guide has a title and meta description; the actual content lives on each <strong>Detailed guide page</strong>. Assign it to a collection so it appears in the right topic. Use <em>applicable phases</em> so the guide can be listed on phase-specific views.</p>
+      </section>
+      <section class="doc-section">
+        <h2 class="doc-section__title">Fields</h2>
+        <table class="govuk-table doc-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>title</td><td>String</td><td>Required, unique. Guide title.</td></tr>
+            <tr><td>slug</td><td>UID (from title)</td><td>URL path for the guide.</td></tr>
+            <tr><td>metaDescription</td><td>Text (max 240)</td><td>Required. SEO and preview.</td></tr>
+            <tr><td>detailed_guide_pages</td><td>Relation (Detailed guide page)</td><td>One-to-many. Pages in this guide (order can be managed in CMS).</td></tr>
+            <tr><td>relatedContent</td><td>Component (content.related-content)</td><td>Repeatable.</td></tr>
+            <tr><td>userNeeds</td><td>Component (content.user-need)</td><td>Repeatable.</td></tr>
+            <tr><td>applicable_phases</td><td>Relation (Phase)</td><td>Many-to-many. Phases this guide applies to (for phase page listing).</td></tr>
+            <tr><td>guidePagesOnRightSide</td><td>Boolean</td><td>Default false. Whether to show the list of pages in the right-hand sidebar.</td></tr>
+            <tr><td>collection</td><td>Relation (Collection)</td><td>Many-to-one. The collection this guide belongs to.</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <p class="govuk-body"><a href="/documentation/templates/detailed-guide-page" class="govuk-link">See Detailed guide page</a> for the template used for each page within the guide.</p>
+    </main>
+  </div>
+</div>

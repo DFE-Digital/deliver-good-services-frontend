@@ -1,0 +1,215 @@
+@{
+  ViewData["Title"] = "Pill component – Documentation";
+
+  // ── Razor code examples ──────────────────────────────────────────────────────
+
+  var razorPhaseAll = @"@foreach (var phase in new[] { ""Discovery"", ""Alpha"", ""Beta"", ""Live"" })
+{
+    @await Html.PartialAsync(""_DfePill"", new ViewDataDictionary(ViewData)
+    {
+        { ""Label"", phase },
+        { ""Phase"", phase.ToLower() }
+    })
+}";
+
+  var razorColour = @"@await Html.PartialAsync(""_DfePill"", new ViewDataDictionary(ViewData)
+{
+    { ""Label"", ""Mandatory"" },
+    { ""Colour"", ""blue"" }
+})";
+
+  // ── Markdown code examples ───────────────────────────────────────────────────
+
+  var mdPhaseAll = @"[pill phase=""discovery"" label=""Discovery""]
+[pill phase=""alpha"" label=""Alpha""]
+[pill phase=""beta"" label=""Beta""]
+[pill phase=""live"" label=""Live""]";
+
+  var mdColour = @"[pill colour=""blue"" label=""Mandatory""]
+[pill colour=""green"" label=""Complete""]
+[pill colour=""orange"" label=""In progress""]
+[pill colour=""red"" label=""Blocked""]
+[pill colour=""yellow"" label=""Caution""]
+[pill colour=""grey"" label=""Optional""]";
+
+  // ── HTML output examples ─────────────────────────────────────────────────────
+
+  var htmlPhaseAll = @"<span class=""dfe-pill dfe-pill--discovery"">Discovery</span>
+<span class=""dfe-pill dfe-pill--alpha"">Alpha</span>
+<span class=""dfe-pill dfe-pill--beta"">Beta</span>
+<span class=""dfe-pill dfe-pill--live"">Live</span>";
+
+  var htmlColour = @"<span class=""dfe-pill dfe-pill--blue"">Mandatory</span>
+<span class=""dfe-pill dfe-pill--green"">Complete</span>
+<span class=""dfe-pill dfe-pill--orange"">In progress</span>
+<span class=""dfe-pill dfe-pill--red"">Blocked</span>
+<span class=""dfe-pill dfe-pill--yellow"">Caution</span>
+<span class=""dfe-pill dfe-pill--grey"">Optional</span>";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/components">Components</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Pill component</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Components</span>
+      <h1 class="govuk-heading-l doc-content__title">Pill component</h1>
+      <p class="doc-content__lead">Small inline labels for indicating service phases or status. Available in four fixed phase colours and six custom colour variants.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">Pills can be used standalone in body content, or as the <code class="doc-inline-code">phases</code> attribute inside a <a href="/documentation/panel-component" class="govuk-link" rel="noopener noreferrer">Panel component</a>. In CMS markdown, use the <code class="doc-inline-code">[pill]</code> shortcode.</p>
+    </div>
+
+    <!-- ── Phase pills ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Phase pills</h2>
+      <p class="govuk-body doc-section__description">Use phase pills to indicate which delivery phases a requirement or standard applies to. The colour is fixed per phase — do not override it.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <span class="dfe-pill dfe-pill--discovery">Discovery</span>
+          <span class="dfe-pill dfe-pill--alpha">Alpha</span>
+          <span class="dfe-pill dfe-pill--beta">Beta</span>
+          <span class="dfe-pill dfe-pill--live">Live</span>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-phase-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-phase-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-phase-html">HTML</button>
+          </div>
+          <div id="ex-phase-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(mdPhaseAll))</code></pre>
+          </div>
+          <div id="ex-phase-razor" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(razorPhaseAll))</code></pre>
+          </div>
+          <div id="ex-phase-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlPhaseAll))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Phase</th><th>Shortcode</th><th>CSS class</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="dfe-pill dfe-pill--discovery">Discovery</span></td><td><code class="doc-inline-code">phase="discovery"</code></td><td><code class="doc-inline-code">dfe-pill--discovery</code></td></tr>
+          <tr><td><span class="dfe-pill dfe-pill--alpha">Alpha</span></td><td><code class="doc-inline-code">phase="alpha"</code></td><td><code class="doc-inline-code">dfe-pill--alpha</code></td></tr>
+          <tr><td><span class="dfe-pill dfe-pill--beta">Beta</span></td><td><code class="doc-inline-code">phase="beta"</code></td><td><code class="doc-inline-code">dfe-pill--beta</code></td></tr>
+          <tr><td><span class="dfe-pill dfe-pill--live">Live</span></td><td><code class="doc-inline-code">phase="live"</code></td><td><code class="doc-inline-code">dfe-pill--live</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Colour pills ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Colour pills</h2>
+      <p class="govuk-body doc-section__description">Use colour pills for arbitrary status labels — things like "Mandatory", "In progress", or "Deprecated". Choose a colour that conveys the appropriate meaning.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <span class="dfe-pill dfe-pill--blue">Mandatory</span>
+          <span class="dfe-pill dfe-pill--green">Complete</span>
+          <span class="dfe-pill dfe-pill--orange">In progress</span>
+          <span class="dfe-pill dfe-pill--red">Blocked</span>
+          <span class="dfe-pill dfe-pill--yellow">Caution</span>
+          <span class="dfe-pill dfe-pill--grey">Optional</span>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-colour-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-colour-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-colour-html">HTML</button>
+          </div>
+          <div id="ex-colour-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(mdColour))</code></pre>
+          </div>
+          <div id="ex-colour-razor" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(razorColour))</code></pre>
+          </div>
+          <div id="ex-colour-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>@Html.Raw(Html.Encode(htmlColour))</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Colour</th><th>Use for</th><th>CSS class</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="dfe-pill dfe-pill--blue">blue</span></td><td>General requirements, mandatory items</td><td><code class="doc-inline-code">dfe-pill--blue</code></td></tr>
+          <tr><td><span class="dfe-pill dfe-pill--green">green</span></td><td>Complete, passing, positive outcomes</td><td><code class="doc-inline-code">dfe-pill--green</code></td></tr>
+          <tr><td><span class="dfe-pill dfe-pill--orange">orange</span></td><td>In progress, needs attention</td><td><code class="doc-inline-code">dfe-pill--orange</code></td></tr>
+          <tr><td><span class="dfe-pill dfe-pill--red">red</span></td><td>Blocked, failed, critical</td><td><code class="doc-inline-code">dfe-pill--red</code></td></tr>
+          <tr><td><span class="dfe-pill dfe-pill--yellow">yellow</span></td><td>Caution, review needed</td><td><code class="doc-inline-code">dfe-pill--yellow</code></td></tr>
+          <tr><td><span class="dfe-pill dfe-pill--grey">grey</span></td><td>Optional, informational, low priority</td><td><code class="doc-inline-code">dfe-pill--grey</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Shortcode reference ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">CMS shortcode reference</h2>
+      <p class="govuk-body doc-section__description">Use the <code class="doc-inline-code">[pill]</code> shortcode in CMS markdown body content. Use either <code class="doc-inline-code">phase</code> or <code class="doc-inline-code">colour</code> — not both.</p>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Attribute</th><th>Required</th><th>Values</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">label</code></td><td>Yes</td><td>Any text</td><td>The text displayed inside the pill.</td></tr>
+          <tr><td><code class="doc-inline-code">phase</code></td><td>No*</td><td><code class="doc-inline-code">discovery</code>, <code class="doc-inline-code">alpha</code>, <code class="doc-inline-code">beta</code>, <code class="doc-inline-code">live</code></td><td>Applies the fixed phase colour. Use instead of <code class="doc-inline-code">colour</code>.</td></tr>
+          <tr><td><code class="doc-inline-code">colour</code></td><td>No*</td><td><code class="doc-inline-code">blue</code>, <code class="doc-inline-code">green</code>, <code class="doc-inline-code">orange</code>, <code class="doc-inline-code">red</code>, <code class="doc-inline-code">yellow</code>, <code class="doc-inline-code">grey</code></td><td>Applies a custom colour. Use instead of <code class="doc-inline-code">phase</code>.</td></tr>
+        </tbody>
+      </table>
+      <p class="govuk-body govuk-body-s" style="margin-top:8px">* Provide either <code class="doc-inline-code">phase</code> or <code class="doc-inline-code">colour</code>. If neither is set, a neutral grey style is used.</p>
+    </section>
+
+    <!-- ── Razor partial parameters ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Razor partial parameters</h2>
+      <p class="govuk-body doc-section__description">Render the pill partial directly in Razor views using <code class="doc-inline-code">_DfePill</code>.</p>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">Label</code></td><td>string</td><td>Required. The text displayed inside the pill.</td></tr>
+          <tr><td><code class="doc-inline-code">Phase</code></td><td>string</td><td>Optional. One of: <code class="doc-inline-code">discovery</code>, <code class="doc-inline-code">alpha</code>, <code class="doc-inline-code">beta</code>, <code class="doc-inline-code">live</code>. Takes priority over Colour.</td></tr>
+          <tr><td><code class="doc-inline-code">Colour</code></td><td>string</td><td>Optional. One of: <code class="doc-inline-code">blue</code>, <code class="doc-inline-code">green</code>, <code class="doc-inline-code">orange</code>, <code class="doc-inline-code">red</code>, <code class="doc-inline-code">yellow</code>, <code class="doc-inline-code">grey</code>.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    </main>
+  </div>
+</div>

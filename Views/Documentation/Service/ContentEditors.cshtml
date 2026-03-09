@@ -1,0 +1,78 @@
+@{
+  ViewData["Title"] = "Content editors – Service documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/service">Service documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Content editors</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-layout">
+  @await Html.PartialAsync("~/Views/Documentation/Service/_ServiceDocLayout.cshtml")
+
+  <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Service</span>
+      <h1 class="govuk-heading-l doc-content__title">Content editors</h1>
+      <p class="doc-content__lead">Guidance for editors using the CMS to create and manage Service Manual content. No login details, URLs, or API values are included here.</p>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Overview</h2>
+      <p class="govuk-body">Content is managed in the headless CMS. Editors create and edit content types such as guides, collections, phases, and navigation. The frontend reads this content and renders it with the design system. Access and permissions are managed in the CMS admin; this page describes how to use the content model and fields.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Writing in the CMS</h2>
+      <p class="govuk-body">Body and rich-text fields use <strong>Markdown</strong>. You can use:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>Headings (<code class="doc-inline-code">#</code>, <code class="doc-inline-code">##</code>, <code class="doc-inline-code">###</code>, <code class="doc-inline-code">####</code>) for structure</li>
+        <li>Bold and italic, bullet and numbered lists</li>
+        <li>Links: <code class="doc-inline-code">[link text](url)</code></li>
+        <li>Blockquotes for inset text: start a line with <code class="doc-inline-code">&gt;</code></li>
+        <li>Warning panels: start each line with <code class="doc-inline-code">&gt;x&gt;</code></li>
+        <li>Info panels: start each line with <code class="doc-inline-code">&gt;!&gt;</code></li>
+        <li>Section breaks: <code class="doc-inline-code">---</code></li>
+      </ul>
+      <p class="govuk-body">For full syntax and shortcodes (panels, cards, action links), see <a class="govuk-link" href="/documentation/markdown">Markdown syntax</a> and <a class="govuk-link" href="/documentation/service/design-components">Design components</a>.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Content types</h2>
+      <p class="govuk-body">The CMS includes content types for:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Guides and single-page guidance</strong> — Title, body (markdown), slug, and optional metadata and related content.</li>
+        <li><strong>Collections</strong> — Groupings of content with sections; used to organise guidance and show navigation.</li>
+        <li><strong>Phases and lifecycle</strong> — Delivery phases (e.g. Discovery, Alpha, Beta, Live) and related tasks, criteria, and activities.</li>
+        <li><strong>Navigation</strong> — Items and structure for the site’s navigation menus.</li>
+      </ul>
+      <p class="govuk-body">Required and optional fields are shown in the CMS when you create or edit an entry. Use clear, consistent titles and slugs so content is easy to find and URLs stay stable.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Publishing</h2>
+      <p class="govuk-body">Save and publish content in the CMS according to your workflow. The frontend shows published content for the environment it is configured to use. Draft or unpublished changes are not shown on the live site. Do not store sensitive information or credentials in any CMS field.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Shortcodes in body content</h2>
+      <p class="govuk-body">You can add panels, metric cards, card lists, and action links using shortcodes in the body field. Examples (structure only; replace with your text and values):</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><code class="doc-inline-code">[panel title="Title" colour="blue"]...[/panel]</code> — Expandable panel</li>
+        <li><code class="doc-inline-code">[metric num="10" label="Label" colour="grey"]</code> — Metric card</li>
+        <li><code class="doc-inline-code">[actionLink url="..." text="Link text"]</code> — Prominent action link</li>
+      </ul>
+      <p class="govuk-body">See <a class="govuk-link" href="/documentation/panel-component">Panel component</a>, <a class="govuk-link" href="/documentation/cards">Cards</a>, and <a class="govuk-link" href="/documentation/action-link">Action link</a> for full options. Use only public URLs and non-sensitive text in content.</p>
+    </section>
+  </main>
+</div>

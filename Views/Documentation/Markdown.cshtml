@@ -1,0 +1,184 @@
+@{
+  ViewData["Title"] = "Markdown syntax – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/components">Components</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Markdown syntax</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Components</span>
+      <h1 class="govuk-heading-l doc-content__title">Markdown syntax</h1>
+      <p class="doc-content__lead">How to write and format content in the CMS body field, including custom panel syntax.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">Content entered in the CMS body field is written in <strong>Markdown</strong> and automatically converted to GOV.UK-styled HTML when the page renders. You do not need to write HTML directly.</p>
+    </div>
+
+    <!-- ── Markdig and the pipeline ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">How it works: Markdig</h2>
+      <p class="govuk-body doc-section__description">The site uses <strong>Markdig</strong>, a .NET library that converts Markdown to HTML. All CMS body content and related-content fields that support rich text go through a single pipeline so that headings, lists, links, and custom syntax behave the same everywhere.</p>
+      <p class="govuk-body">The pipeline works in three stages:</p>
+      <ol class="govuk-list govuk-list--number">
+        <li><strong>Pre-processing</strong> — Custom shortcodes and syntax are turned into HTML or markers before Markdig runs. That includes <code class="doc-inline-code">[panel]</code>, <code class="doc-inline-code">[metric]</code>, <code class="doc-inline-code">[chevron-cards]</code> / <code class="doc-inline-code">[card-list]</code>, <code class="doc-inline-code">[chevroncard ordered]</code> / <code class="doc-inline-code">[chevroncard unordered]</code>, <code class="doc-inline-code">&gt;x&gt;</code> / <code class="doc-inline-code">&gt;!&gt;</code> panels, <code class="doc-inline-code">{new-tab}</code> on links, sortable table markers, and section breaks (<code class="doc-inline-code">---</code>, <code class="doc-inline-code">---xl</code>, etc.). This is done so that Markdig does not interpret our custom syntax as plain markdown.</li>
+        <li><strong>Markdig</strong> — The markdown (and the HTML we injected) is passed to Markdig with <em>advanced extensions</em> enabled (tables, task lists, etc.) and raw HTML allowed. Markdig outputs standard HTML for headings, paragraphs, lists, links, and tables.</li>
+        <li><strong>Post-processing</strong> — The HTML is then adjusted: GOV.UK CSS classes are applied to headings, paragraphs, and lists; heading IDs are added for “On this page” links; sortable tables are wrapped for the JavaScript module; and any remaining link modifiers (e.g. open in new tab) are applied.</li>
+      </ol>
+      <p class="govuk-body">The public API for this is <code class="doc-inline-code">GovUkMarkdownHelper.ToGovUkHtml(markdown)</code>. If processing fails, a styled error message is returned instead of raw HTML so authors can see that something went wrong. For more on the GOV.UK classes and shortcodes, see the other documentation pages (e.g. <a class="govuk-link" href="/documentation/panel-component">Panel component</a>, <a class="govuk-link" href="/documentation/tables">Tables</a>).</p>
+    </section>
+
+    <!-- ── Quick reference ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Quick reference</h2>
+
+      <table class="doc-table">
+        <thead>
+          <tr><th>What you type</th><th>What it produces</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code"># Heading</code></td><td>Extra large heading (h1, govuk-heading-xl)</td></tr>
+          <tr><td><code class="doc-inline-code">## Heading</code></td><td>Large heading (h2, govuk-heading-l)</td></tr>
+          <tr><td><code class="doc-inline-code">### Heading</code></td><td>Medium heading (h3, govuk-heading-m)</td></tr>
+          <tr><td><code class="doc-inline-code">#### Heading</code></td><td>Small heading (h4, govuk-heading-s)</td></tr>
+          <tr><td><code class="doc-inline-code">Normal paragraph text</code></td><td>Body paragraph</td></tr>
+          <tr><td><code class="doc-inline-code">**bold text**</code></td><td><strong>Bold text</strong></td></tr>
+          <tr><td><code class="doc-inline-code">*italic text*</code></td><td><em>Italic text</em></td></tr>
+          <tr><td><code class="doc-inline-code">- item</code></td><td>Bullet list item</td></tr>
+          <tr><td><code class="doc-inline-code">1. item</code></td><td>Numbered list item</td></tr>
+          <tr><td><code class="doc-inline-code">[Link text](url)</code></td><td>Hyperlink</td></tr>
+          <tr><td><code class="doc-inline-code">&gt; text</code></td><td>GOV.UK inset text (blockquote)</td></tr>
+          <tr><td><code class="doc-inline-code">---</code></td><td>Horizontal section break</td></tr>
+          <tr><td><code class="doc-inline-code">&gt;x&gt; text</code></td><td>Warning panel</td></tr>
+          <tr><td><code class="doc-inline-code">&gt;!&gt; text</code></td><td>Info panel</td></tr>
+          <tr><td><code class="doc-inline-code">[panel ...]...[/panel]</code></td><td><a class="govuk-link" href="/documentation/panel-component">Expandable panel component</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Warning panel ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Warning panel</h2>
+      <p class="govuk-body doc-section__description">Use <code class="doc-inline-code">&gt;x&gt;</code> at the start of each line to create a warning panel. Consecutive lines with the same prefix are grouped into one block.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel dfe-f-panel--warning">
+            <p class="govuk-body"><strong class="govuk-!-font-weight-bold">Warning</strong></p>
+            <p class="govuk-body">Your service could be prevented from going into beta or live and even be required to be taken offline if it does not have an appropriate name.</p>
+          </div>
+        </div>
+        <div class="doc-example__code">
+          <button class="doc-copy-btn" type="button">Copy</button>
+          <pre><code>&gt;x&gt; **Warning**
+&gt;x&gt; Your service could be prevented from going into beta or live and even be
+&gt;x&gt; required to be taken offline if it does not have an appropriate name.</code></pre>
+        </div>
+      </div>
+
+      <div class="doc-note doc-note--warning">
+        <p class="govuk-body" style="margin:0">Every line of the warning block must start with <code class="doc-inline-code">&gt;x&gt; </code> (including a space after the last <code class="doc-inline-code">&gt;</code>). A blank line ends the block.</p>
+      </div>
+    </section>
+
+    <!-- ── Info panel ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Info panel</h2>
+      <p class="govuk-body doc-section__description">Use <code class="doc-inline-code">&gt;!&gt;</code> at the start of each line to create an information panel.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel dfe-f-panel--info">
+            <p class="govuk-body"><strong class="govuk-!-font-weight-bold">Note</strong></p>
+            <p class="govuk-body">This guidance applies from the point your team starts any delivery work in DfE digital, data or technology.</p>
+          </div>
+        </div>
+        <div class="doc-example__code">
+          <button class="doc-copy-btn" type="button">Copy</button>
+          <pre><code>&gt;!&gt; **Note**
+&gt;!&gt; This guidance applies from the point your team starts any delivery work
+&gt;!&gt; in DfE digital, data or technology.</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Contents list ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">On this page contents list</h2>
+      <p class="govuk-body doc-section__description">The "On this page" contents list is generated automatically from all <code class="doc-inline-code">##</code> (h2) headings in the body. You do not need to do anything — just use <code class="doc-inline-code">##</code> headings for your major sections.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Example body content</p>
+        <div class="doc-example__code">
+          <button class="doc-copy-btn" type="button">Copy</button>
+          <pre><code>## What you need to do
+
+Paragraph text here.
+
+## Why this matters
+
+More paragraph text here.
+
+## Further reading
+
+Links and resources here.</code></pre>
+        </div>
+      </div>
+
+      <p class="govuk-body">This produces a contents list with three items: "What you need to do", "Why this matters", and "Further reading", each linking to the relevant section via an anchor.</p>
+    </section>
+
+    <!-- ── Full page example ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Full page example</h2>
+      <p class="govuk-body doc-section__description">A complete example of a well-structured CMS body field combining headings, paragraphs, lists, and panels.</p>
+
+      <div class="doc-example">
+        <div class="doc-example__code">
+          <button class="doc-copy-btn" type="button">Copy</button>
+          <pre><code>## What you need to do
+
+Your service name should help users understand what the service does.
+
+- Use plain English
+- Avoid jargon and technical terms
+- Keep it short — ideally under 5 words
+
+## Why this matters
+
+A clear service name helps users find your service and understand what it does
+before they start using it.
+
+&gt;x&gt; **Warning**
+&gt;x&gt; Your service could be prevented from going into beta or live if it does
+&gt;x&gt; not have an appropriate name.
+
+## Further reading
+
+[Naming your service — GOV.UK Service Manual](https://www.gov.uk/service-manual/design/naming-your-service)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    </main>
+  </div>
+</div>

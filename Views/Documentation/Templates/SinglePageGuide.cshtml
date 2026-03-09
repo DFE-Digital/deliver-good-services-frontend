@@ -1,0 +1,51 @@
+@{
+  ViewData["Title"] = "Single page guide – Templates";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/templates">Templates</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Single page guide</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Templates</span>
+        <h1 class="govuk-heading-l doc-content__title">Single page guide</h1>
+        <p class="doc-content__lead">One-page guidance with a single body. Supports review dates, phase tags, related content, and optional collection membership.</p>
+      </div>
+      <section class="doc-section">
+        <h2 class="doc-section__title">When to use</h2>
+        <p class="govuk-body">Use a <strong>Single page guide</strong> when the guidance fits on one page (no multi-step flow). It has a title, slug, meta description, and one rich-text body. Optionally attach it to a collection, add phase tags for filtering, and record last/next review dates and review comments for governance.</p>
+      </section>
+      <section class="doc-section">
+        <h2 class="doc-section__title">Fields</h2>
+        <table class="govuk-table doc-table">
+          <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>title</td><td>String (max 60)</td><td>Required, unique.</td></tr>
+            <tr><td>metaDescription</td><td>Text (max 240)</td><td>Required.</td></tr>
+            <tr><td>slug</td><td>UID (from title)</td><td>Required.</td></tr>
+            <tr><td>body</td><td>Rich text</td><td>Required. Main content (markdown).</td></tr>
+            <tr><td>reviewComments</td><td>Text</td><td>Optional. Internal review notes.</td></tr>
+            <tr><td>lastReviewDate</td><td>Date</td><td>Optional.</td></tr>
+            <tr><td>lastReviewBy</td><td>Relation (User)</td><td>Optional. User who last reviewed.</td></tr>
+            <tr><td>nextReviewDate</td><td>Date</td><td>Optional.</td></tr>
+            <tr><td>phaseTag</td><td>Relation (Tags phase)</td><td>Optional.</td></tr>
+            <tr><td>relatedContent</td><td>Component (content.related-content)</td><td>Repeatable.</td></tr>
+            <tr><td>userNeeds</td><td>Component (content.user-need)</td><td>Repeatable.</td></tr>
+            <tr><td>applicable_phases</td><td>Relation (Phase)</td><td>Many-to-many. For phase page listing.</td></tr>
+            <tr><td>collection</td><td>Relation (Collection)</td><td>Many-to-one. Optional collection.</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>

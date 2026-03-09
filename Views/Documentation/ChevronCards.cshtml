@@ -1,0 +1,369 @@
+@{
+  ViewData["Title"] = "Card list – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/components">Components</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Card list</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+@{
+  var sampleItems = new[]
+  {
+    new { Title = "Benefits", Description = "Includes eligibility, appeals, tax credits and Universal Credit.", Href = "/benefits", OpenInNewTab = false },
+    new { Title = "Births, deaths, marriages and care", Description = "Parenting, civil partnerships, divorce and Lasting Power of Attorney.", Href = "/births-deaths-marriages", OpenInNewTab = false },
+    new { Title = "Business and self-employed", Description = "Tools and guidance for businesses.", Href = "/business", OpenInNewTab = false }
+  };
+
+  // ── Code example strings ──────────────────────────────────────────────────
+  var variantDefaultRazor = @"@await Html.PartialAsync(""_ChevronCards"", new ViewDataDictionary(ViewData)
+{
+  { ""Heading"", ""Services and information"" },
+  { ""Items"", items }
+})";
+  var variantDefaultMarkdown = @"[chevron-cards heading=""Services and information""]
+[card title=""Benefits"" description=""Includes eligibility, appeals, tax credits and Universal Credit."" href=""/benefits""]
+[card title=""Births, deaths, marriages and care"" description=""Parenting, civil partnerships, divorce and Lasting Power of Attorney."" href=""/births-deaths-marriages""]
+[card title=""Business and self-employed"" description=""Tools and guidance for businesses."" href=""/business""]
+[/chevron-cards]";
+  var variantDefaultHtml = @"<h2 class=""govuk-heading-l govuk-!-margin-bottom-6"">Services and information</h2>
+<ul class=""dfe-card-list"">
+  <li class=""dfe-card-list__item""><a href=""/benefits"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Benefits</span><span class=""dfe-card-list__description govuk-body"">Includes eligibility, appeals, tax credits and Universal Credit.</span></a></li>
+  <li class=""dfe-card-list__item""><a href=""/births-deaths-marriages"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Births, deaths, marriages and care</span><span class=""dfe-card-list__description govuk-body"">Parenting, civil partnerships, divorce and Lasting Power of Attorney.</span></a></li>
+  <li class=""dfe-card-list__item""><a href=""/business"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Business and self-employed</span><span class=""dfe-card-list__description govuk-body"">Tools and guidance for businesses.</span></a></li>
+</ul>";
+
+  var variantNoHeadingRazor = @"@await Html.PartialAsync(""_ChevronCards"", new ViewDataDictionary(ViewData) { { ""Items"", items } })";
+  var variantNoHeadingMarkdown = @"[chevron-cards]
+[card title=""Benefits"" description=""Includes eligibility, appeals and Universal Credit."" href=""/benefits""]
+[card title=""Business and self-employed"" description=""Tools and guidance for businesses."" href=""/business""]
+[/chevron-cards]";
+  var variantNoHeadingHtml = @"<ul class=""dfe-card-list"">
+  <li class=""dfe-card-list__item""><a href=""/benefits"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Benefits</span><span class=""dfe-card-list__description govuk-body"">Includes eligibility, appeals and Universal Credit.</span></a></li>
+  <li class=""dfe-card-list__item""><a href=""/business"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Business and self-employed</span><span class=""dfe-card-list__description govuk-body"">Tools and guidance for businesses.</span></a></li>
+</ul>";
+
+  var variantExternalRazor = @"var items = new[] {
+  new { Title = ""Design Manual"", Description = ""Standards and guidance for DfE design."", Href = ""https://design.education.gov.uk/"", OpenInNewTab = true },
+  new { Title = ""Find and Use Standards"", Description = ""Digital, data and technology standards."", Href = ""https://standards.education.gov.uk/"", OpenInNewTab = true }
+};
+@await Html.PartialAsync(""_ChevronCards"", new ViewDataDictionary(ViewData) { { ""Heading"", ""External resources"" }, { ""Items"", items } })";
+  var variantExternalMarkdown = @"[chevron-cards heading=""External resources""]
+[card title=""Design Manual"" description=""Standards and guidance for DfE design."" href=""https://design.education.gov.uk/"" external=""true""]
+[card title=""Find and Use Standards"" description=""Digital, data and technology standards."" href=""https://standards.education.gov.uk/"" external=""true""]
+[/chevron-cards]";
+  var variantExternalHtml = @"<h2 class=""govuk-heading-l govuk-!-margin-bottom-6"">External resources</h2>
+<ul class=""dfe-card-list"">
+  <li class=""dfe-card-list__item""><a href=""https://design.education.gov.uk/"" class=""dfe-card-list__link govuk-link"" target=""_blank"" rel=""noopener noreferrer""><span class=""dfe-card-list__heading govuk-heading-s"">Design Manual</span><span class=""dfe-card-list__description govuk-body"">Standards and guidance for DfE design.</span></a></li>
+  <li class=""dfe-card-list__item""><a href=""https://standards.education.gov.uk/"" class=""dfe-card-list__link govuk-link"" target=""_blank"" rel=""noopener noreferrer""><span class=""dfe-card-list__heading govuk-heading-s"">Find and Use Standards</span><span class=""dfe-card-list__description govuk-body"">Digital, data and technology standards.</span></a></li>
+</ul>";
+
+  var variant2ColRazor = @"@await Html.PartialAsync(""_ChevronCards"", new ViewDataDictionary(ViewData)
+{
+  { ""Heading"", ""Services and information"" },
+  { ""Items"", items },
+  { ""Columns"", 2 }
+})";
+  var variant2ColMarkdown = @"[chevron-cards heading=""Services and information"" columns=""2""]
+[card title=""Benefits"" description=""Includes eligibility, appeals and Universal Credit."" href=""/benefits""]
+[card title=""Births, deaths, marriages"" description=""Parenting, civil partnerships, divorce."" href=""/births-deaths-marriages""]
+[card title=""Business and self-employed"" description=""Tools and guidance for businesses."" href=""/business""]
+[card title=""Childcare and parenting"" description=""Childcare, schools and benefits for children."" href=""/childcare""]
+[/chevron-cards]";
+  var variant2ColHtml = @"<h2 class=""govuk-heading-l govuk-!-margin-bottom-6"">Services and information</h2>
+<ul class=""dfe-card-list dfe-card-list--2-col"">
+  <li class=""dfe-card-list__item""><a href=""/benefits"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Benefits</span><span class=""dfe-card-list__description govuk-body"">...</span></a></li>
+  <li class=""dfe-card-list__item""><a href=""/births-deaths-marriages"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Births, deaths, marriages</span><span class=""dfe-card-list__description govuk-body"">...</span></a></li>
+</ul>";
+
+  var variant3ColRazor = @"@await Html.PartialAsync(""_ChevronCards"", new ViewDataDictionary(ViewData)
+{
+  { ""Heading"", ""Services and information"" },
+  { ""Items"", items },
+  { ""Columns"", 3 }
+})";
+  var variant3ColMarkdown = @"[chevron-cards heading=""Services and information"" columns=""3""]
+[card title=""Benefits"" description=""Eligibility, appeals, Universal Credit."" href=""/benefits""]
+[card title=""Births, deaths, marriages"" description=""Parenting, civil partnerships."" href=""/births-deaths-marriages""]
+[card title=""Business"" description=""Tools and guidance."" href=""/business""]
+[/chevron-cards]";
+  var variant3ColHtml = @"<h2 class=""govuk-heading-l govuk-!-margin-bottom-6"">Services and information</h2>
+<ul class=""dfe-card-list dfe-card-list--3-col"">
+  <li class=""dfe-card-list__item""><a href=""/benefits"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Benefits</span><span class=""dfe-card-list__description govuk-body"">...</span></a></li>
+  <li class=""dfe-card-list__item""><a href=""/births-deaths-marriages"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Births, deaths, marriages</span><span class=""dfe-card-list__description govuk-body"">...</span></a></li>
+  <li class=""dfe-card-list__item""><a href=""/business"" class=""dfe-card-list__link govuk-link""><span class=""dfe-card-list__heading govuk-heading-s"">Business</span><span class=""dfe-card-list__description govuk-body"">...</span></a></li>
+</ul>";
+
+  // Action list (chevroncard ordered / unordered)
+  var actionListItems = new[]
+  {
+    new { Title = "1. Understand users and their needs", Href = "/guidance/guides/applying-the-service-standard/understand-users-and-their-needs", OpenInNewTab = false },
+    new { Title = "2. Solve a whole problem for users", Href = "/guidance/guides/applying-the-service-standard/solve-a-whole-problem-for-users", OpenInNewTab = false },
+    new { Title = "3. Provide a joined up experience across all channels", Href = "/service-standard/3-join-up-across-channels", OpenInNewTab = false }
+  };
+  var actionListOrderedRazor = @"@await Html.PartialAsync(""_ActionList"", new ViewDataDictionary(ViewData) { { ""Items"", items }, { ""Ordered"", true } })";
+  var actionListOrderedMarkdown = @"[chevroncard ordered]
+[card title=""1. Understand users and their needs"" href=""/guidance/guides/applying-the-service-standard/understand-users-and-their-needs""]
+[card title=""2. Solve a whole problem for users"" href=""/guidance/guides/applying-the-service-standard/solve-a-whole-problem-for-users""]
+[card title=""3. Provide a joined up experience across all channels"" href=""/service-standard/3-join-up-across-channels""]
+[/chevroncard]";
+  var actionListOrderedHtml = @"<ol class=""govuk-list dfe-action-list"">
+  <li>
+    <a href=""/guidance/guides/applying-the-service-standard/understand-users-and-their-needs"" class=""govuk-link govuk-link--no-visited-state"">1. Understand users and their needs
+    <svg class=""chevron dfe-icon dfe-icon__chevron-right"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" aria-hidden=""true"" focusable=""false"">
+      <path d=""M15.5 12a1 1 0 0 1-.29.71l-5 5a1 1 0 0 1-1.42-1.42l4.3-4.29-4.3-4.29a1 1 0 0 1 1.42-1.42l5 5a1 1 0 0 1 .29.71z""></path>
+    </svg>
+    </a>
+  </li>
+  <li>
+    <a href=""/guidance/guides/applying-the-service-standard/solve-a-whole-problem-for-users"" class=""govuk-link govuk-link--no-visited-state"">2. Solve a whole problem for users
+    <svg class=""chevron dfe-icon dfe-icon__chevron-right"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" aria-hidden=""true"" focusable=""false"">
+      <path d=""M15.5 12a1 1 0 0 1-.29.71l-5 5a1 1 0 0 1-1.42-1.42l4.3-4.29-4.3-4.29a1 1 0 0 1 1.42-1.42l5 5a1 1 0 0 1 .29.71z""></path>
+    </svg>
+    </a>
+  </li>
+</ol>";
+  var actionListUnorderedRazor = @"@await Html.PartialAsync(""_ActionList"", new ViewDataDictionary(ViewData) { { ""Items"", items }, { ""Ordered"", false } })";
+  var actionListUnorderedMarkdown = @"[chevroncard unordered]
+[card title=""Understand users and their needs"" href=""/guidance/guides/applying-the-service-standard/understand-users-and-their-needs""]
+[card title=""Solve a whole problem for users"" href=""/guidance/guides/applying-the-service-standard/solve-a-whole-problem-for-users""]
+[/chevroncard]";
+  var actionListUnorderedHtml = @"<ul class=""govuk-list dfe-action-list"">
+  <li>
+    <a href=""/guidance/guides/applying-the-service-standard/understand-users-and-their-needs"" class=""govuk-link govuk-link--no-visited-state"">Understand users and their needs
+    <svg class=""chevron dfe-icon dfe-icon__chevron-right"" xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" aria-hidden=""true"" focusable=""false"">
+      <path d=""M15.5 12a1 1 0 0 1-.29.71l-5 5a1 1 0 0 1-1.42-1.42l4.3-4.29-4.3-4.29a1 1 0 0 1 1.42-1.42l5 5a1 1 0 0 1 .29.71z""></path>
+    </svg>
+    </a>
+  </li>
+</ul>";
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Components</span>
+      <h1 class="govuk-heading-l doc-content__title">Card list</h1>
+      <p class="doc-content__lead">A simple list of fully clickable cards: each item is one link with a title and description. No chevron icon. Based on the <a href="https://components.publishing.service.gov.uk/component-guide/cards" class="govuk-link" target="_blank" rel="noopener noreferrer">GOV.UK cards component</a>. Use for “Services and information”–style navigation or any list of related links.</p>
+      <p class="govuk-body">Available as a Razor partial (<code class="doc-inline-code">_CardList</code> or legacy <code class="doc-inline-code">_ChevronCards</code>), markdown shortcode <code class="doc-inline-code">[chevron-cards]</code> or <code class="doc-inline-code">[card-list]</code>, or raw HTML. Choose a layout: single column (default), two columns, or three columns on desktop.</p>
+      <p class="govuk-body">For a list of full-width links with a chevron icon (numbered or plain), use the <strong>action list</strong>: <code class="doc-inline-code">[chevroncard ordered]</code> or <code class="doc-inline-code">[chevroncard unordered]</code> (see below).</p>
+    </div>
+
+    <!-- Variant: Default (with heading, single column) -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">With section heading (default)</h2>
+      <p class="govuk-body doc-section__description">Single-column list with an optional <code class="doc-inline-code">h2</code> above the cards. Each card is a single link; the whole card is clickable.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          @await Html.PartialAsync("_ChevronCards", new ViewDataDictionary(ViewData) { { "Heading", "Services and information" }, { "Items", sampleItems } })
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="v1-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v1-md">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v1-html">HTML</button>
+          </div>
+          <div id="v1-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantDefaultRazor))</code></pre></div>
+          <div id="v1-md" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantDefaultMarkdown))</code></pre></div>
+          <div id="v1-html" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantDefaultHtml))</code></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Variant: Without heading -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Without section heading</h2>
+      <p class="govuk-body doc-section__description">Omit the <code class="doc-inline-code">Heading</code> parameter (or <code class="doc-inline-code">heading</code> in markdown) for a list with no top border on the first card. Use when the page context already provides a heading.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          @await Html.PartialAsync("_ChevronCards", new ViewDataDictionary(ViewData) { { "Items", sampleItems.Take(2) } })
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="v2-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v2-md">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v2-html">HTML</button>
+          </div>
+          <div id="v2-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantNoHeadingRazor))</code></pre></div>
+          <div id="v2-md" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantNoHeadingMarkdown))</code></pre></div>
+          <div id="v2-html" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantNoHeadingHtml))</code></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Variant: External links -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">External links (open in new tab)</h2>
+      <p class="govuk-body doc-section__description">Set <code class="doc-inline-code">OpenInNewTab = true</code> per item (Razor) or <code class="doc-inline-code">external="true"</code> on each <code class="doc-inline-code">[card]</code> in markdown. Links get <code class="doc-inline-code">target="_blank"</code> and <code class="doc-inline-code">rel="noopener noreferrer"</code>. Consider adding “(opens in new tab)” in the description or using the new-tab link pattern for screen readers.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          @{
+            var externalItems = new[]
+            {
+              new { Title = "Design Manual", Description = "Standards and guidance for DfE design.", Href = "https://design.education.gov.uk/", OpenInNewTab = true },
+              new { Title = "Find and Use Standards", Description = "Digital, data and technology standards.", Href = "https://standards.education.gov.uk/", OpenInNewTab = true }
+            };
+          }
+          @await Html.PartialAsync("_ChevronCards", new ViewDataDictionary(ViewData) { { "Heading", "External resources" }, { "Items", externalItems } })
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="v3-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v3-md">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v3-html">HTML</button>
+          </div>
+          <div id="v3-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantExternalRazor))</code></pre></div>
+          <div id="v3-md" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantExternalMarkdown))</code></pre></div>
+          <div id="v3-html" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variantExternalHtml))</code></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Variant: Two-column layout -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Two-column layout</h2>
+      <p class="govuk-body doc-section__description">Set <code class="doc-inline-code">Columns = 2</code> (Razor) or <code class="doc-inline-code">columns="2"</code> on the shortcode. Cards sit in two columns from tablet width (641px) up. Add class <code class="doc-inline-code">dfe-card-list--2-col</code> to the <code class="doc-inline-code">ul</code> for raw HTML.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          @{
+            var fourItems = sampleItems.Concat(new[] { new { Title = "Childcare and parenting", Description = "Childcare, schools and benefits for children.", Href = "/childcare", OpenInNewTab = false } }).ToArray();
+          }
+          @await Html.PartialAsync("_ChevronCards", new ViewDataDictionary(ViewData) { { "Heading", "Services and information" }, { "Items", fourItems }, { "Columns", 2 } })
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="v4-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v4-md">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v4-html">HTML</button>
+          </div>
+          <div id="v4-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code"><pre><code>@Html.Raw(Html.Encode(variant2ColRazor))</code></pre></div>
+          <div id="v4-md" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variant2ColMarkdown))</code></pre></div>
+          <div id="v4-html" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variant2ColHtml))</code></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Variant: Three-column layout -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Three-column layout</h2>
+      <p class="govuk-body doc-section__description">Set <code class="doc-inline-code">Columns = 3</code> (Razor) or <code class="doc-inline-code">columns="3"</code> on the shortcode. Three columns from 769px. Add class <code class="doc-inline-code">dfe-card-list--3-col</code> to the <code class="doc-inline-code">ul</code> for raw HTML.</p>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          @await Html.PartialAsync("_ChevronCards", new ViewDataDictionary(ViewData) { { "Heading", "Services and information" }, { "Items", sampleItems }, { "Columns", 3 } })
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="v5-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v5-md">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="v5-html">HTML</button>
+          </div>
+          <div id="v5-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code"><pre><code>@Html.Raw(Html.Encode(variant3ColRazor))</code></pre></div>
+          <div id="v5-md" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variant3ColMarkdown))</code></pre></div>
+          <div id="v5-html" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(variant3ColHtml))</code></pre></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action list: chevroncard ordered / unordered -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Action list (chevroncard ordered / unordered)</h2>
+      <p class="govuk-body doc-section__description">Full-width link list with a chevron icon on each item. Use <code class="doc-inline-code">[chevroncard ordered]</code> for a numbered list (<code class="doc-inline-code">ol</code>) or <code class="doc-inline-code">[chevroncard unordered]</code> for a plain list (<code class="doc-inline-code">ul</code>). Each item is a single link; no description. Available as markdown shortcode, Razor partial <code class="doc-inline-code">_ActionList</code>, or raw HTML with classes <code class="doc-inline-code">govuk-list dfe-action-list</code>.</p>
+
+      <h3 class="govuk-heading-m">Ordered (numbered)</h3>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          @await Html.PartialAsync("_ActionList", new ViewDataDictionary(ViewData) { { "Items", actionListItems }, { "Ordered", true } })
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="action-ordered-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="action-ordered-md">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="action-ordered-html">HTML</button>
+          </div>
+          <div id="action-ordered-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code"><pre><code>@Html.Raw(Html.Encode(actionListOrderedRazor))</code></pre></div>
+          <div id="action-ordered-md" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(actionListOrderedMarkdown))</code></pre></div>
+          <div id="action-ordered-html" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(actionListOrderedHtml))</code></pre></div>
+        </div>
+      </div>
+
+      <h3 class="govuk-heading-m">Unordered (plain list)</h3>
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          @await Html.PartialAsync("_ActionList", new ViewDataDictionary(ViewData) { { "Items", actionListItems.Take(2).Select(x => new { Title = x.Title.Replace("1. ", "").Replace("2. ", ""), x.Href, x.OpenInNewTab }) }, { "Ordered", false } })
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="action-unordered-razor">Razor</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="action-unordered-md">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="action-unordered-html">HTML</button>
+          </div>
+          <div id="action-unordered-razor" class="doc-tab-panel doc-tab-panel--active doc-example__code"><pre><code>@Html.Raw(Html.Encode(actionListUnorderedRazor))</code></pre></div>
+          <div id="action-unordered-md" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(actionListUnorderedMarkdown))</code></pre></div>
+          <div id="action-unordered-html" class="doc-tab-panel doc-example__code"><pre><code>@Html.Raw(Html.Encode(actionListUnorderedHtml))</code></pre></div>
+        </div>
+      </div>
+
+      <p class="govuk-body"><strong>Action list Razor</strong> <code class="doc-inline-code">_ActionList</code> ViewData: <code class="doc-inline-code">Items</code> (each item: <code class="doc-inline-code">Title</code>, <code class="doc-inline-code">Href</code>, optional <code class="doc-inline-code">OpenInNewTab</code>), <code class="doc-inline-code">Ordered</code> (bool, default true). <strong>Markdown</strong>: <code class="doc-inline-code">[chevroncard ordered]</code> or <code class="doc-inline-code">[chevroncard unordered]</code> with <code class="doc-inline-code">[card title="..." href="..." external="true"]</code> lines.</p>
+    </section>
+
+    <!-- Parameters and CSS reference -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Parameters</h2>
+      <p class="govuk-body"><strong>Razor partial</strong> <code class="doc-inline-code">_CardList</code> (or legacy <code class="doc-inline-code">_ChevronCards</code>) ViewData:</p>
+      <table class="doc-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">Heading</code></td><td>string</td><td>No</td><td>Section heading above the list</td></tr>
+          <tr><td><code class="doc-inline-code">Items</code></td><td>IEnumerable&lt;dynamic&gt;</td><td>Yes</td><td>Each item: <code class="doc-inline-code">Title</code>, <code class="doc-inline-code">Description</code>, <code class="doc-inline-code">Href</code>, and optionally <code class="doc-inline-code">OpenInNewTab</code> (bool)</td></tr>
+          <tr><td><code class="doc-inline-code">Columns</code></td><td>int</td><td>No</td><td>1 (default), 2, or 3 for layout</td></tr>
+        </tbody>
+      </table>
+      <p class="govuk-body" style="margin-top:12px"><strong>Markdown</strong> <code class="doc-inline-code">[chevron-cards]</code> or <code class="doc-inline-code">[card-list]</code>: <code class="doc-inline-code">heading="..."</code>, <code class="doc-inline-code">columns="2"</code> or <code class="doc-inline-code">columns="3"</code>. Each <code class="doc-inline-code">[card title="..." description="..." href="..." external="true"]</code>.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">CSS class reference</h2>
+      <table class="doc-table">
+        <thead><tr><th>Class</th><th>Element</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">dfe-card-list</code></td><td>ul</td><td>Unordered list container</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-card-list--2-col</code></td><td>ul</td><td>Two-column grid from 641px</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-card-list--3-col</code></td><td>ul</td><td>Three-column grid from 769px</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-card-list__item</code></td><td>li</td><td>List item; top border separator</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-card-list__link</code></td><td>a</td><td>Whole card is one link; fully clickable</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-card-list__heading</code></td><td>span</td><td>Card title (blue link style)</td></tr>
+          <tr><td><code class="doc-inline-code">dfe-card-list__description</code></td><td>span</td><td>Card description text</td></tr>
+        </tbody>
+      </table>
+      <p class="govuk-body" style="margin-top:16px"><strong>Action list</strong> (<code class="doc-inline-code">[chevroncard ordered]</code> / <code class="doc-inline-code">[chevroncard unordered]</code>):</p>
+      <table class="doc-table">
+        <thead><tr><th>Class</th><th>Element</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code class="doc-inline-code">govuk-list dfe-action-list</code></td><td>ol / ul</td><td>List container; full-width link list with chevron</td></tr>
+          <tr><td><code class="doc-inline-code">chevron dfe-icon dfe-icon__chevron-right</code></td><td>svg</td><td>Chevron icon on each link</td></tr>
+        </tbody>
+      </table>
+    </section>
+    </main>
+  </div>
+</div>

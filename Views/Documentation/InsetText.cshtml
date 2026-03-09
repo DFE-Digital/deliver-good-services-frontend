@@ -1,0 +1,132 @@
+@{
+  ViewData["Title"] = "Inset text – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/styles">Styles</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Inset text</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Styles</span>
+      <h1 class="govuk-heading-l doc-content__title">Inset text</h1>
+      <p class="doc-content__lead">Use inset text to differentiate a block of content from the surrounding text — for example, a quote, a legal notice, or supplementary information.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">Standard markdown blockquote syntax (<code class="doc-inline-code">&gt; text</code>) automatically renders as <a href="https://design-system.service.gov.uk/components/inset-text/" class="govuk-link" rel="noopener noreferrer">GOV.UK inset text</a>. For warning and information callouts, use the <a href="/documentation/markdown" class="govuk-link" rel="noopener noreferrer">custom panel syntax</a> instead.</p>
+    </div>
+
+    <!-- ── Standard inset text ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Inset text</h2>
+      <p class="govuk-body doc-section__description">Use a <code class="doc-inline-code">&gt;</code> prefix on each line of the block. Multiple lines in the same block are joined into a single paragraph.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <blockquote class="govuk-inset-text">
+            <p class="govuk-body">It can take up to 8 weeks to register a lasting power of attorney if there are no mistakes in the application.</p>
+          </blockquote>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-inset-markdown">Markdown</button>
+            <button class="doc-tab" role="tab" aria-selected="false" data-target="ex-inset-html">HTML</button>
+          </div>
+          <div id="ex-inset-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&gt; It can take up to 8 weeks to register a lasting power of attorney
+&gt; if there are no mistakes in the application.</code></pre>
+          </div>
+          <div id="ex-inset-html" class="doc-tab-panel doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&lt;blockquote class="govuk-inset-text"&gt;
+  &lt;p class="govuk-body"&gt;It can take up to 8 weeks to register a lasting power of attorney
+  if there are no mistakes in the application.&lt;/p&gt;
+&lt;/blockquote&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Multi-paragraph inset ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Multi-paragraph inset text</h2>
+      <p class="govuk-body doc-section__description">Separate paragraphs within an inset block with a blank line that also starts with <code class="doc-inline-code">&gt;</code>.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <blockquote class="govuk-inset-text">
+            <p class="govuk-body">Your service must meet the GOV.UK Service Standard before it can move to public beta.</p>
+            <p class="govuk-body">Contact your service assessment team at least 6 weeks before your planned assessment date.</p>
+          </blockquote>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-multi-markdown">Markdown</button>
+          </div>
+          <div id="ex-multi-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&gt; Your service must meet the GOV.UK Service Standard before it can move to public beta.
+&gt;
+&gt; Contact your service assessment team at least 6 weeks before your planned assessment date.</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Warning and info panels ── -->
+    <section class="doc-section">
+      <h2 class="doc-section__title">Warning and information panels</h2>
+      <p class="govuk-body doc-section__description">For stronger callouts — warnings and informational notices — use the custom panel syntax instead of a blockquote.</p>
+
+      <div class="doc-example">
+        <p class="doc-example__label">Preview</p>
+        <div class="doc-example__preview">
+          <div class="dfe-f-panel dfe-f-panel--warning">
+            <p class="govuk-body"><strong class="govuk-!-font-weight-bold">Warning</strong></p>
+            <p class="govuk-body">Your service could be prevented from going into beta or live if it does not have an appropriate name.</p>
+          </div>
+          <div class="dfe-f-panel dfe-f-panel--info" style="margin-top:16px">
+            <p class="govuk-body"><strong class="govuk-!-font-weight-bold">Note</strong></p>
+            <p class="govuk-body">This guidance applies from the point your team starts any delivery work.</p>
+          </div>
+        </div>
+        <div class="doc-example__tabs-wrapper">
+          <div class="doc-tabs" role="tablist" aria-label="Code examples">
+            <button class="doc-tab doc-tab--active" role="tab" aria-selected="true" data-target="ex-panels-markdown">Markdown</button>
+          </div>
+          <div id="ex-panels-markdown" class="doc-tab-panel doc-tab-panel--active doc-example__code">
+            <button class="doc-copy-btn" type="button">Copy</button>
+            <pre><code>&gt;x&gt; **Warning**
+&gt;x&gt; Your service could be prevented from going into beta or live if it does not have an appropriate name.
+
+&gt;!&gt; **Note**
+&gt;!&gt; This guidance applies from the point your team starts any delivery work.</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <p class="govuk-body">See the <a href="/documentation/markdown" class="govuk-link" rel="noopener noreferrer">Markdown syntax</a> page for the full panel reference.</p>
+    </section>
+
+    </main>
+  </div>
+</div>

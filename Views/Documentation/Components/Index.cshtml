@@ -1,0 +1,35 @@
+@{
+  ViewData["Title"] = "Components";
+}
+
+@section Styles { <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" /> }
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Components</li>
+}
+@section Scripts { <script src="/js/documentation.js"></script> }
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">Components</span>
+        <h1 class="govuk-heading-l doc-content__title">Components</h1>
+        <p class="doc-content__lead">Markdown shortcodes and reusable UI components used in the CMS and frontend.</p>
+      </div>
+      <div class="doc-card-grid">
+        <a href="/documentation/components/markdown" class="doc-card"><span class="doc-card__category">Components</span><h3 class="doc-card__title">Markdown syntax</h3><p class="doc-card__description">Headings, lists, panels, and shortcode reference.</p></a>
+        <a href="/documentation/components/action-link" class="doc-card"><span class="doc-card__category">Components</span><h3 class="doc-card__title">Action link</h3><p class="doc-card__description">Prominent link with arrow.</p></a>
+        <a href="/documentation/components/panel" class="doc-card"><span class="doc-card__category">Components</span><h3 class="doc-card__title">Panel</h3><p class="doc-card__description">Expandable panel with colour variants.</p></a>
+        <a href="/documentation/components/pill" class="doc-card"><span class="doc-card__category">Components</span><h3 class="doc-card__title">Pill</h3><p class="doc-card__description">Phase or status labels.</p></a>
+        <a href="/documentation/components/cards" class="doc-card"><span class="doc-card__category">Components</span><h3 class="doc-card__title">Cards</h3><p class="doc-card__description">Metric and stat cards.</p></a>
+        <a href="/documentation/components/card-list" class="doc-card"><span class="doc-card__category">Components</span><h3 class="doc-card__title">Card list</h3><p class="doc-card__description">Clickable card list layout.</p></a>
+        <a href="/documentation/components/related-content" class="doc-card"><span class="doc-card__category">Components</span><h3 class="doc-card__title">Related content</h3><p class="doc-card__description">Sidebar related links and nav.</p></a>
+        <a href="/documentation/components/phase-components" class="doc-card"><span class="doc-card__category">Components</span><h3 class="doc-card__title">Delivery phase components</h3><p class="doc-card__description">Phase picker, nav, criteria, task panels.</p></a>
+      </div>
+    </main>
+  </div>
+</div>

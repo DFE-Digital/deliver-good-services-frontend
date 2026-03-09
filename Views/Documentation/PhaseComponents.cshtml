@@ -1,0 +1,303 @@
+@{
+  ViewData["Title"] = "Delivery phase components – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/components">Components</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Delivery phase components</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+  <script src="/js/dfe-f-panel-container.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Components</span>
+      <h1 class="govuk-heading-l doc-content__title">Delivery phase components</h1>
+      <p class="doc-content__lead">Copy-paste HTML snippets for phase picker, phase nav, phase header with meta stats, entry/exit criteria cards, key activities list, and expandable task panels. CSS and JS live in the core design system (<code class="doc-inline-code">dfe-f-panel-container.css</code>, <code class="doc-inline-code">dfe-f-panel-container.js</code>).</p>
+    </div>
+
+    <p class="govuk-body">These components are used on delivery phase overview and detail pages. Include <code class="doc-inline-code">dfe-f-panel-container.css</code> and <code class="doc-inline-code">dfe-f-panel-container.js</code> in your layout; then drop in the HTML snippets below.</p>
+
+    <!-- ── 1. Phase picker ───────────────────────────────────────────────────── -->
+    <section class="doc-section govuk-!-margin-top-8" id="phase-picker">
+      <h2 class="govuk-heading-m doc-section__title">Phase picker (<code class="doc-inline-code">dfe-f-phase-picker</code>)</h2>
+      <p class="govuk-body">Tab-style selector for switching between delivery phases on an overview page. One card is active; clicking another moves the active state. On viewports under 768px the picker becomes a collapsible list: a single button shows the active phase (or “Choose phase”) and expands to show all phases when activated. The toggle is injected by <code class="doc-inline-code">dfe-f-panel-container.js</code> and uses <code class="doc-inline-code">aria-expanded</code> and <code class="doc-inline-code">aria-controls</code> for accessibility.</p>
+      <div class="doc-example">
+        <div class="doc-example__preview">
+        <div class="dfe-f-phase-picker">
+          <button type="button" class="dfe-f-phase-card" data-phase="explore"><span class="dfe-f-phase-card__name">Explore</span><span class="dfe-f-phase-card__hint">Frame the problem</span></button>
+          <button type="button" class="dfe-f-phase-card" data-phase="triage"><span class="dfe-f-phase-card__name">Triage</span><span class="dfe-f-phase-card__hint">Assess and route</span></button>
+          <button type="button" class="dfe-f-phase-card dfe-f-phase-card--active" data-phase="discovery"><span class="dfe-f-phase-card__name">Discovery</span><span class="dfe-f-phase-card__hint">Understand the problem</span></button>
+          <button type="button" class="dfe-f-phase-card" data-phase="alpha"><span class="dfe-f-phase-card__name">Alpha</span><span class="dfe-f-phase-card__hint">Test and prove</span></button>
+          <button type="button" class="dfe-f-phase-card" data-phase="beta"><span class="dfe-f-phase-card__name">Beta</span><span class="dfe-f-phase-card__hint">Build and iterate</span></button>
+          <button type="button" class="dfe-f-phase-card" data-phase="live"><span class="dfe-f-phase-card__name">Live</span><span class="dfe-f-phase-card__hint">Operate and improve</span></button>
+          <button type="button" class="dfe-f-phase-card" data-phase="retire"><span class="dfe-f-phase-card__name">Retire</span><span class="dfe-f-phase-card__hint">Decommission safely</span></button>
+        </div>
+        </div>
+        <div class="doc-example__code"><pre><code>&lt;div class="dfe-f-phase-picker"&gt;
+  &lt;button type="button" class="dfe-f-phase-card" data-phase="explore"&gt;&lt;span class="dfe-f-phase-card__name"&gt;Explore&lt;/span&gt;&lt;span class="dfe-f-phase-card__hint"&gt;Frame the problem&lt;/span&gt;&lt;/button&gt;
+  &lt;button type="button" class="dfe-f-phase-card" data-phase="triage"&gt;&lt;span class="dfe-f-phase-card__name"&gt;Triage&lt;/span&gt;&lt;span class="dfe-f-phase-card__hint"&gt;Assess and route&lt;/span&gt;&lt;/button&gt;
+  &lt;button type="button" class="dfe-f-phase-card dfe-f-phase-card--active" data-phase="discovery"&gt;&lt;span class="dfe-f-phase-card__name"&gt;Discovery&lt;/span&gt;&lt;span class="dfe-f-phase-card__hint"&gt;Understand the problem&lt;/span&gt;&lt;/button&gt;
+  &lt;button type="button" class="dfe-f-phase-card" data-phase="alpha"&gt;&lt;span class="dfe-f-phase-card__name"&gt;Alpha&lt;/span&gt;&lt;span class="dfe-f-phase-card__hint"&gt;Test and prove&lt;/span&gt;&lt;/button&gt;
+  &lt;button type="button" class="dfe-f-phase-card" data-phase="beta"&gt;&lt;span class="dfe-f-phase-card__name"&gt;Beta&lt;/span&gt;&lt;span class="dfe-f-phase-card__hint"&gt;Build and iterate&lt;/span&gt;&lt;/button&gt;
+  &lt;button type="button" class="dfe-f-phase-card" data-phase="live"&gt;&lt;span class="dfe-f-phase-card__name"&gt;Live&lt;/span&gt;&lt;span class="dfe-f-phase-card__hint"&gt;Operate and improve&lt;/span&gt;&lt;/button&gt;
+  &lt;button type="button" class="dfe-f-phase-card" data-phase="retire"&gt;&lt;span class="dfe-f-phase-card__name"&gt;Retire&lt;/span&gt;&lt;span class="dfe-f-phase-card__hint"&gt;Decommission safely&lt;/span&gt;&lt;/button&gt;
+&lt;/div&gt;</code></pre></div>
+      </div>
+    </section>
+
+    <!-- ── 2. Phase nav bar ────────────────────────────────────────────────── -->
+    <section class="doc-section govuk-!-margin-top-8" id="phase-nav">
+      <h2 class="govuk-heading-m doc-section__title">Phase nav bar (<code class="doc-inline-code">dfe-f-phase-nav</code>)</h2>
+      <p class="govuk-body">Horizontal navigation between phases on detail pages. Current phase uses <code class="doc-inline-code">dfe-f-phase-nav__item--current</code> plus a phase modifier (e.g. <code class="doc-inline-code">dfe-f-phase-nav__item--discovery</code>) for the coloured underline. On viewports under 768px the nav becomes a collapsible list: a “Phases” (or current phase name) button expands to show all phase links. The toggle is injected by <code class="doc-inline-code">dfe-f-panel-container.js</code> with <code class="doc-inline-code">aria-expanded</code>, <code class="doc-inline-code">aria-controls</code> and an <code class="doc-inline-code">aria-label</code> that toggles between “Show delivery phases” and “Hide delivery phases”.</p>
+      <div class="doc-example">
+        <div class="doc-example__preview doc-example__preview--shaded" style="padding: 0;">
+        <nav class="dfe-f-phase-nav" aria-label="Delivery phases">
+          <div class="dfe-f-phase-nav__inner">
+            <span class="dfe-f-phase-nav__label">Phases</span>
+            <div class="dfe-f-phase-nav__items">
+              <a href="#" class="dfe-f-phase-nav__item"><span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--explore"></span>Explore</a>
+              <a href="#" class="dfe-f-phase-nav__item"><span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--triage"></span>Triage</a>
+              <a href="#" class="dfe-f-phase-nav__item dfe-f-phase-nav__item--discovery dfe-f-phase-nav__item--current"><span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--discovery"></span>Discovery</a>
+              <a href="#" class="dfe-f-phase-nav__item"><span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--alpha"></span>Alpha</a>
+              <a href="#" class="dfe-f-phase-nav__item"><span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--beta"></span>Beta</a>
+              <a href="#" class="dfe-f-phase-nav__item"><span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--live"></span>Live</a>
+              <a href="#" class="dfe-f-phase-nav__item"><span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--retire"></span>Retire</a>
+            </div>
+          </div>
+        </nav>
+        </div>
+        <div class="doc-example__code"><pre><code>&lt;nav class="dfe-f-phase-nav" aria-label="Delivery phases"&gt;
+  &lt;div class="dfe-f-phase-nav__inner"&gt;
+    &lt;span class="dfe-f-phase-nav__label"&gt;Phases&lt;/span&gt;
+    &lt;div class="dfe-f-phase-nav__items"&gt;
+      &lt;a href="/phases/explore" class="dfe-f-phase-nav__item"&gt;&lt;span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--explore"&gt;&lt;/span&gt;Explore&lt;/a&gt;
+      &lt;a href="/phases/triage" class="dfe-f-phase-nav__item"&gt;&lt;span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--triage"&gt;&lt;/span&gt;Triage&lt;/a&gt;
+      &lt;a href="/phases/discovery" class="dfe-f-phase-nav__item dfe-f-phase-nav__item--discovery dfe-f-phase-nav__item--current"&gt;&lt;span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--discovery"&gt;&lt;/span&gt;Discovery&lt;/a&gt;
+      &lt;a href="/phases/alpha" class="dfe-f-phase-nav__item"&gt;&lt;span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--alpha"&gt;&lt;/span&gt;Alpha&lt;/a&gt;
+      &lt;a href="/phases/beta" class="dfe-f-phase-nav__item"&gt;&lt;span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--beta"&gt;&lt;/span&gt;Beta&lt;/a&gt;
+      &lt;a href="/phases/live" class="dfe-f-phase-nav__item"&gt;&lt;span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--live"&gt;&lt;/span&gt;Live&lt;/a&gt;
+      &lt;a href="/phases/retire" class="dfe-f-phase-nav__item"&gt;&lt;span class="dfe-f-phase-nav__dot dfe-f-phase-nav__dot--retire"&gt;&lt;/span&gt;Retire&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</code></pre></div>
+      </div>
+    </section>
+
+    <!-- ── 3. Phase header + meta stats ─────────────────────────────────────── -->
+    <section class="doc-section govuk-!-margin-top-8" id="phase-header">
+      <h2 class="govuk-heading-m doc-section__title">Phase header with meta stats (<code class="doc-inline-code">dfe-f-phase-hd</code>, <code class="doc-inline-code">dfe-f-phase-hd__stats</code>)</h2>
+      <p class="govuk-body">Phase badge, title, goal text and a row of key facts (Duration, Ends with, Assessment). Badge modifier: <code class="doc-inline-code">--explore</code>, <code class="doc-inline-code">--triage</code>, <code class="doc-inline-code">--discovery</code>, <code class="doc-inline-code">--alpha</code>, <code class="doc-inline-code">--beta</code>, <code class="doc-inline-code">--live</code>, <code class="doc-inline-code">--retire</code>.</p>
+      <div class="doc-example">
+        <div class="doc-example__preview">
+        <div class="dfe-f-phase-hd" style="margin-bottom: 0;">
+          <span class="dfe-f-phase-hd__badge dfe-f-phase-hd__badge--discovery">Discovery</span>
+          <h2>Understand the problem before building anything</h2>
+          <p class="dfe-f-phase-hd__goal">Discovery is about understanding your users and the current landscape. You are not building a solution yet.</p>
+          <div class="dfe-f-phase-hd__stats">
+            <div class="dfe-f-phase-stat"><span class="dfe-f-phase-stat__label">Duration</span><span class="dfe-f-phase-stat__val">6–12 weeks</span></div>
+            <div class="dfe-f-phase-stat"><span class="dfe-f-phase-stat__label">Ends with</span><span class="dfe-f-phase-stat__val">Portfolio board decision</span></div>
+            <div class="dfe-f-phase-stat"><span class="dfe-f-phase-stat__label">Assessment</span><span class="dfe-f-phase-stat__val">Not required</span></div>
+          </div>
+        </div>
+        </div>
+        <div class="doc-example__code"><pre><code>&lt;div class="dfe-f-phase-hd"&gt;
+  &lt;span class="dfe-f-phase-hd__badge dfe-f-phase-hd__badge--discovery"&gt;Discovery&lt;/span&gt;
+  &lt;h2&gt;Understand the problem before building anything&lt;/h2&gt;
+  &lt;p class="dfe-f-phase-hd__goal"&gt;Discovery is about understanding your users and the current landscape.&lt;/p&gt;
+  &lt;div class="dfe-f-phase-hd__stats"&gt;
+    &lt;div class="dfe-f-phase-stat"&gt;&lt;span class="dfe-f-phase-stat__label"&gt;Duration&lt;/span&gt;&lt;span class="dfe-f-phase-stat__val"&gt;6–12 weeks&lt;/span&gt;&lt;/div&gt;
+    &lt;div class="dfe-f-phase-stat"&gt;&lt;span class="dfe-f-phase-stat__label"&gt;Ends with&lt;/span&gt;&lt;span class="dfe-f-phase-stat__val"&gt;Portfolio board decision&lt;/span&gt;&lt;/div&gt;
+    &lt;div class="dfe-f-phase-stat"&gt;&lt;span class="dfe-f-phase-stat__label"&gt;Assessment&lt;/span&gt;&lt;span class="dfe-f-phase-stat__val"&gt;Not required&lt;/span&gt;    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div>
+      </div>
+    </section>
+
+    <!-- ── 4. Entry / exit criteria cards ───────────────────────────────────── -->
+    <section class="doc-section govuk-!-margin-top-8" id="summary-cards">
+      <h2 class="govuk-heading-m doc-section__title">Entry / exit criteria cards (<code class="doc-inline-code">dfe-f-phase-summary-grid</code>)</h2>
+      <p class="govuk-body">Two cards side by side: entry criteria (set <code class="doc-inline-code">border-top: 4px solid var(--dfe-f-ph-discovery)</code> or the phase colour) and exit criteria (add class <code class="doc-inline-code">dfe-f-phase-summary-card--exit</code> for green top border and list styling).</p>
+      <div class="doc-example">
+        <div class="doc-example__preview">
+        <div class="dfe-f-phase-summary-grid">
+          <div class="dfe-f-phase-summary-card" style="border-top: 4px solid var(--dfe-f-ph-discovery);">
+            <div class="dfe-f-phase-summary-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h12M8 2v12"/></svg> Entry criteria</div>
+            <h3>What you need before starting</h3>
+            <ul>
+              <li>Problem area identified through Explore or Triage</li>
+              <li>SRO confirmed and engaged</li>
+              <li>Core team agreed</li>
+              <li>Time-box and budget approved</li>
+            </ul>
+          </div>
+          <div class="dfe-f-phase-summary-card dfe-f-phase-summary-card--exit">
+            <div class="dfe-f-phase-summary-card__icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="#00703c" stroke-width="1.5"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg> Exit criteria</div>
+            <h3>What you need before moving on</h3>
+            <ul>
+              <li>Discovery report written and shared</li>
+              <li>User needs documented with evidence</li>
+              <li>Discovery peer review completed</li>
+              <li>Decision recorded: proceed, pause, or stop</li>
+            </ul>
+          </div>
+        </div>
+        </div>
+        <div class="doc-example__code"><pre><code>&lt;div class="dfe-f-phase-summary-grid"&gt;
+  &lt;div class="dfe-f-phase-summary-card" style="border-top: 4px solid var(--dfe-f-ph-discovery);"&gt;
+    &lt;div class="dfe-f-phase-summary-card__icon"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"&gt;&lt;path d="M2 8h12M8 2v12"/&gt;&lt;/svg&gt; Entry criteria&lt;/div&gt;
+    &lt;h3&gt;What you need before starting&lt;/h3&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Problem area identified through Explore or Triage&lt;/li&gt;
+      &lt;li&gt;SRO confirmed and engaged&lt;/li&gt;
+      &lt;li&gt;Core team agreed&lt;/li&gt;
+      &lt;li&gt;Time-box and budget approved&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+  &lt;div class="dfe-f-phase-summary-card dfe-f-phase-summary-card--exit"&gt;
+    &lt;div class="dfe-f-phase-summary-card__icon"&gt;&lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="#00703c" stroke-width="1.5"&gt;&lt;path d="M3 8.5l3.5 3.5 6.5-7"/&gt;&lt;/svg&gt; Exit criteria&lt;/div&gt;
+    &lt;h3&gt;What you need before moving on&lt;/h3&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Discovery report written and shared&lt;/li&gt;
+      &lt;li&gt;User needs documented with evidence&lt;/li&gt;
+      &lt;li&gt;Discovery peer review completed&lt;/li&gt;
+      &lt;li&gt;Decision recorded: proceed, pause, or stop&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div>
+      </div>
+    </section>
+
+    <!-- ── 5. Key activities (numbered list) ────────────────────────────────── -->
+    <section class="doc-section govuk-!-margin-top-8" id="activities">
+      <h2 class="govuk-heading-m doc-section__title">Key activities list (<code class="doc-inline-code">dfe-f-phase-activities</code>, <code class="doc-inline-code">dfe-f-activity-list</code>)</h2>
+      <p class="govuk-body">Two-column grid of numbered activities. Optional tags: <code class="doc-inline-code">dfe-f-activity-item__tag--m</code> (Mandatory), <code class="doc-inline-code">dfe-f-activity-item__tag--g</code> (Governance).</p>
+      <div class="doc-example">
+        <div class="doc-example__preview">
+        <div class="dfe-f-phase-activities">
+          <span class="dfe-f-phase-activities__label">Key activities in Discovery</span>
+          <ul class="dfe-f-activity-list">
+            <li class="dfe-f-activity-item"><div class="dfe-f-activity-num">1</div><div class="dfe-f-activity-item__text"><span class="dfe-f-activity-item__title">Agree team and time-box <span class="dfe-f-activity-item__tag dfe-f-activity-item__tag--m">Mandatory</span></span></div></li>
+            <li class="dfe-f-activity-item"><div class="dfe-f-activity-num">2</div><div class="dfe-f-activity-item__text"><span class="dfe-f-activity-item__title">Write a discovery plan <span class="dfe-f-activity-item__tag dfe-f-activity-item__tag--m">Mandatory</span></span></div></li>
+            <li class="dfe-f-activity-item"><div class="dfe-f-activity-num">3</div><div class="dfe-f-activity-item__text"><span class="dfe-f-activity-item__title">Conduct user research <span class="dfe-f-activity-item__tag dfe-f-activity-item__tag--m">Mandatory</span></span></div></li>
+            <li class="dfe-f-activity-item"><div class="dfe-f-activity-num">4</div><div class="dfe-f-activity-item__text"><span class="dfe-f-activity-item__title">Map the as-is landscape</span></div></li>
+            <li class="dfe-f-activity-item"><div class="dfe-f-activity-num">5</div><div class="dfe-f-activity-item__text"><span class="dfe-f-activity-item__title">Write discovery report <span class="dfe-f-activity-item__tag dfe-f-activity-item__tag--m">Mandatory</span></span></div></li>
+            <li class="dfe-f-activity-item"><div class="dfe-f-activity-num">6</div><div class="dfe-f-activity-item__text"><span class="dfe-f-activity-item__title">Present to portfolio board <span class="dfe-f-activity-item__tag dfe-f-activity-item__tag--g">Governance</span></span></div></li>
+          </ul>
+        </div>
+        </div>
+        <div class="doc-example__code"><pre><code>&lt;div class="dfe-f-phase-activities"&gt;
+  &lt;span class="dfe-f-phase-activities__label"&gt;Key activities in Discovery&lt;/span&gt;
+  &lt;ul class="dfe-f-activity-list"&gt;
+    &lt;li class="dfe-f-activity-item"&gt;&lt;div class="dfe-f-activity-num"&gt;1&lt;/div&gt;&lt;div class="dfe-f-activity-item__text"&gt;&lt;span class="dfe-f-activity-item__title"&gt;Agree team and time-box &lt;span class="dfe-f-activity-item__tag dfe-f-activity-item__tag--m"&gt;Mandatory&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/li&gt;
+    &lt;li class="dfe-f-activity-item"&gt;&lt;div class="dfe-f-activity-num"&gt;2&lt;/div&gt;&lt;div class="dfe-f-activity-item__text"&gt;&lt;span class="dfe-f-activity-item__title"&gt;Write a discovery plan &lt;span class="dfe-f-activity-item__tag dfe-f-activity-item__tag--m"&gt;Mandatory&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/li&gt;
+    &lt;li class="dfe-f-activity-item"&gt;&lt;div class="dfe-f-activity-num"&gt;3&lt;/div&gt;&lt;div class="dfe-f-activity-item__text"&gt;&lt;span class="dfe-f-activity-item__title"&gt;Conduct user research&lt;/span&gt;&lt;/div&gt;&lt;/li&gt;
+    &lt;!-- Tag modifiers: --m (Mandatory), --g (Governance) --&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;</code></pre></div>
+      </div>
+    </section>
+
+    <!-- ── 6. Task panel (accordion) ─────────────────────────────────────────── -->
+    <section class="doc-section govuk-!-margin-top-8" id="task-panel">
+      <h2 class="govuk-heading-m doc-section__title">Expandable task panel (<code class="doc-inline-code">dfe-f-task-panel</code>)</h2>
+      <p class="govuk-body">Accordion-style card: numbered badge, title, hint, optional tags (<code class="doc-inline-code">dfe-f-step__tag--m</code>, <code class="doc-inline-code">--a</code>, <code class="doc-inline-code">--g</code>, <code class="doc-inline-code">--o</code>), and expandable body with guidance, roles and links. Add <code class="doc-inline-code">is-open</code> to the panel to show expanded by default. Number badge: <code class="doc-inline-code">dfe-f-task-panel__num--green</code>, <code class="doc-inline-code">--orange</code>, <code class="doc-inline-code">--grey</code>.</p>
+      <div class="doc-example">
+        <div class="doc-example__preview">
+        <span class="dfe-f-task-section-hd" style="margin-top: 0;">At the start</span>
+        <div class="dfe-f-task-panel is-open">
+          <button type="button" class="dfe-f-task-panel__trigger" aria-expanded="true">
+            <div class="dfe-f-task-panel__num dfe-f-task-panel__num--green">1</div>
+            <div class="dfe-f-task-panel__title-group">
+              <span class="dfe-f-task-panel__title">Agree team, SRO and time-box</span>
+              <span class="dfe-f-task-panel__hint">Confirm who's involved, who's accountable, and how long the discovery will last.</span>
+              <div class="dfe-f-task-panel__meta">
+                <span class="dfe-f-step__tag dfe-f-step__tag--m">Mandatory</span>
+                <span class="dfe-f-task-panel__role" style="font-size: 0.75rem; color: var(--govuk-colour-secondary-text);">Delivery manager · Product manager</span>
+              </div>
+            </div>
+            <span class="dfe-f-task-panel__chevron">▼</span>
+          </button>
+          <div class="dfe-f-task-panel__body">
+            <p>Confirm who the Senior Responsible Owner (SRO) is, agree the team composition, and define the intended duration before any work begins.</p>
+            <div class="dfe-f-task-panel__good"><strong>What good looks like</strong> SRO is named and engaged. Team has a user researcher and product manager at minimum. Duration is time-boxed — typically 6–12 weeks.</div>
+            <div class="dfe-f-task-panel__watch"><strong>Common mistakes</strong> Starting without a named SRO. Not agreeing the time-box upfront.</div>
+            <span class="dfe-f-task-panel__section-hd" style="margin-top: 20px;">Who does this</span>
+            <div class="dfe-f-task-panel__roles">
+              <span class="dfe-f-task-panel__role">Delivery manager</span>
+              <span class="dfe-f-task-panel__role">Product manager</span>
+              <span class="dfe-f-task-panel__role">SRO</span>
+            </div>
+            <div class="dfe-f-task-panel__links">
+              <a class="dfe-f-task-panel__link" href="#">Team composition guidance →</a>
+              <a class="dfe-f-task-panel__link" href="#">Portfolio intake form →</a>
+            </div>
+          </div>
+        </div>
+        <div class="dfe-f-task-panel">
+          <button type="button" class="dfe-f-task-panel__trigger" aria-expanded="false">
+            <div class="dfe-f-task-panel__num dfe-f-task-panel__num--green">2</div>
+            <div class="dfe-f-task-panel__title-group">
+              <span class="dfe-f-task-panel__title">Write and share a discovery plan</span>
+              <span class="dfe-f-task-panel__hint">Set out your research questions, user groups, methods and constraints before you begin.</span>
+              <div class="dfe-f-task-panel__meta">
+                <span class="dfe-f-step__tag dfe-f-step__tag--m">Mandatory</span>
+              </div>
+            </div>
+            <span class="dfe-f-task-panel__chevron">▼</span>
+          </button>
+          <div class="dfe-f-task-panel__body">
+            <p>Before starting any research, write a plan that sets out what you want to learn.</p>
+          </div>
+        </div>
+        </div>
+        <div class="doc-example__code"><pre><code>&lt;span class="dfe-f-task-section-hd"&gt;At the start&lt;/span&gt;
+&lt;div class="dfe-f-task-panel is-open"&gt;
+  &lt;button type="button" class="dfe-f-task-panel__trigger" aria-expanded="true"&gt;
+    &lt;div class="dfe-f-task-panel__num dfe-f-task-panel__num--green"&gt;1&lt;/div&gt;
+    &lt;div class="dfe-f-task-panel__title-group"&gt;
+      &lt;span class="dfe-f-task-panel__title"&gt;Agree team, SRO and time-box&lt;/span&gt;
+      &lt;span class="dfe-f-task-panel__hint"&gt;Confirm who's involved, who's accountable, and how long the discovery will last.&lt;/span&gt;
+      &lt;div class="dfe-f-task-panel__meta"&gt;
+        &lt;span class="dfe-f-step__tag dfe-f-step__tag--m"&gt;Mandatory&lt;/span&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;span class="dfe-f-task-panel__chevron"&gt;▼&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;div class="dfe-f-task-panel__body"&gt;
+    &lt;p&gt;Guidance text goes here.&lt;/p&gt;
+    &lt;div class="dfe-f-task-panel__good"&gt;&lt;strong&gt;What good looks like&lt;/strong&gt; Description of good practice.&lt;/div&gt;
+    &lt;div class="dfe-f-task-panel__watch"&gt;&lt;strong&gt;Common mistakes&lt;/strong&gt; Description of anti-patterns.&lt;/div&gt;
+    &lt;span class="dfe-f-task-panel__section-hd" style="margin-top: 20px;"&gt;Who does this&lt;/span&gt;
+    &lt;div class="dfe-f-task-panel__roles"&gt;
+      &lt;span class="dfe-f-task-panel__role"&gt;Delivery manager&lt;/span&gt;
+      &lt;span class="dfe-f-task-panel__role"&gt;Product manager&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="dfe-f-task-panel__links"&gt;
+      &lt;a class="dfe-f-task-panel__link" href="#"&gt;Guidance link →&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div>
+      </div>
+      <p class="govuk-body govuk-!-font-weight-bold">Required JS</p>
+      <p class="govuk-body">Include this script in your layout (e.g. before <code class="doc-inline-code">&lt;/body&gt;</code>) so the panel expand/collapse works:</p>
+      <div class="doc-example__code"><pre><code>&lt;script src="/js/dfe-f-panel-container.js"&gt;&lt;/script&gt;</code></pre></div>
+      <p class="govuk-body">If you add task panels dynamically (e.g. via AJAX), call <code class="doc-inline-code">window.dfeTaskPanelInit()</code> after inserting the HTML.</p>
+    </section>
+
+    </main>
+  </div>
+</div>

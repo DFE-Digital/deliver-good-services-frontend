@@ -1,0 +1,79 @@
+@{
+  ViewData["Title"] = "Service documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Service documentation</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-layout">
+  @await Html.PartialAsync("~/Views/Documentation/Service/_ServiceDocLayout.cshtml")
+
+  <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Service</span>
+      <h1 class="govuk-heading-l doc-content__title">Service documentation</h1>
+      <p class="doc-content__lead">Purpose, needs, configuration, design components, templates, and content-editor guidance for this service.</p>
+    </div>
+
+    <div class="doc-note">
+      <p class="govuk-body" style="margin:0">Use the sidebar to move between sections. This documentation does not contain secrets, keys, or environment-specific values — those are configured in app settings or environment variables per deployment.</p>
+    </div>
+
+    <section class="doc-index-section">
+      <h2 class="doc-index-section__title">Purpose</h2>
+      <p class="govuk-body doc-index-section__description">This service delivers the DfE Service Manual: guidance, standards, and lifecycle content for teams building and running services in DfE. The frontend consumes content from a headless CMS so editors can manage guidance, collections, phases, and related content without code changes.</p>
+    </section>
+
+    <section class="doc-index-section">
+      <h2 class="doc-index-section__title">User needs</h2>
+      <p class="govuk-body doc-index-section__description">The service supports:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>Content editors</strong> — Creating and updating guidance, organising content into collections and phases, and publishing via the CMS.</li>
+        <li><strong>Service teams</strong> — Finding standards, lifecycle guidance, and phase-based information to deliver services.</li>
+        <li><strong>Developers</strong> — Understanding design components, templates, and CMS usage to extend or maintain the frontend.</li>
+      </ul>
+    </section>
+
+    <section class="doc-index-section">
+      <h2 class="doc-index-section__title">What’s in this section</h2>
+      <div class="doc-card-grid">
+        <a href="/documentation/service/cms-configuration" class="doc-card">
+          <span class="doc-card__category">Service</span>
+          <h3 class="doc-card__title">CMS configuration</h3>
+          <p class="doc-card__description">How the frontend connects to the CMS, environment setup, and where to configure endpoints and authentication (no secrets in docs).</p>
+        </a>
+        <a href="/documentation/service/design-components" class="doc-card">
+          <span class="doc-card__category">Service</span>
+          <h3 class="doc-card__title">Design components</h3>
+          <p class="doc-card__description">Reusable components and shortcodes with examples: panels, cards, phase components, markdown, and more.</p>
+        </a>
+        <a href="/documentation/service/template-guidance" class="doc-card">
+          <span class="doc-card__category">Service</span>
+          <h3 class="doc-card__title">Template guidance</h3>
+          <p class="doc-card__description">How pages and templates are structured, when to use which layout, and conventions for views.</p>
+        </a>
+        <a href="/documentation/service/content-editors" class="doc-card">
+          <span class="doc-card__category">Service</span>
+          <h3 class="doc-card__title">Content editors</h3>
+          <p class="doc-card__description">Guidance for editors using the CMS: content types, fields, markdown, and publishing workflow.</p>
+        </a>
+        <a href="/documentation/service/publishing-lifecycle" class="doc-card">
+          <span class="doc-card__category">Service</span>
+          <h3 class="doc-card__title">Publishing lifecycle</h3>
+          <p class="doc-card__description">How code and content move through Local, Dev, Test, and Production — with a visual flow and rules for promoting.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+</div>

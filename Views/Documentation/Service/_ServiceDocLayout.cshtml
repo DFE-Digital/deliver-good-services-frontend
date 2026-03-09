@@ -1,0 +1,32 @@
+@* Service documentation sidebar — purpose, CMS, design, templates, editors *@
+@{
+  var currentPath = Context.Request.Path.Value ?? "";
+  var servicePath = "/documentation/service";
+}
+
+<nav class="doc-nav" aria-label="Service documentation navigation">
+  <p class="doc-nav__heading">Service documentation</p>
+  <ul class="doc-nav__list">
+    <li class="doc-nav__item">
+      <a class="doc-nav__link @(currentPath == servicePath ? "doc-nav__link--active" : "")" href="@servicePath">Overview</a>
+    </li>
+    <li class="doc-nav__item">
+      <a class="doc-nav__link @(currentPath == servicePath + "/cms-configuration" ? "doc-nav__link--active" : "")" href="@(servicePath)/cms-configuration">CMS configuration</a>
+    </li>
+    <li class="doc-nav__item">
+      <a class="doc-nav__link @(currentPath == servicePath + "/design-components" ? "doc-nav__link--active" : "")" href="@(servicePath)/design-components">Design components</a>
+    </li>
+    <li class="doc-nav__item">
+      <a class="doc-nav__link @(currentPath == servicePath + "/template-guidance" ? "doc-nav__link--active" : "")" href="@(servicePath)/template-guidance">Template guidance</a>
+    </li>
+    <li class="doc-nav__item">
+      <a class="doc-nav__link @(currentPath == servicePath + "/content-editors" ? "doc-nav__link--active" : "")" href="@(servicePath)/content-editors">Content editors</a>
+    </li>
+    <li class="doc-nav__item">
+      <a class="doc-nav__link @(currentPath == servicePath + "/publishing-lifecycle" ? "doc-nav__link--active" : "")" href="@(servicePath)/publishing-lifecycle">Publishing lifecycle</a>
+    </li>
+  </ul>
+  <p class="doc-nav__back">
+    <a class="doc-nav__link doc-nav__link--muted" href="/documentation">← Back to Documentation</a>
+  </p>
+</nav>

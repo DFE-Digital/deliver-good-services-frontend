@@ -1,0 +1,64 @@
+@{
+  ViewData["Title"] = "Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">Documentation</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <h1 class="govuk-heading-l doc-content__title">Documentation</h1>
+        <p class="doc-content__lead">Styles, components, patterns, CMS templates, publishing lifecycle, and configuration for the DfE Service Manual.</p>
+      </div>
+      <div class="doc-note">
+        <p class="govuk-body" style="margin:0">Use the section tabs above to jump to a topic, then the side nav for specific pages. No secrets or environment-specific values are stored in this documentation.</p>
+      </div>
+      <div class="doc-card-grid" style="margin-top: 32px;">
+        <a href="/documentation/styles" class="doc-card">
+          <span class="doc-card__category">Styles</span>
+          <h3 class="doc-card__title">Styles</h3>
+          <p class="doc-card__description">Typography, headings, links, inset text, tables, horizontal rules, and colour — GOV.UK Frontend conventions.</p>
+        </a>
+        <a href="/documentation/components" class="doc-card">
+          <span class="doc-card__category">Components</span>
+          <h3 class="doc-card__title">Components</h3>
+          <p class="doc-card__description">Markdown, panels, pills, cards, related content, and delivery phase components.</p>
+        </a>
+        <a href="/documentation/patterns" class="doc-card">
+          <span class="doc-card__category">Patterns</span>
+          <h3 class="doc-card__title">Patterns</h3>
+          <p class="doc-card__description">Content and authoring patterns for the Service Manual.</p>
+        </a>
+        <a href="/documentation/templates" class="doc-card">
+          <span class="doc-card__category">Templates</span>
+          <h3 class="doc-card__title">Templates</h3>
+          <p class="doc-card__description">CMS content types: Collection, Detailed guide, Single page guide, Redirector — when to use each and field reference.</p>
+        </a>
+        <a href="/documentation/publishing" class="doc-card">
+          <span class="doc-card__category">Publishing</span>
+          <h3 class="doc-card__title">Publishing</h3>
+          <p class="doc-card__description">Code and content lifecycle: Local, Dev, Test, Production — when to promote and when not to.</p>
+        </a>
+        <a href="/documentation/configuration" class="doc-card">
+          <span class="doc-card__category">Configuration</span>
+          <h3 class="doc-card__title">Configuration</h3>
+          <p class="doc-card__description">How the frontend and CMS are configured; where to set endpoints and tokens (no secrets in docs).</p>
+        </a>
+      </div>
+    </main>
+  </div>
+</div>

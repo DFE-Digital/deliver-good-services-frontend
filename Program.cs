@@ -34,6 +34,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 
+// Path-based 301 redirects (old path -> new path or interim "content has moved" page)
+app.UseMiddleware<ServiceManual.Middleware.PathRedirectMiddleware>();
+
 // Global redirect: /redirect/{shorturl} -> lookup in CMS, redirect to urlToRedirectTo
 app.UseMiddleware<ServiceManual.Middleware.RedirectMiddleware>();
 

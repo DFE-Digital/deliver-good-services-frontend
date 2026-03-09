@@ -1,0 +1,54 @@
+@{
+  ViewData["Title"] = "CMS configuration – Service documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/service">Service documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">CMS configuration</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-layout">
+  @await Html.PartialAsync("~/Views/Documentation/Service/_ServiceDocLayout.cshtml")
+
+  <main class="doc-content" id="main-content">
+    <div class="doc-content__header">
+      <span class="doc-content__tag">Service</span>
+      <h1 class="govuk-heading-l doc-content__title">CMS configuration</h1>
+      <p class="doc-content__lead">How the frontend connects to the headless CMS. Configuration uses app settings or environment variables; no secrets or keys are stored in code or documentation.</p>
+    </div>
+
+    <div class="doc-note doc-note--warning">
+      <p class="govuk-body" style="margin:0"><strong>Do not put API URLs, tokens, or secrets in documentation or source control.</strong> Use <code class="doc-inline-code">appsettings.json</code> (for local development, with values in <code class="doc-inline-code">appsettings.Development.json</code> or user secrets) and environment variables or secure config for deployed environments.</p>
+    </div>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Configuration structure</h2>
+      <p class="govuk-body">The frontend expects a <strong>CmsApi</strong> section in configuration with:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><strong>BaseUrl</strong> — Base URL of the CMS API (e.g. the Strapi REST API). Set per environment.</li>
+        <li><strong>ApiToken</strong> — Token used to authenticate requests to the CMS API. Store in environment variables or a secret store in production.</li>
+      </ul>
+      <p class="govuk-body">Use the example config file (e.g. <code class="doc-inline-code">appsettings.Example.json</code>) as a template: it shows the keys with empty values. Copy it to <code class="doc-inline-code">appsettings.Development.json</code> or use user secrets and fill in values locally only.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Environments</h2>
+      <p class="govuk-body">Configure a different CMS base URL and token for each environment (development, test, production). The same frontend code reads from configuration at runtime so no URLs or tokens appear in views or documentation.</p>
+    </section>
+
+    <section class="doc-section">
+      <h2 class="doc-section__title">Content and navigation</h2>
+      <p class="govuk-body">The CMS exposes content types such as guides, collections, phases, and navigation. The frontend fetches content via the configured base URL and uses the API token where the CMS requires authentication. Ensure the token has permissions to read the content types used by the service.</p>
+    </section>
+  </main>
+</div>
