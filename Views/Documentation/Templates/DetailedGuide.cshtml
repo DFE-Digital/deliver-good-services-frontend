@@ -19,11 +19,11 @@
       <div class="doc-content__header">
         <span class="doc-content__tag">Templates</span>
         <h1 class="govuk-heading-l doc-content__title">Detailed guide</h1>
-        <p class="doc-content__lead">A multi-page guide made up of detailed guide pages. It belongs to a collection and can be filtered by delivery phase.</p>
+        <p class="doc-content__lead">A multi-page guide made up of an overview (body on the guide) and optional detailed guide pages. One template serves both the overview and each child page.</p>
       </div>
       <section class="doc-section">
         <h2 class="doc-section__title">When to use</h2>
-        <p class="govuk-body">Use a <strong>Detailed guide</strong> when the guidance spans multiple pages (e.g. a process with steps). The guide has a title and meta description; the actual content lives on each <strong>Detailed guide page</strong>. Assign it to a collection so it appears in the right topic. Use <em>applicable phases</em> so the guide can be listed on phase-specific views.</p>
+        <p class="govuk-body">Use a <strong>Detailed guide</strong> when the guidance spans one or more pages. The guide has a title and meta description; the overview body is shown at <code>/guidance/guides/{slug}</code>. Child pages are at <code>/guidance/guides/{slug}/{page-slug}</code>. The same view template is used for both. Assign the guide to a collection and use <em>applicable phases</em> so it can be listed on phase-specific views. Use <em>hideContentsOnPrimaryPage</em> only on the overview to hide the contents list there; child pages always show the contents when there are multiple pages.</p>
       </section>
       <section class="doc-section">
         <h2 class="doc-section__title">Fields</h2>
@@ -37,12 +37,12 @@
             <tr><td>relatedContent</td><td>Component (content.related-content)</td><td>Repeatable.</td></tr>
             <tr><td>userNeeds</td><td>Component (content.user-need)</td><td>Repeatable.</td></tr>
             <tr><td>applicable_phases</td><td>Relation (Phase)</td><td>Many-to-many. Phases this guide applies to (for phase page listing).</td></tr>
-            <tr><td>guidePagesOnRightSide</td><td>Boolean</td><td>Default false. Whether to show the list of pages in the right-hand sidebar.</td></tr>
+            <tr><td>hideContentsOnPrimaryPage</td><td>Boolean</td><td>Default false. When true, the contents list is hidden on the guide's primary (overview) page.</td></tr>
             <tr><td>collection</td><td>Relation (Collection)</td><td>Many-to-one. The collection this guide belongs to.</td></tr>
           </tbody>
         </table>
       </section>
-      <p class="govuk-body"><a href="/documentation/templates/detailed-guide-page" class="govuk-link">See Detailed guide page</a> for the template used for each page within the guide.</p>
+      <p class="govuk-body">The same template (<code>Views/Templates/DetailedGuide.cshtml</code>) is used for the guide overview and for each child page; the controller builds a unified <code>GuidePageViewModel</code> from either the guide or the guide page.</p>
     </main>
   </div>
 </div>

@@ -15,5 +15,13 @@ namespace ServiceManual.Models
         public string? ParentContentType { get; set; }
         /// <summary>Parent slug when parent is identified by slug (e.g. guide slug for detailed guide pages).</summary>
         public string? ParentSlug { get; set; }
+        /// <summary>When this content is part of a collection, the collection title (for display).</summary>
+        public string? CollectionTitle { get; set; }
+        /// <summary>When this content is part of a collection, the collection slug (for link).</summary>
+        public string? CollectionSlug { get; set; }
+        /// <summary>Tagged phases (tags-phase) this content is applicable to, for "Content by tagged phase" index.</summary>
+        public List<TagRef> ApplicablePhaseTags { get; set; } = [];
+        /// <summary>Tagged professions (tags-profession) this content is applicable to, for "Content by tagged profession" index.</summary>
+        public List<TagRef> ApplicableProfessionTags { get; set; } = [];
     }
 }

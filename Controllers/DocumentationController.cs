@@ -70,12 +70,6 @@ public class DocumentationController : Controller
     [Route("documentation/templates/detailed-guide")]
     public IActionResult TemplatesDetailedGuide() => View("~/Views/Documentation/Templates/DetailedGuide.cshtml");
 
-    [Route("documentation/templates/detailed-guide-page")]
-    public IActionResult TemplatesDetailedGuidePage() => View("~/Views/Documentation/Templates/DetailedGuidePage.cshtml");
-
-    [Route("documentation/templates/single-page-guide")]
-    public IActionResult TemplatesSinglePageGuide() => View("~/Views/Documentation/Templates/SinglePageGuide.cshtml");
-
     [Route("documentation/templates/redirector")]
     public IActionResult TemplatesRedirector() => View("~/Views/Documentation/Templates/Redirector.cshtml");
 

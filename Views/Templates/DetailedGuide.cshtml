@@ -1,103 +1,190 @@
 @using ServiceManual.Models
+@using ServiceManual.Helpers
 @{
-    var guide = ViewBag.Guide as DetailedGuide ?? new DetailedGuide();
-    ViewData["Title"] = guide.Title;
-    var hasRightPanel = guide.RelatedContent.Count > 0 || guide.Collections.Count > 0;
+    var vm = ViewBag.GuidePage as GuidePageViewModel ?? new GuidePageViewModel();
+    ViewData["Title"] = vm.IsOverviewPage ? vm.HeroTitle : (vm.PageTitle ?? vm.HeroTitle);
 }
 
-@section Breadcrumbs {
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
-@if (!string.IsNullOrEmpty(guide.CollectionSlug) && !string.IsNullOrEmpty(guide.CollectionTitle))
-{
-    <li class="govuk-breadcrumbs__list-item" aria-current="page">@guide.CollectionTitle</li>
-}
-}
-
-<div class="govuk-grid-row">
-    <div class="@(hasRightPanel ? "govuk-grid-column-two-thirds" : "govuk-grid-column-full")">
-
-        <div class="dfe-f-header">
-        <span class="govuk-caption-xl  govuk-!-margin-top-5">Guidance</span>
-            <h1 class="govuk-heading-xl dfe-f-header__title">@guide.Title</h1>
-            @if (!string.IsNullOrEmpty(guide.MetaDescription))
-            {
-                <p class="govuk-body-l dfe-f-header__intro">@guide.MetaDescription</p>
-            }
-            @if (guide.ShowLastUpdatedDateOnPage && !string.IsNullOrEmpty(guide.UpdatedAtDisplay))
-            {
-                <p class="govuk-body-s govuk-!-margin-top-2">Last updated: @guide.UpdatedAtDisplay</p>
-            }
-        </div>
-
-        @if (guide.Pages.Count > 0)
-        {
-            <nav class="dfe-f-guide-contents" aria-label="Guide contents">
-                <p class="dfe-f-guide-contents__skip"><a class="govuk-link" href="/guidance/guides/@guide.Slug/@guide.Pages[0].Slug">Skip contents</a></p>
-                <h2 class="dfe-f-guide-contents__title">Contents</h2>
-                <ul class="dfe-f-guide-contents__list">
-                    @foreach (var guidePage in guide.Pages)
-                    {
-                        <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
-                            <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                            <a class="govuk-link dfe-f-guide-contents__link" href="/guidance/guides/@guide.Slug/@guidePage.Slug">@guidePage.Title</a>
-                        </li>
-                    }
-                </ul>
-            </nav>
-        }
-
-        @if (ViewBag.PageNotification != null)
-        {
-            @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
-        }
-
-    </div>
-
-    @if (hasRightPanel)
-    {
-        <div class="govuk-grid-column-one-third">
-            @if (guide.Collections.Count > 0)
-            {
-                <aside class="dfe-f-sidebar-box dfe-f-sidebar-box--highlight" aria-label="Part of">
-                    <div class="dfe-f-sidebar-box__section">
-                        <h3>Part of</h3>
-                        <ul class="govuk-list govuk-list--spaced">
-                            <li><a class="govuk-link" href="/guidance/collections/@guide.Collections[0].Slug"><strong>@guide.Collections[0].Title</strong></a></li>
-                        </ul>
+<div class="guide-modern">
+    @* Hero: breadcrumb + header within container *@
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <header class="guide-hero">
+                <div class="govuk-width-container">
+                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+                        <ol class="govuk-breadcrumbs__list">
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                            @if (!string.IsNullOrEmpty(vm.CollectionSlug) && !string.IsNullOrEmpty(vm.CollectionTitle))
+                            {
+                                <li class="govuk-breadcrumbs__list-item" aria-current="page">@vm.CollectionTitle</li>
+                            }
+                        </ol>
+                    </nav>
+                    <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-two-thirds">
+                            <span class="guide-hero__label">Guidance</span>
+                            <h1 class="govuk-heading-xl">@vm.HeroTitle</h1>
+                            @if (!string.IsNullOrEmpty(vm.HeroIntro))
+                            {
+                                <p class="govuk-body-l">@vm.HeroIntro</p>
+                            }
+                        </div>
                     </div>
-                    @if (guide.Collections.Count > 1)
-                    {
-                        <div class="dfe-f-sidebar-box__section">
-                            <h3 class="govuk-!-font-weight-regular">Also part of</h3>
-                            <ul class="govuk-list govuk-list--spaced">
-                                @foreach (var c in guide.Collections.Skip(1))
+                </div>
+            </header>
+
+            @* Meta strip *@
+            @{
+                var hasMeta = vm.Collections.Count > 0 || (vm.ShowLastUpdatedDateOnPage && !string.IsNullOrEmpty(vm.UpdatedAtDisplay)) || !string.IsNullOrEmpty(vm.LastReviewedDateDisplay) || !string.IsNullOrWhiteSpace(vm.Owner) || vm.AudienceTags.Count > 0;
+            }
+            @if (hasMeta)
+            {
+                <div class="guide-meta">
+                    <div class="govuk-width-container">
+                        @if (vm.Collections.Count > 0)
+                        {
+                            var c = vm.Collections[0];
+                            <span class="guide-meta__item"><strong>Part of:</strong> <a href="/guidance/collections/@c.Slug">@System.Net.WebUtility.HtmlEncode(c.Title)</a></span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (vm.ShowLastUpdatedDateOnPage && !string.IsNullOrEmpty(vm.UpdatedAtDisplay))
+                        {
+                            <span class="guide-meta__item"><strong>Last updated:</strong> @System.Net.WebUtility.HtmlEncode(vm.UpdatedAtDisplay)</span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (!string.IsNullOrEmpty(vm.LastReviewedDateDisplay))
+                        {
+                            <span class="guide-meta__item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(vm.LastReviewedDateDisplay)</span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(vm.Owner))
+                        {
+                            <span class="guide-meta__item">
+                                <strong>Owner:</strong>
+                                @if (!string.IsNullOrWhiteSpace(vm.OwnerUrl))
+                                { <a href="@System.Net.WebUtility.HtmlEncode(vm.OwnerUrl!)">@System.Net.WebUtility.HtmlEncode(vm.Owner!)</a> }
+                                else
+                                { @System.Net.WebUtility.HtmlEncode(vm.Owner!) }
+                            </span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (vm.AudienceTags.Count > 0)
+                        {
+                            <span class="guide-meta__item"><strong>Audience:</strong> @Html.Raw(string.Join(", ", vm.AudienceTags.Select(t => $"<a href=\"/content/profession/{Uri.EscapeDataString(t.Slug)}\">{System.Net.WebUtility.HtmlEncode(t.Title)}</a>")))</span>
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Contents: on overview, respect ShowContents (HideContentsOnPrimaryPage); on child pages always show when we have items *@
+            @if (vm.ShowContents && vm.ContentsItems.Count > 0)
+            {
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-two-thirds">
+                        <nav class="guide-contents@(vm.ContentsUseNumbers ? "" : " guide-contents--dashed")" aria-label="Guide contents">
+                            <h2 class="guide-contents__title">Contents</h2>
+                            <ul class="guide-contents__list">
+                                @foreach (var item in vm.ContentsItems)
                                 {
-                                    <li><a class="govuk-link" href="/guidance/collections/@c.Slug">@c.Title</a></li>
+                                    <li class="guide-contents__item @(item.IsCurrent ? "guide-contents__item--current" : "")">
+                                        <span class="guide-contents__num" aria-hidden="true">@(vm.ContentsUseNumbers ? item.Number.ToString() : "—")</span>
+                                        @if (item.IsCurrent || item.Url == null)
+                                        {
+                                            <span aria-current="page">@item.Title</span>
+                                        }
+                                        else
+                                        {
+                                            <a href="@item.Url">@item.Title</a>
+                                        }
+                                    </li>
                                 }
                             </ul>
-                        </div>
-                    }
-                </aside>
+                        </nav>
+                    </div>
+                </div>
             }
+        </div>
+    </div>
 
-            @if (guide.RelatedContent.Count > 0)
+    @* Content + sidebar *@
+    <div class="govuk-grid-row guide-content-row@(vm.ApplyNoContentsSectionStyle ? " guide-content-row--no-contents" : "")">
+        <div class="govuk-grid-column-two-thirds">
+            <section class="dfe-f-content-section guide-content-section@(vm.ApplyNoContentsSectionStyle ? " guide-content-section--no-contents" : "")" aria-label="Content">
+                @if (ViewBag.PageNotification != null)
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
+                }
+
+                @if (vm.ShowPageHeader && (!string.IsNullOrEmpty(vm.PageTitle) || !string.IsNullOrEmpty(vm.PageBeforeContentsHtml)))
+                {
+                    <header class="dfe-f-content-header">
+                        @if (!string.IsNullOrEmpty(vm.PageTitle))
+                        {
+                            <h2 class="govuk-heading-l">@vm.PageTitle</h2>
+                        }
+                        @if (!string.IsNullOrEmpty(vm.PageBeforeContentsHtml))
+                        {
+                            <div class="dfe-f-content-header__intro govuk-body">
+                                @Html.Raw(vm.PageBeforeContentsHtml)
+                            </div>
+                        }
+                    </header>
+                }
+
+                @if (!string.IsNullOrEmpty(vm.BodyHtml))
+                {
+                    <div class="dfe-f-body">
+                        @Html.Raw(vm.BodyHtml)
+                    </div>
+                }
+
+                @if (vm.PaginationPrevUrl != null || vm.PaginationNextUrl != null)
+                {
+                    <nav class="govuk-pagination govuk-pagination--block guide-pagination" aria-label="Pages in this guide">
+                        @if (vm.PaginationPrevUrl != null)
+                        {
+                            <div class="govuk-pagination__prev">
+                                <a class="govuk-link govuk-pagination__link" href="@vm.PaginationPrevUrl" rel="prev">
+                                    <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" focusable="false" aria-hidden="true" viewBox="0 0 15 13"><path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"/></svg>
+                                    <span class="govuk-pagination__link-title">Previous<span class="govuk-visually-hidden"> page</span></span>
+                                    <span class="govuk-visually-hidden">:</span>
+                                    <span class="govuk-pagination__link-label">@(vm.PaginationPrevLabel ?? "Previous")</span>
+                                </a>
+                            </div>
+                        }
+                        @if (vm.PaginationNextUrl != null)
+                        {
+                            <div class="govuk-pagination__next">
+                                <a class="govuk-link govuk-pagination__link" href="@vm.PaginationNextUrl" rel="next">
+                                    <span class="govuk-pagination__link-title">Next<span class="govuk-visually-hidden"> page</span></span>
+                                    <span class="govuk-visually-hidden">:</span>
+                                    <span class="govuk-pagination__link-label">@(vm.PaginationNextLabel ?? "Next")</span>
+                                    <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" focusable="false" aria-hidden="true" viewBox="0 0 15 13"><path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7246z"/></svg>
+                                </a>
+                            </div>
+                        }
+                    </nav>
+                }
+            </section>
+        </div>
+
+        <div class="govuk-grid-column-one-third">
+            @if (vm.RelatedContent.Count > 0)
             {
-                <aside class="dfe-f-sidebar-box" aria-label="Related content">
-                    @foreach (var item in guide.RelatedContent)
+                <aside class="guide-sidebar__card" aria-label="Related content">
+                    @foreach (var item in vm.RelatedContent)
                     {
-                        <div class="dfe-f-sidebar-box__section">
-                            <h3>@Html.Raw(ServiceManual.Helpers.GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
+                        <div class="govuk-!-margin-bottom-4">
+                            <h3 class="govuk-heading-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
                             @if (!string.IsNullOrEmpty(item.Content))
                             {
-                                <div class="govuk-body-s">
-                                    @Html.Raw(ServiceManual.Helpers.GovUkMarkdownHelper.ToGovUkHtmlForRelatedContent(item.Content))
-                                </div>
+                                <div class="govuk-body-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForRelatedContent(item.Content))</div>
                             }
                         </div>
                     }
                 </aside>
             }
         </div>
-    }
+    </div>
 </div>

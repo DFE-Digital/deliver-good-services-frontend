@@ -1,0 +1,48 @@
+@model ServiceManual.Models.ContentByProfessionViewModel
+@{
+    ViewData["Title"] = "Content for " + Model.ProfessionTitle;
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/content">Content index</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.ProfessionTitle</li>
+}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <h1 class="govuk-heading-xl">Content for @Model.ProfessionTitle</h1>
+    <p class="govuk-body-l">All published content tagged with this profession (role).</p>
+
+    @if (Model.Items.Count == 0)
+    {
+      <p class="govuk-body">No content found for this profession.</p>
+    }
+    else
+    {
+      <table class="govuk-table">
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
+            <th scope="col" class="govuk-table__header govuk-!-width-one-sixth">Content type</th>
+            <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Description</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          @foreach (var item in Model.Items)
+          {
+            <tr class="govuk-table__row">
+              <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
+              <td class="govuk-table__cell">@item.ContentType</td>
+              <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <p class="govuk-body govuk-!-margin-top-6">
+      <a href="/content" class="govuk-link">Back to content index</a>
+    </p>
+  </div>
+</div>

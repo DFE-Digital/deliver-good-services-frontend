@@ -10,7 +10,8 @@ namespace ServiceManual.Models
         public string? GuideTitle { get; set; }
         public string? GuideSlug { get; set; }
         public string? GuideMetaDescription { get; set; }
-        public bool GuidePagesOnRightSide { get; set; }
+        /// <summary>When true, hide the contents list on the guide's primary (overview) page.</summary>
+        public bool HideContentsOnPrimaryPage { get; set; }
         public bool HideTitleAndDescription { get; set; }
         public bool HideContents { get; set; }
         /// <summary>When true, the "Pages in this guide" sidebar is hidden (takes precedence over other rules).</summary>
@@ -26,5 +27,13 @@ namespace ServiceManual.Models
         public bool ShowLastUpdatedDateOnPage { get; set; }
         /// <summary>Formatted last updated date for display (e.g. "7 January 2026"), when ShowLastUpdatedDateOnPage is true.</summary>
         public string? UpdatedAtDisplay { get; set; }
+        /// <summary>Formatted last reviewed date from the parent guide for display (e.g. "7 January 2026").</summary>
+        public string? LastReviewedDateDisplay { get; set; }
+        /// <summary>Owner from parent guide for meta strip.</summary>
+        public string? Owner { get; set; }
+        /// <summary>Owner link from parent guide (e.g. informationPage redirect).</summary>
+        public string? OwnerUrl { get; set; }
+        /// <summary>Audience (profession tags) from parent guide for meta strip.</summary>
+        public List<TagRef> AudienceTags { get; set; } = [];
     }
 }

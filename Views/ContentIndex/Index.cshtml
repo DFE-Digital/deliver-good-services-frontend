@@ -22,6 +22,16 @@
       var groupedBySection = Model
         .GroupBy(i => i.ContentType == "Detailed Guide Page" ? "Detailed Guide" : i.ContentType == "Phase" ? "Lifecycle" : i.ContentType)
         .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+      var phaseTags = Model
+        .SelectMany(i => i.ApplicablePhaseTags)
+        .DistinctBy(t => t.Slug)
+        .OrderBy(t => t.Title, StringComparer.OrdinalIgnoreCase)
+        .ToList();
+      var professionTags = Model
+        .SelectMany(i => i.ApplicableProfessionTags)
+        .DistinctBy(t => t.Slug)
+        .OrderBy(t => t.Title, StringComparer.OrdinalIgnoreCase)
+        .ToList();
 
       @foreach (var contentSection in groupedBySection)
       {
@@ -83,6 +93,66 @@
             }
           </tbody>
         </table>
+      }
+
+      @if (phaseTags.Count > 0)
+      {
+        <h2 class="govuk-heading-l govuk-!-margin-top-8 govuk-!-margin-bottom-4">Content by tagged phase</h2>
+        <p class="govuk-body">Content tagged with delivery phases (tags-phase).</p>
+        @foreach (var tag in phaseTags)
+        {
+          var phaseItems = Model.Where(i => i.ApplicablePhaseTags.Any(pt => pt.Slug == tag.Slug)).OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
+          <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3">@tag.Title</h3>
+          <table class="govuk-table">
+            <thead class="govuk-table__head">
+              <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
+                <th scope="col" class="govuk-table__header govuk-!-width-one-sixth">Content type</th>
+                <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Description</th>
+              </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+              @foreach (var item in phaseItems)
+              {
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
+                  <td class="govuk-table__cell">@item.ContentType</td>
+                  <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      }
+
+      @if (professionTags.Count > 0)
+      {
+        <h2 class="govuk-heading-l govuk-!-margin-top-8 govuk-!-margin-bottom-4">Content by tagged profession</h2>
+        <p class="govuk-body">Content tagged with professions (tags-profession).</p>
+        @foreach (var tag in professionTags)
+        {
+          var professionItems = Model.Where(i => i.ApplicableProfessionTags.Any(pt => pt.Slug == tag.Slug)).OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
+          <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3"><a href="/content/profession/@Uri.EscapeDataString(tag.Slug)" class="govuk-link">@tag.Title</a></h3>
+          <table class="govuk-table">
+            <thead class="govuk-table__head">
+              <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
+                <th scope="col" class="govuk-table__header govuk-!-width-one-sixth">Content type</th>
+                <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Description</th>
+              </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+              @foreach (var item in professionItems)
+              {
+                <tr class="govuk-table__row">
+                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
+                  <td class="govuk-table__cell">@item.ContentType</td>
+                  <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
       }
     }
   </div>

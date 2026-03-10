@@ -4,7 +4,6 @@ namespace ServiceManual.Services
 {
     public interface ICmsApiService
     {
-        Task<SinglePageGuide?> GetSinglePageGuideBySlugAsync(string slug);
         Task<Collection?> GetCollectionBySlugAsync(string slug);
         Task<JobSpecification?> GetJobSpecificationBySlugAsync(string slug);
         Task<DetailedGuide?> GetDetailedGuideBySlugAsync(string slug);
@@ -23,7 +22,7 @@ namespace ServiceManual.Services
         /// <summary>Looks up a published 301 redirect by old path. Returns the redirect rule, or null if not found.</summary>
         Task<PathRedirect?> GetPathRedirectByOldPathAsync(string path);
 
-        /// <summary>Gets an active page notification for the given content type and slug, when validFrom &lt;= now &lt;= validTo and enabled is true. relationFilter: single_page_guides, collections, detailed_guides, or detailed_guide_pages.</summary>
+        /// <summary>Gets an active page notification for the given content type and slug, when validFrom &lt;= now &lt;= validTo and enabled is true. relationFilter: collections, detailed_guides, or detailed_guide_pages.</summary>
         Task<PageNotification?> GetActivePageNotificationAsync(string relationFilter, string slug);
     }
 }

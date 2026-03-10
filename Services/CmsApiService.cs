@@ -30,58 +30,6 @@ namespace ServiceManual.Services
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
         }
 
-        public async Task<SinglePageGuide?> GetSinglePageGuideBySlugAsync(string slug)
-        {
-            try
-            {
-                var url = $"api/single-page-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug&fields[3]=body&fields[4]=lastReviewDate&fields[5]=nextReviewDate&fields[6]=showLastUpdatedDateOnPage&fields[7]=updatedAt" +
-                          "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
-                          "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug";
-                var response = await _httpClient.GetAsync(url);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogWarning("CMS API returned {StatusCode} for slug '{Slug}'", response.StatusCode, slug);
-                    return null;
-                }
-
-                var json = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiSinglePageGuide>>(json, JsonOptions);
-
-                var item = result?.Data?.FirstOrDefault();
-                if (item is null)
-                    return null;
-
-                var collections = item.Collection != null && !string.IsNullOrEmpty(item.Collection.Slug) && !string.IsNullOrEmpty(item.Collection.Title)
-                    ? new List<CollectionRef> { new CollectionRef { Slug = item.Collection.Slug!, Title = item.Collection.Title! } }
-                    : new List<CollectionRef>();
-                var firstCollection = collections.FirstOrDefault();
-                return new SinglePageGuide
-                {
-                    Title = item.Title ?? string.Empty,
-                    MetaDescription = item.MetaDescription ?? string.Empty,
-                    Slug = item.Slug ?? string.Empty,
-                    Body = item.Body ?? string.Empty,
-                    LastReviewDate = FormatDate(item.LastReviewDate),
-                    NextReviewDate = FormatDate(item.NextReviewDate),
-                    RelatedContent = item.RelatedContent?
-                        .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
-                        .ToList() ?? [],
-                    CollectionSlug = firstCollection?.Slug,
-                    CollectionTitle = firstCollection?.Title,
-                    Collections = collections,
-                    ShowLastUpdatedDateOnPage = item.ShowLastUpdatedDateOnPage ?? false,
-                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching single page guide for slug '{Slug}'", slug);
-                return null;
-            }
-        }
-
         public async Task<Collection?> GetCollectionBySlugAsync(string slug)
         {
             try
@@ -198,10 +146,12 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=guidePagesOnRightSide&fields[4]=showLastUpdatedDateOnPage&fields[5]=updatedAt" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastUpdatedDateOnPage&fields[5]=updatedAt&fields[6]=lastReviewedDate&fields[7]=hideContentsOnPrimaryPage" +
                           "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug" +
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
-                          "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content";
+                          "&populate[contentOwner][fields][0]=title&populate[contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
+                          "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
+                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug";
 
                 var response = await _httpClient.GetAsync(url);
 
@@ -227,10 +177,11 @@ namespace ServiceManual.Services
                     Title = item.Title ?? string.Empty,
                     Slug = item.Slug ?? string.Empty,
                     MetaDescription = item.MetaDescription,
+                    Body = item.Body,
                     CollectionTitle = firstCollection?.Title,
                     CollectionSlug = firstCollection?.Slug,
                     Collections = collections,
-                    GuidePagesOnRightSide = item.GuidePagesOnRightSide ?? false,
+                    HideContentsOnPrimaryPage = item.HideContentsOnPrimaryPage ?? false,
                     Pages = item.Detailed_Guide_Pages?
                         .Select(p => new DetailedGuidePageSummary { Title = p.Title ?? string.Empty, Slug = p.Slug ?? string.Empty })
                         .ToList() ?? [],
@@ -238,7 +189,18 @@ namespace ServiceManual.Services
                         .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
                         .ToList() ?? [],
                     ShowLastUpdatedDateOnPage = item.ShowLastUpdatedDateOnPage ?? false,
-                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null
+                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null,
+                    LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
+                    Owner = item.ContentOwner?.Title?.Trim(),
+                    OwnerUrl = item.ContentOwner?.RedirectUrl?.Trim(),
+                    Audience = item.ApplicableProfessions?
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => p.Title!.Trim())
+                        .ToList() ?? [],
+                    AudienceTags = item.ApplicableProfessions?
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
+                        .ToList() ?? [],
                 };
             }
             catch (Exception ex)
@@ -254,10 +216,12 @@ namespace ServiceManual.Services
             {
                 var url = $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
                           "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav&fields[8]=showLastUpdatedDateOnPage&fields[9]=updatedAt" +
-                          "&populate[professionsApplicable][fields][0]=title" +
-                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=guidePagesOnRightSide" +
+                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug" +
+                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=lastReviewedDate&populate[detailed_guide][fields][4]=hideContentsOnPrimaryPage" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug" +
                           "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
+                          "&populate[detailed_guide][populate][contentOwner][fields][0]=title&populate[detailed_guide][populate][contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
+                          "&populate[detailed_guide][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][applicableProfessions][fields][1]=slug" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content";
 
                 var response = await _httpClient.GetAsync(url);
@@ -292,7 +256,7 @@ namespace ServiceManual.Services
                     GuideTitle = item.Detailed_Guide?.Title,
                     GuideSlug = item.Detailed_Guide?.Slug,
                     GuideMetaDescription = item.Detailed_Guide?.MetaDescription,
-                    GuidePagesOnRightSide = item.Detailed_Guide?.GuidePagesOnRightSide ?? false,
+                    HideContentsOnPrimaryPage = item.Detailed_Guide?.HideContentsOnPrimaryPage ?? false,
                     CollectionTitle = firstGuideCollection?.Title,
                     CollectionSlug = firstGuideCollection?.Slug,
                     Collections = guideCollections,
@@ -302,12 +266,19 @@ namespace ServiceManual.Services
                     RelatedContent = item.RelatedContent?
                         .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
                         .ToList() ?? [],
-                    Professions = item.ProfessionsApplicable?
+                    Professions = item.ApplicableProfessions?
                         .Where(p => !string.IsNullOrWhiteSpace(p.Title))
                         .Select(p => p.Title!.Trim())
                         .ToList() ?? [],
                     ShowLastUpdatedDateOnPage = item.ShowLastUpdatedDateOnPage ?? false,
-                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null
+                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null,
+                    LastReviewedDateDisplay = item.Detailed_Guide != null ? FormatDateTime(item.Detailed_Guide.LastReviewedDate) : null,
+                    Owner = item.Detailed_Guide?.ContentOwner?.Title?.Trim(),
+                    OwnerUrl = item.Detailed_Guide?.ContentOwner?.RedirectUrl?.Trim(),
+                    AudienceTags = item.Detailed_Guide?.ApplicableProfessions?
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
+                        .ToList() ?? []
                 };
             }
             catch (Exception ex)
@@ -710,12 +681,10 @@ namespace ServiceManual.Services
                           "&fields[0]=title&fields[1]=order&fields[2]=externalUrl" +
                           "&populate[collection][fields][0]=slug" +
                           "&populate[detailed_guide][fields][0]=slug" +
-                          "&populate[single_page_guide][fields][0]=slug" +
                           "&populate[html_page][fields][0]=slug" +
                           "&populate[children][fields][0]=title&populate[children][fields][1]=order&populate[children][fields][2]=externalUrl" +
                           "&populate[children][populate][collection][fields][0]=slug" +
                           "&populate[children][populate][detailed_guide][fields][0]=slug" +
-                          "&populate[children][populate][single_page_guide][fields][0]=slug" +
                           "&populate[children][populate][html_page][fields][0]=slug" +
                           "&sort=order:asc" +
                           "&pagination[pageSize]=100";
@@ -751,32 +720,31 @@ namespace ServiceManual.Services
             var items = new List<ContentIndexItem>();
             const int pageSize = 250;
 
-            // Single page guides: /guidance/{slug}
-            await AddListAsync(items, "api/single-page-guides",
-                "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug",
-                pageSize,
-                "Single Page Guide",
-                d => $"/guidance/{d.Slug}",
-                d => d.Slug);
-
             // Collections: /guidance/collections/{slug}
             await AddListAsync(items, "api/collections",
-                "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug",
+                "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug" +
+                "&populate[applicablePhases][fields][0]=slug&populate[applicablePhases][fields][1]=title" +
+                "&populate[applicableProfessions][fields][0]=slug&populate[applicableProfessions][fields][1]=title",
                 pageSize,
                 "Collection",
                 d => $"/guidance/collections/{d.Slug}",
-                d => d.Slug);
+                d => d.Slug,
+                phaseTagsSelector: d => ToTagRefs(d.ApplicablePhases),
+                professionTagsSelector: d => ToTagRefs(d.ApplicableProfessions));
 
-            // Detailed guides (landing): /guidance/guides/{slug}
+            // Detailed guides (landing): /guidance/guides/{slug} (with collection for "Part of collection")
             await AddListAsync(items, "api/detailed-guides",
-                "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug",
+                "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
+                "&populate[applicableProfessions][fields][0]=slug&populate[applicableProfessions][fields][1]=title",
                 pageSize,
                 "Detailed Guide",
                 d => $"/guidance/guides/{d.Slug}",
                 d => d.Slug,
-                indexSlug: d => d.Slug);
+                indexSlug: d => d.Slug,
+                collectionSelector: d => d.Collection != null && !string.IsNullOrEmpty(d.Collection.Slug) ? (d.Collection.Title, d.Collection.Slug) : null,
+                professionTagsSelector: d => ToTagRefs(d.ApplicableProfessions));
 
-            // Detailed guide pages: /guidance/guides/{guideSlug}/{pageSlug}
+            // Detailed guide pages: /guidance/guides/{guideSlug}/{pageSlug} (with guide's collection)
             await AddDetailedGuidePagesAsync(items, pageSize);
 
             // HTML pages: /pages/{slug}
@@ -878,7 +846,10 @@ namespace ServiceManual.Services
 
         private async Task AddListAsync(List<ContentIndexItem> items, string endpoint, string fields, int pageSize,
             string contentType, Func<StrapiContentListItem, string> urlSelector, Func<StrapiContentListItem, string?> slugSelector,
-            Func<StrapiContentListItem, string?>? indexSlug = null)
+            Func<StrapiContentListItem, string?>? indexSlug = null,
+            Func<StrapiContentListItem, (string? Title, string? Slug)?>? collectionSelector = null,
+            Func<StrapiContentListItem, List<TagRef>>? phaseTagsSelector = null,
+            Func<StrapiContentListItem, List<TagRef>>? professionTagsSelector = null)
         {
             try
             {
@@ -890,13 +861,18 @@ namespace ServiceManual.Services
                 if (result?.Data == null) return;
                 foreach (var d in result.Data.Where(d => !string.IsNullOrEmpty(slugSelector(d))))
                 {
+                    var collection = collectionSelector?.Invoke(d);
                     items.Add(new ContentIndexItem
                     {
                         Title = d.Title ?? string.Empty,
                         MetaDescription = d.MetaDescription,
                         ContentType = contentType,
                         Url = urlSelector(d),
-                        Slug = indexSlug?.Invoke(d)
+                        Slug = indexSlug?.Invoke(d),
+                        CollectionTitle = collection?.Title,
+                        CollectionSlug = collection?.Slug,
+                        ApplicablePhaseTags = phaseTagsSelector?.Invoke(d) ?? [],
+                        ApplicableProfessionTags = professionTagsSelector?.Invoke(d) ?? []
                     });
                 }
             }
@@ -912,7 +888,10 @@ namespace ServiceManual.Services
             {
                 var url = "api/detailed-guide-pages?pagination[pageSize]=" + pageSize +
                          "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug" +
-                         "&populate[detailed_guide][fields][0]=slug";
+                         "&populate[detailed_guide][fields][0]=slug" +
+                         "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
+                         "&populate[applicablePhases][fields][0]=slug&populate[applicablePhases][fields][1]=title" +
+                         "&populate[applicableProfessions][fields][0]=slug&populate[applicableProfessions][fields][1]=title";
                 var response = await _httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode) return;
                 var json = await response.Content.ReadAsStringAsync();
@@ -922,6 +901,7 @@ namespace ServiceManual.Services
                 {
                     var guideSlug = d.Detailed_Guide?.Slug;
                     if (string.IsNullOrEmpty(guideSlug) || string.IsNullOrEmpty(d.Slug)) continue;
+                    var coll = d.Detailed_Guide?.Collection;
                     items.Add(new ContentIndexItem
                     {
                         Title = d.Title ?? string.Empty,
@@ -929,7 +909,11 @@ namespace ServiceManual.Services
                         ContentType = "Detailed Guide Page",
                         Url = $"/guidance/guides/{guideSlug}/{d.Slug}",
                         ParentContentType = "Detailed Guide",
-                        ParentSlug = guideSlug
+                        ParentSlug = guideSlug,
+                        CollectionTitle = coll != null && !string.IsNullOrEmpty(coll.Slug) ? coll.Title : null,
+                        CollectionSlug = coll?.Slug,
+                        ApplicablePhaseTags = ToTagRefs(d.ApplicablePhases),
+                        ApplicableProfessionTags = ToTagRefs(d.ApplicableProfessions)
                     });
                 }
             }
@@ -993,9 +977,6 @@ namespace ServiceManual.Services
             if (item.Detailed_Guide?.Slug is not null)
                 return $"/guidance/guides/{item.Detailed_Guide.Slug}";
 
-            if (item.Single_Page_Guide?.Slug is not null)
-                return $"/guidance/{item.Single_Page_Guide.Slug}";
-
             return null;
         }
 
@@ -1016,6 +997,15 @@ namespace ServiceManual.Services
             return null;
         }
 
+        private static List<TagRef> ToTagRefs(List<StrapiTagRef>? list) =>
+            list?.Where(t => !string.IsNullOrEmpty(t.Slug) || !string.IsNullOrEmpty(t.Title))
+                .Select(t => new TagRef { Slug = t.Slug ?? "", Title = t.Title ?? "" }).ToList() ?? [];
+
+        private static List<TagRef> ToTagRefs(StrapiTagRef? single) =>
+            single != null && (!string.IsNullOrEmpty(single.Slug) || !string.IsNullOrEmpty(single.Title))
+                ? [new TagRef { Slug = single.Slug ?? "", Title = single.Title ?? "" }]
+                : [];
+
         /// <summary>Maps API content type to display label for collection listing (GOV.UK style).</summary>
         private static string? ContentTypeLabel(string? type)
         {
@@ -1023,7 +1013,6 @@ namespace ServiceManual.Services
             {
                 "detailed_guide" => "Guidance",
                 "detailed_guide_page" => "Guidance",
-                "single_page_guide" => "Guidance",
                 "job_specification" => "Job description",
                 "external_link" => "External link",
                 _ => null
@@ -1064,6 +1053,73 @@ namespace ServiceManual.Services
         {
             public string? Title { get; set; }
             public string? Slug { get; set; }
+        }
+
+        /// <summary>Deserializes tag refs from either a direct array or Strapi v5 wrapper { "data": [ ... ] } (each element may be { slug, title } or { id, attributes: { slug, title } }).</summary>
+        private sealed class StrapiTagRefListConverter : JsonConverter<List<StrapiTagRef>?>
+        {
+            public override List<StrapiTagRef>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Null) return null;
+                if (reader.TokenType == JsonTokenType.StartArray)
+                    return JsonSerializer.Deserialize<List<StrapiTagRef>>(ref reader, options);
+                if (reader.TokenType == JsonTokenType.StartObject)
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType == JsonTokenType.PropertyName && reader.GetString() == "data")
+                        {
+                            reader.Read();
+                            if (reader.TokenType != JsonTokenType.StartArray) return null;
+                            var list = new List<StrapiTagRef>();
+                            while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
+                            {
+                                var tag = ReadOneTagRef(ref reader, options);
+                                if (tag != null) list.Add(tag);
+                            }
+                            return list;
+                        }
+                        if (reader.TokenType == JsonTokenType.PropertyName) { reader.Read(); reader.Skip(); }
+                    }
+                }
+                return null;
+            }
+
+            private static StrapiTagRef? ReadOneTagRef(ref Utf8JsonReader reader, JsonSerializerOptions options)
+            {
+                if (reader.TokenType != JsonTokenType.StartObject) return null;
+                string? slug = null, title = null;
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndObject) break;
+                    if (reader.TokenType == JsonTokenType.PropertyName)
+                    {
+                        var name = reader.GetString();
+                        reader.Read();
+                        if (name == "attributes" && reader.TokenType == JsonTokenType.StartObject)
+                        {
+                            while (reader.Read())
+                            {
+                                if (reader.TokenType == JsonTokenType.EndObject) break;
+                                if (reader.TokenType == JsonTokenType.PropertyName)
+                                {
+                                    var n = reader.GetString();
+                                    reader.Read();
+                                    if (n == "slug") slug = reader.GetString();
+                                    else if (n == "title") title = reader.GetString();
+                                }
+                            }
+                        }
+                        else if (name == "slug") slug = reader.GetString();
+                        else if (name == "title") title = reader.GetString();
+                        else reader.Skip();
+                    }
+                }
+                return (slug != null || title != null) ? new StrapiTagRef { Slug = slug ?? "", Title = title ?? "" } : null;
+            }
+
+            public override void Write(Utf8JsonWriter writer, List<StrapiTagRef>? value, JsonSerializerOptions options) =>
+                throw new NotImplementedException();
         }
 
         /// <summary>Deserializes phases from either a direct array or Strapi v5 wrapper { "data": [ ... ] }.</summary>
@@ -1391,22 +1447,6 @@ namespace ServiceManual.Services
             public StrapiSlugRef? Preparation_Guidance { get; set; }
         }
 
-        private class StrapiSinglePageGuide
-        {
-            public string? Title { get; set; }
-            public string? MetaDescription { get; set; }
-            public string? Slug { get; set; }
-            public string? Body { get; set; }
-            public string? LastReviewDate { get; set; }
-            public string? NextReviewDate { get; set; }
-            public List<StrapiRelatedContent>? RelatedContent { get; set; }
-            public StrapiSlugRef? Collection { get; set; }
-            [JsonPropertyName("showLastUpdatedDateOnPage")]
-            public bool? ShowLastUpdatedDateOnPage { get; set; }
-            [JsonPropertyName("updatedAt")]
-            public string? UpdatedAt { get; set; }
-        }
-
         private class StrapiCollection
         {
             [JsonPropertyName("title")]
@@ -1486,13 +1526,6 @@ namespace ServiceManual.Services
             public StrapiSlugRef? Detailed_Guide { get; set; }
         }
 
-        private class StrapiSinglePageGuideSummary
-        {
-            public string? Title { get; set; }
-            public string? Slug { get; set; }
-            public string? MetaDescription { get; set; }
-        }
-
         private class StrapiExternalLink
         {
             public string? Title { get; set; }
@@ -1507,19 +1540,30 @@ namespace ServiceManual.Services
             public string? Title { get; set; }
             public string? Slug { get; set; }
             public string? MetaDescription { get; set; }
-            public bool? GuidePagesOnRightSide { get; set; }
+            public string? Body { get; set; }
+            [JsonPropertyName("hideContentsOnPrimaryPage")]
+            public bool? HideContentsOnPrimaryPage { get; set; }
             public StrapiCollectionRef? Collection { get; set; }
+            [JsonConverter(typeof(StrapiContentOwnerRefConverter))]
+            [JsonPropertyName("contentOwner")]
+            public StrapiContentOwnerRef? ContentOwner { get; set; }
             public List<StrapiDetailedGuidePageSummary>? Detailed_Guide_Pages { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicableProfessions")]
+            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
             [JsonPropertyName("showLastUpdatedDateOnPage")]
             public bool? ShowLastUpdatedDateOnPage { get; set; }
             [JsonPropertyName("updatedAt")]
             public string? UpdatedAt { get; set; }
+            [JsonPropertyName("lastReviewedDate")]
+            public string? LastReviewedDate { get; set; }
         }
 
         private class StrapiTagsProfession
         {
             public string? Title { get; set; }
+            public string? Slug { get; set; }
         }
 
         private class StrapiDetailedGuidePage
@@ -1532,7 +1576,8 @@ namespace ServiceManual.Services
             public bool? HideTitleAndDescription { get; set; }
             public bool? HideContents { get; set; }
             public bool? HideGuidePagesNav { get; set; }
-            public List<StrapiTagsProfession>? ProfessionsApplicable { get; set; }
+            [JsonPropertyName("applicableProfessions")]
+            public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
             public StrapiDetailedGuideRef? Detailed_Guide { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
             [JsonPropertyName("showLastUpdatedDateOnPage")]
@@ -1565,8 +1610,16 @@ namespace ServiceManual.Services
             public string? Title { get; set; }
             public string? Slug { get; set; }
             public string? MetaDescription { get; set; }
-            public bool? GuidePagesOnRightSide { get; set; }
+            public string? LastReviewedDate { get; set; }
+            [JsonPropertyName("hideContentsOnPrimaryPage")]
+            public bool? HideContentsOnPrimaryPage { get; set; }
             public StrapiCollectionRef? Collection { get; set; }
+            [JsonConverter(typeof(StrapiContentOwnerRefConverter))]
+            [JsonPropertyName("contentOwner")]
+            public StrapiContentOwnerRef? ContentOwner { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicableProfessions")]
+            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
             public List<StrapiDetailedGuidePageSummary>? Detailed_Guide_Pages { get; set; }
         }
 
@@ -1584,7 +1637,6 @@ namespace ServiceManual.Services
             public string? ExternalUrl { get; set; }
             public StrapiNavSlugRef? Collection { get; set; }
             public StrapiNavSlugRef? Detailed_Guide { get; set; }
-            public StrapiNavSlugRef? Single_Page_Guide { get; set; }
             public StrapiNavSlugRef? Html_Page { get; set; }
             public List<StrapiNavigationItem>? Children { get; set; }
         }
@@ -1610,11 +1662,95 @@ namespace ServiceManual.Services
             public JsonElement? Message { get; set; }
         }
 
+        private class StrapiTagRef
+        {
+            public string? Slug { get; set; }
+            public string? Title { get; set; }
+        }
+
+        /// <summary>Converter for contentOwner relation: { data: { attributes: { title, informationPage: { data: { attributes: { urlToRedirectTo } } } } } }.</summary>
+        private sealed class StrapiContentOwnerRefConverter : JsonConverter<StrapiContentOwnerRef?>
+        {
+            public override StrapiContentOwnerRef? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Null) return null;
+                if (reader.TokenType != JsonTokenType.StartObject) return null;
+                using var doc = JsonDocument.ParseValue(ref reader);
+                var root = doc.RootElement;
+                JsonElement attrs;
+                if (root.TryGetProperty("data", out var data))
+                {
+                    if (data.ValueKind == JsonValueKind.Null || data.ValueKind == JsonValueKind.Undefined) return null;
+                    attrs = data.TryGetProperty("attributes", out var a) ? a : data;
+                }
+                else
+                    attrs = root;
+                var title = attrs.TryGetProperty("title", out var t) ? t.GetString() : null;
+                string? redirectUrl = null;
+                if (attrs.TryGetProperty("informationPage", out var infoPage))
+                {
+                    var infoData = infoPage.ValueKind == JsonValueKind.Object && infoPage.TryGetProperty("data", out var id) ? id : infoPage;
+                    if (infoData.ValueKind == JsonValueKind.Object)
+                    {
+                        var infoAttrs = infoData.TryGetProperty("attributes", out var ia) ? ia : infoData;
+                        if (infoAttrs.TryGetProperty("urlToRedirectTo", out var urlEl))
+                            redirectUrl = urlEl.GetString();
+                    }
+                }
+                if (title == null && redirectUrl == null) return null;
+                return new StrapiContentOwnerRef { Title = title, RedirectUrl = redirectUrl };
+            }
+
+            public override void Write(Utf8JsonWriter writer, StrapiContentOwnerRef? value, JsonSerializerOptions options) =>
+                throw new NotImplementedException();
+        }
+
+        private class StrapiContentOwnerRef
+        {
+            public string? Title { get; set; }
+            public string? RedirectUrl { get; set; }
+        }
+
+        /// <summary>Converter for single relation that may be { data: { attributes: { slug, title } } } or { slug, title }.</summary>
+        private sealed class StrapiTagRefSingleConverter : JsonConverter<StrapiTagRef?>
+        {
+            public override StrapiTagRef? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Null) return null;
+                if (reader.TokenType == JsonTokenType.StartObject)
+                {
+                    using var doc = JsonDocument.ParseValue(ref reader);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("data", out var data))
+                    {
+                        if (data.ValueKind == JsonValueKind.Null || data.ValueKind == JsonValueKind.Undefined) return null;
+                        var attrs = data.TryGetProperty("attributes", out var a) ? a : data;
+                        return new StrapiTagRef { Slug = attrs.TryGetProperty("slug", out var slugEl) ? slugEl.GetString() : null, Title = attrs.TryGetProperty("title", out var titleEl) ? titleEl.GetString() : null };
+                    }
+                    return new StrapiTagRef { Slug = root.TryGetProperty("slug", out var slugEl2) ? slugEl2.GetString() : null, Title = root.TryGetProperty("title", out var titleEl2) ? titleEl2.GetString() : null };
+                }
+                return null;
+            }
+
+            public override void Write(Utf8JsonWriter writer, StrapiTagRef? value, JsonSerializerOptions options) =>
+                throw new NotImplementedException();
+        }
+
         private class StrapiContentListItem
         {
             public string? Title { get; set; }
             public string? MetaDescription { get; set; }
             public string? Slug { get; set; }
+            public StrapiSlugRef? Collection { get; set; }
+            [JsonConverter(typeof(StrapiTagRefSingleConverter))]
+            [JsonPropertyName("phaseTag")]
+            public StrapiTagRef? PhaseTag { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicablePhases")]
+            public List<StrapiTagRef>? ApplicablePhases { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicableProfessions")]
+            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
         }
 
         private class StrapiDetailedGuidePageListItem
@@ -1622,7 +1758,19 @@ namespace ServiceManual.Services
             public string? Title { get; set; }
             public string? MetaDescription { get; set; }
             public string? Slug { get; set; }
-            public StrapiNavSlugRef? Detailed_Guide { get; set; }
+            public StrapiDetailedGuideRefForList? Detailed_Guide { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicablePhases")]
+            public List<StrapiTagRef>? ApplicablePhases { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicableProfessions")]
+            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
+        }
+
+        private class StrapiDetailedGuideRefForList
+        {
+            public string? Slug { get; set; }
+            public StrapiSlugRef? Collection { get; set; }
         }
 
         private class StrapiPhaseListItem

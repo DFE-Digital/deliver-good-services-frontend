@@ -116,7 +116,7 @@
 
                             @if (externalItems.Any())
                             {
-                                <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3">Additional resources</h3>
+                                <h3 class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-3">External guidance and resources</h3>
                                 <ul class="dfe-f-guide-list">
                                     @foreach (var link in externalItems)
                                     {
@@ -128,7 +128,7 @@
                                             </a>
                                             @if (!string.IsNullOrEmpty(subText))
                                             {
-                                                <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(subText))</p>
+                                                @Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(subText))
                                             }
                                         </li>
                                     }
