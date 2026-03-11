@@ -30,6 +30,12 @@ namespace ServiceManual.Services
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
         }
 
+        private string? GetCmsBaseUrl()
+        {
+            var baseUrl = _httpClient.BaseAddress?.ToString();
+            return string.IsNullOrEmpty(baseUrl) ? null : baseUrl.TrimEnd('/');
+        }
+
         public async Task<Collection?> GetCollectionBySlugAsync(string slug)
         {
             try
@@ -58,6 +64,14 @@ namespace ServiceManual.Services
                     MetaDescription = item.MetaDescription ?? string.Empty,
                     Slug = item.Slug ?? string.Empty,
                     Body = item.Body,
+                    LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
+                    Owner = item.ContentOwner?.Title?.Trim(),
+                    OwnerUrl = item.ContentOwner?.RedirectUrl?.Trim(),
+                    AudienceTags = item.ApplicableProfessions?
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
+                        .ToList() ?? [],
+                    RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
                     Sections = item.Collection_Sections?
                         .OrderBy(s => s.Order)
                         .Select(s => new CollectionSection
@@ -151,7 +165,8 @@ namespace ServiceManual.Services
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
                           "&populate[contentOwner][fields][0]=title&populate[contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
-                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug";
+                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug" +
+                          "&populate[relatedFiles]=true";
 
                 var response = await _httpClient.GetAsync(url);
 
@@ -201,6 +216,7 @@ namespace ServiceManual.Services
                         .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
                         .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
                         .ToList() ?? [],
+                    RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
                 };
             }
             catch (Exception ex)
@@ -222,7 +238,8 @@ namespace ServiceManual.Services
                           "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
                           "&populate[detailed_guide][populate][contentOwner][fields][0]=title&populate[detailed_guide][populate][contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
                           "&populate[detailed_guide][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][applicableProfessions][fields][1]=slug" +
-                          "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content";
+                          "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
+                          "&populate[relatedFiles]=true";
 
                 var response = await _httpClient.GetAsync(url);
 
@@ -278,7 +295,8 @@ namespace ServiceManual.Services
                     AudienceTags = item.Detailed_Guide?.ApplicableProfessions?
                         .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
                         .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
-                        .ToList() ?? []
+                        .ToList() ?? [],
+                    RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
                 };
             }
             catch (Exception ex)
@@ -1122,6 +1140,90 @@ namespace ServiceManual.Services
                 throw new NotImplementedException();
         }
 
+        private class StrapiFileItem
+        {
+            [JsonPropertyName("name")]
+            public string? Name { get; set; }
+            [JsonPropertyName("url")]
+            public string? Url { get; set; }
+            [JsonPropertyName("size")]
+            public decimal Size { get; set; }
+            [JsonPropertyName("mime")]
+            public string? Mime { get; set; }
+            [JsonPropertyName("ext")]
+            public string? Ext { get; set; }
+            [JsonPropertyName("caption")]
+            public string? Caption { get; set; }
+        }
+
+        /// <summary>Deserializes relatedFiles from array or Strapi wrapper { "data": [ ... ] }; each item may be flat or have "attributes".</summary>
+        private sealed class StrapiRelatedFilesConverter : JsonConverter<List<StrapiFileItem>?>
+        {
+            public override List<StrapiFileItem>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Null) return null;
+                if (reader.TokenType == JsonTokenType.StartArray)
+                    return JsonSerializer.Deserialize<List<StrapiFileItem>>(ref reader, options);
+                if (reader.TokenType == JsonTokenType.StartObject)
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.TokenType == JsonTokenType.PropertyName && reader.GetString() == "data")
+                        {
+                            reader.Read();
+                            if (reader.TokenType != JsonTokenType.StartArray) return null;
+                            return JsonSerializer.Deserialize<List<StrapiFileItem>>(ref reader, options);
+                        }
+                        if (reader.TokenType == JsonTokenType.PropertyName) { reader.Read(); reader.Skip(); }
+                    }
+                }
+                return null;
+            }
+            public override void Write(Utf8JsonWriter writer, List<StrapiFileItem>? value, JsonSerializerOptions options) =>
+                throw new NotImplementedException();
+        }
+
+        private static string FormatFileSize(decimal bytes)
+        {
+            if (bytes <= 0) return "0 B";
+            string[] units = { "B", "KB", "MB", "GB" };
+            int u = 0;
+            decimal n = bytes;
+            while (n >= 1024 && u < units.Length - 1) { n /= 1024; u++; }
+            return u == 0 ? $"{n:F0} {units[u]}" : $"{n:F1} {units[u]}";
+        }
+
+        private static string FileTypeFromMimeOrExt(string? mime, string? ext)
+        {
+            if (!string.IsNullOrWhiteSpace(ext)) return ext.TrimStart('.').ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(mime)) return "File";
+            var part = mime.Split('/').LastOrDefault();
+            return string.IsNullOrEmpty(part) ? "File" : part.ToUpperInvariant();
+        }
+
+        private static List<RelatedFileItem> MapRelatedFiles(List<StrapiFileItem>? files, string? cmsBaseUrl)
+        {
+            if (files == null || files.Count == 0) return [];
+            var baseUrl = (cmsBaseUrl ?? "").TrimEnd('/');
+            var result = new List<RelatedFileItem>();
+            foreach (var f in files)
+            {
+                var url = (f.Url ?? "").Trim();
+                if (string.IsNullOrEmpty(url)) continue;
+                if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(baseUrl))
+                    url = baseUrl + (url.StartsWith("/") ? url : "/" + url);
+                result.Add(new RelatedFileItem
+                {
+                    Name = f.Name ?? "Download",
+                    Url = url,
+                    SizeDisplay = FormatFileSize(f.Size),
+                    FileType = FileTypeFromMimeOrExt(f.Mime, f.Ext),
+                    Caption = string.IsNullOrWhiteSpace(f.Caption) ? null : f.Caption.Trim()
+                });
+            }
+            return result;
+        }
+
         /// <summary>Deserializes phases from either a direct array or Strapi v5 wrapper { "data": [ ... ] }.</summary>
         private sealed class StrapiPhasesConverter : JsonConverter<List<StrapiPhaseSummary>?>
         {
@@ -1457,10 +1559,21 @@ namespace ServiceManual.Services
             public string? Slug { get; set; }
             [JsonPropertyName("body")]
             public string? Body { get; set; }
+            [JsonPropertyName("lastReviewedDate")]
+            public string? LastReviewedDate { get; set; }
+            [JsonConverter(typeof(StrapiContentOwnerRefConverter))]
+            [JsonPropertyName("contentOwner")]
+            public StrapiContentOwnerRef? ContentOwner { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicableProfessions")]
+            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
             [JsonPropertyName("collection_sections")]
             public List<StrapiCollectionSection>? Collection_Sections { get; set; }
             [JsonPropertyName("relatedContent")]
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
+            [JsonConverter(typeof(StrapiRelatedFilesConverter))]
+            [JsonPropertyName("relatedFiles")]
+            public List<StrapiFileItem>? RelatedFiles { get; set; }
         }
 
         private class StrapiCollectionSection
@@ -1558,6 +1671,9 @@ namespace ServiceManual.Services
             public string? UpdatedAt { get; set; }
             [JsonPropertyName("lastReviewedDate")]
             public string? LastReviewedDate { get; set; }
+            [JsonConverter(typeof(StrapiRelatedFilesConverter))]
+            [JsonPropertyName("relatedFiles")]
+            public List<StrapiFileItem>? RelatedFiles { get; set; }
         }
 
         private class StrapiTagsProfession
@@ -1580,6 +1696,9 @@ namespace ServiceManual.Services
             public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
             public StrapiDetailedGuideRef? Detailed_Guide { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
+            [JsonConverter(typeof(StrapiRelatedFilesConverter))]
+            [JsonPropertyName("relatedFiles")]
+            public List<StrapiFileItem>? RelatedFiles { get; set; }
             [JsonPropertyName("showLastUpdatedDateOnPage")]
             public bool? ShowLastUpdatedDateOnPage { get; set; }
             [JsonPropertyName("updatedAt")]

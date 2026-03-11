@@ -5,7 +5,7 @@
     var collection = ViewBag.Collection as Collection ?? new Collection();
     var bodyHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(collection.Body);
     var hasSections = collection.Sections.Count > 0;
-    var hasRightPanel = collection.RelatedContent.Count > 0;
+    var hasRightPanel = collection.RelatedContent.Count > 0 || collection.RelatedFiles.Count > 0;
     var showContentsNav = hasSections && collection.Sections.Count >= 2;
     ViewData["Title"] = collection.Title;
 
@@ -17,147 +17,217 @@
     }
 }
 
-@section Breadcrumbs {
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
-<li class="govuk-breadcrumbs__list-item" aria-current="page">@collection.Title</li>
-}
+<div class="guide-modern">
+    @* Hero: breadcrumb + header within container (same structure as DetailedGuide) *@
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <header class="guide-hero">
+                <div class="govuk-width-container">
+                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+                        <ol class="govuk-breadcrumbs__list">
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                            <li class="govuk-breadcrumbs__list-item" aria-current="page">@collection.Title</li>
+                        </ol>
+                    </nav>
+                    <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-two-thirds">
+                            <span class="guide-hero__label">Collection</span>
+                            <h1 class="govuk-heading-xl">@collection.Title</h1>
+                            @if (!string.IsNullOrEmpty(collection.MetaDescription))
+                            {
+                                <p class="govuk-body-l">@collection.MetaDescription</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-@* Row 1: header + optional contents nav *@
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-        <div class="dfe-f-header">
-            <span class="govuk-caption-xl govuk-!-margin-top-5">Collection</span>
-            <h1 class="govuk-heading-xl">@collection.Title</h1>
-            @if (!string.IsNullOrEmpty(collection.MetaDescription))
+            @* Meta strip: Last reviewed, Owner, Audience (same structure as DetailedGuide) *@
+            @{
+                var hasMeta = !string.IsNullOrEmpty(collection.LastReviewedDateDisplay) || !string.IsNullOrWhiteSpace(collection.Owner) || collection.AudienceTags.Count > 0;
+            }
+            @if (hasMeta)
             {
-                <p class="govuk-body-l">@collection.MetaDescription</p>
+                <div class="guide-meta">
+                    <div class="govuk-width-container">
+                        @if (!string.IsNullOrEmpty(collection.LastReviewedDateDisplay))
+                        {
+                            <span class="guide-meta__item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(collection.LastReviewedDateDisplay)</span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(collection.Owner))
+                        {
+                            <span class="guide-meta__item">
+                                <strong>Owner:</strong>
+                                @if (!string.IsNullOrWhiteSpace(collection.OwnerUrl))
+                                { <a href="@System.Net.WebUtility.HtmlEncode(collection.OwnerUrl!)">@System.Net.WebUtility.HtmlEncode(collection.Owner!)</a> }
+                                else
+                                { @System.Net.WebUtility.HtmlEncode(collection.Owner!) }
+                            </span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (collection.AudienceTags.Count > 0)
+                        {
+                            @await Html.PartialAsync("~/Views/Shared/_AudienceMeta.cshtml", collection.AudienceTags)
+                        }
+                    </div>
+                </div>
+            }
+
+            @* Contents: dashed list of section links (same style as guide when no sub pages) *@
+            @if (showContentsNav)
+            {
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-two-thirds">
+                        <nav class="guide-contents guide-contents--dashed" aria-label="@(collection.Title) contents">
+                            <h2 class="guide-contents__title">Contents</h2>
+                            <ul class="guide-contents__list">
+                                @foreach (var grp in collection.Sections)
+                                {
+                                    var id = SectionId(grp.Title);
+                                    <li class="guide-contents__item">
+                                        <span class="guide-contents__num" aria-hidden="true">—</span>
+                                        <a href="#@id">@grp.Title</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
             }
         </div>
-
-        @if (showContentsNav)
-        {
-            <nav class="dfe-f-guide-contents govuk-!-margin-top-6" aria-label="@(collection.Title) contents">
-                <h2 class="dfe-f-guide-contents__title">Contents</h2>
-                <ol class="dfe-f-guide-contents__list">
-                    @foreach (var grp in collection.Sections)
-                    {
-                        var id = SectionId(grp.Title);
-                        <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
-                            <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                            <a class="govuk-link dfe-f-guide-contents__link" href="#@id">@grp.Title</a>
-                        </li>
-                    }
-                </ol>
-            </nav>
-        }
     </div>
-</div>
 
-@* Row 2: body + section groups + right panel *@
-<div class="govuk-grid-row">
-    <div class="@(hasRightPanel ? "govuk-grid-column-two-thirds" : "govuk-grid-column-full")">
-
-        @if (ViewBag.PageNotification != null)
-        {
-            @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
-        }
-
-        @if (!string.IsNullOrEmpty(collection.Body))
-        {
-            <div class="dfe-f-body @(hasSections ? "govuk-!-margin-bottom-0" : "")">
-                @Html.Raw(bodyHtml)
-            </div>
-        }
-
-        @if (hasSections)
-        {
-            <div id="collection-content">
-                @for (var i = 0; i < collection.Sections.Count; i++)
+    @* Content + sidebar: same two-thirds / one-third layout as DetailedGuide *@
+    <div class="govuk-grid-row guide-content-row">
+        <div class="govuk-grid-column-two-thirds">
+            <section class="dfe-f-content-section guide-content-section" aria-label="Content">
+                @if (ViewBag.PageNotification != null)
                 {
-                    var grp = collection.Sections[i];
-                    var id = SectionId(grp.Title);
-                    var titleId = id + "-title";
-                    var addSectionMargin = !string.IsNullOrEmpty(collection.Body) || i > 0;
-                    <section class="dfe-collection-group @(addSectionMargin ? "govuk-!-margin-top-6" : "")" id="@id" aria-labelledby="@titleId">
-                        <h2 class="govuk-heading-l" id="@titleId">@grp.Title</h2>
-                        @if (!string.IsNullOrEmpty(grp.Summary))
-                        {
-                            <div class="govuk-body dfe-collection-group__summary">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(grp.Summary))</div>
-                        }
-                        @if (grp.Items.Any())
-                        {
-                            var guidanceItems = grp.Items.Where(l => l.ContentType != "External link").ToList();
-                            var externalItems = grp.Items.Where(l => l.ContentType == "External link").ToList();
-
-                            @if (guidanceItems.Any())
-                            {
-                                <ul class="dfe-f-guide-list">
-                                    @foreach (var link in guidanceItems)
-                                    {
-                                        var subText = link.ContentType;
-                                        var linkHref = link.Url + (subText == "Job description" && !string.IsNullOrEmpty(collection.Slug) ? "?collection=" + Uri.EscapeDataString(collection.Slug) : "");
-                                        <li class="dfe-f-guide-list__item">
-                                            <a class="govuk-link dfe-f-guide-list__item-title" href="@linkHref" target="@(link.OpenInNewTab ? "_blank" : null)" rel="@(link.OpenInNewTab ? "noopener noreferrer" : null)">
-                                                @link.Title
-                                                @if (link.OpenInNewTab)
-                                                {
-                                                    <span class="govuk-visually-hidden">(opens in new tab)</span>
-                                                }
-                                            </a>
-                                            @if (!string.IsNullOrEmpty(subText))
-                                            {
-                                                <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">@subText</p>
-                                            }
-                                        </li>
-                                    }
-                                </ul>
-                            }
-
-                            @if (externalItems.Any())
-                            {
-                                <h3 class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-3">External guidance and resources</h3>
-                                <ul class="dfe-f-guide-list">
-                                    @foreach (var link in externalItems)
-                                    {
-                                        var subText = link.MetaDescription;
-                                        <li class="dfe-f-guide-list__item dfe-f-guide-list__item--external">
-                                            <a class="govuk-link dfe-f-guide-list__item-title" href="@link.Url" @if (link.OpenInNewTab) { <text>target="_blank" rel="noopener noreferrer"</text> }>
-                                                @link.Title
-                                                <span class="govuk-visually-hidden">(opens in new tab)</span>
-                                            </a>
-                                            @if (!string.IsNullOrEmpty(subText))
-                                            {
-                                                @Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(subText))
-                                            }
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                        }
-                    </section>
+                    @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
                 }
-            </div>
-        }
-    </div>
 
-    @if (hasRightPanel)
-    {
-        <div class="govuk-grid-column-one-third">
-            <aside class="dfe-f-sidebar-box" aria-label="Related content">
-                @foreach (var item in collection.RelatedContent)
+                @if (!string.IsNullOrEmpty(collection.Body))
                 {
-                    <div class="dfe-f-sidebar-box__section">
-                        <h3>@Html.Raw(GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
-                        @if (!string.IsNullOrEmpty(item.Content))
+                    <div class="dfe-f-body @(hasSections ? "govuk-!-margin-bottom-0" : "")">
+                        @Html.Raw(bodyHtml)
+                    </div>
+                }
+
+                @if (hasSections)
+                {
+                    <div id="collection-content">
+                        @for (var i = 0; i < collection.Sections.Count; i++)
                         {
-                            <div class="govuk-body-s">
-                                @Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForRelatedContent(item.Content))
-                            </div>
+                            var grp = collection.Sections[i];
+                            var id = SectionId(grp.Title);
+                            var titleId = id + "-title";
+                            var addSectionMargin = !string.IsNullOrEmpty(collection.Body) || i > 0;
+                            <section class="dfe-collection-group @(addSectionMargin ? "govuk-!-margin-top-6" : "")" id="@id" aria-labelledby="@titleId">
+                                <h2 class="govuk-heading-l" id="@titleId">@grp.Title</h2>
+                                @if (!string.IsNullOrEmpty(grp.Summary))
+                                {
+                                    <div class="govuk-body dfe-collection-group__summary">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(grp.Summary))</div>
+                                }
+                                @if (grp.Items.Any())
+                                {
+                                    var guidanceItems = grp.Items.Where(l => l.ContentType != "External link").ToList();
+                                    var externalItems = grp.Items.Where(l => l.ContentType == "External link").ToList();
+
+                                    @if (guidanceItems.Any())
+                                    {
+                                        <ul class="dfe-f-guide-list">
+                                            @foreach (var link in guidanceItems)
+                                            {
+                                                var subText = link.ContentType;
+                                                var linkHref = link.Url + (subText == "Job description" && !string.IsNullOrEmpty(collection.Slug) ? "?collection=" + Uri.EscapeDataString(collection.Slug) : "");
+                                                <li class="dfe-f-guide-list__item">
+                                                    <a class="govuk-link dfe-f-guide-list__item-title" href="@linkHref" target="@(link.OpenInNewTab ? "_blank" : null)" rel="@(link.OpenInNewTab ? "noopener noreferrer" : null)">
+                                                        @link.Title
+                                                        @if (link.OpenInNewTab)
+                                                        {
+                                                            <span class="govuk-visually-hidden">(opens in new tab)</span>
+                                                        }
+                                                    </a>
+                                                    @if (!string.IsNullOrEmpty(subText))
+                                                    {
+                                                        <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">@subText</p>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+
+                                    @if (externalItems.Any())
+                                    {
+                                        <h3 class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-3">External guidance and resources</h3>
+                                        <ul class="dfe-f-guide-list">
+                                            @foreach (var link in externalItems)
+                                            {
+                                                var subText = link.MetaDescription;
+                                                <li class="dfe-f-guide-list__item dfe-f-guide-list__item--external">
+                                                    <a class="govuk-link dfe-f-guide-list__item-title" href="@link.Url" @if (link.OpenInNewTab) { <text>target="_blank" rel="noopener noreferrer"</text> }>
+                                                        @link.Title
+                                                        <span class="govuk-visually-hidden">(opens in new tab)</span>
+                                                    </a>
+                                                    @if (!string.IsNullOrEmpty(subText))
+                                                    {
+                                                        @Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(subText))
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                }
+                            </section>
                         }
                     </div>
                 }
-            </aside>
+            </section>
         </div>
-    }
+
+        <div class="govuk-grid-column-one-third">
+            @if (hasRightPanel)
+            {
+                <aside class="guide-sidebar__card" aria-label="Related content">
+                    @foreach (var item in collection.RelatedContent)
+                    {
+                        <div class="govuk-!-margin-bottom-4">
+                            <h3>@Html.Raw(GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
+                            @if (!string.IsNullOrEmpty(item.Content))
+                            {
+                                <div class="govuk-body-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForRelatedContent(item.Content))</div>
+                            }
+                        </div>
+                    }
+                </aside>
+            }
+            @if (collection.RelatedFiles.Count > 0)
+            {
+                <aside class="guide-sidebar__card guide-sidebar__card--downloads" aria-label="Downloads">
+                    <h3 class="govuk-heading-s">Downloads</h3>
+                    <ul class="guide-sidebar__downloads-list">
+                        @foreach (var file in collection.RelatedFiles)
+                        {
+                            <li class="guide-sidebar__downloads-item">
+                                <a class="guide-sidebar__downloads-link" href="@file.Url" target="_blank" rel="noopener noreferrer">
+                                    <span class="guide-sidebar__downloads-link-inner">
+                                        <span class="guide-sidebar__downloads-filename">@System.Net.WebUtility.HtmlEncode(file.Name)</span>
+                                        <span class="guide-sidebar__downloads-meta"><span class="guide-sidebar__downloads-type">@System.Net.WebUtility.HtmlEncode(file.FileType)</span> · @System.Net.WebUtility.HtmlEncode(file.SizeDisplay)</span>
+                                        @if (!string.IsNullOrWhiteSpace(file.Caption))
+                                        {
+                                            <span class="guide-sidebar__downloads-caption">@System.Net.WebUtility.HtmlEncode(file.Caption)</span>
+                                        }
+                                    </span>
+                                    <span class="guide-sidebar__downloads-icon" aria-hidden="true"></span>
+                                    <span class="govuk-visually-hidden"> (opens in new tab)</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </aside>
+            }
+        </div>
+    </div>
 </div>

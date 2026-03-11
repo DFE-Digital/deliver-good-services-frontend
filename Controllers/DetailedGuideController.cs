@@ -111,6 +111,7 @@ namespace ServiceManual.Controllers
                 PaginationNextUrl = guide.Pages.Count > 0 ? $"/guidance/guides/{guide.Slug}/{guide.Pages[0].Slug}" : null,
                 PaginationNextLabel = guide.Pages.Count > 0 ? guide.Pages[0].Title : null,
                 RelatedContent = guide.RelatedContent,
+                RelatedFiles = guide.RelatedFiles,
                 ApplyNoContentsSectionStyle = guide.HideContentsOnPrimaryPage
             };
         }
@@ -205,6 +206,7 @@ namespace ServiceManual.Controllers
                 PaginationNextUrl = nextUrl,
                 PaginationNextLabel = nextLabel,
                 RelatedContent = guidePage.RelatedContent,
+                RelatedFiles = guidePage.RelatedFiles,
                 ApplyNoContentsSectionStyle = false
             };
         }

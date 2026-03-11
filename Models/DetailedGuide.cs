@@ -29,6 +29,8 @@ namespace ServiceManual.Models
         public List<string> Audience { get; set; } = [];
         /// <summary>Audience as tag refs (slug + title) for linking to content-by-profession view.</summary>
         public List<TagRef> AudienceTags { get; set; } = [];
+        /// <summary>Related files for the Downloads sidebar section.</summary>
+        public List<RelatedFileItem> RelatedFiles { get; set; } = [];
     }
 
     public class DetailedGuidePageSummary

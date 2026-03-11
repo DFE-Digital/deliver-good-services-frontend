@@ -5111,6 +5111,35 @@ a:focus-visible {
     display: none;
 }
 
+/* Audience: expandable list when more than 2 professions */
+.guide-modern .guide-meta__audience-extra {
+    display: none;
+}
+
+.guide-modern .guide-meta__audience--expanded .guide-meta__audience-extra {
+    display: inline;
+}
+
+.guide-modern .guide-meta__audience--expanded .guide-meta__audience-toggle {
+    display: none;
+}
+
+.guide-modern .guide-meta__audience-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: 0.25rem;
+    font: inherit;
+    color: var(--govuk-colour-blue-shade-25);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.guide-modern .guide-meta__audience-toggle:hover {
+    color: var(--govuk-colour-blue-shade-50);
+}
+
 /* Contents: simple list (no bordered box) */
 .guide-modern .guide-contents {
     margin-top: 1.5rem;
@@ -5271,6 +5300,100 @@ a:focus-visible {
     text-underline-offset: 2px;
 }
 
+/* Sidebar Downloads section */
+.guide-modern .guide-sidebar__card--downloads .govuk-heading-s {
+    margin-bottom: 1rem;
+}
+
+.guide-modern .guide-sidebar__downloads-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.guide-modern .guide-sidebar__downloads-item {
+    margin: 0;
+    border-radius: 0;
+}
+
+
+.guide-modern .guide-sidebar__downloads-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: #1d1d1d;
+    transition: background-color 0.1s ease;
+    padding: 12px;
+    background-color: var(--govuk-colour-surface-bg);
+    border: 1px solid var(--govuk-colour-surface-border);
+}
+
+.guide-modern .guide-sidebar__downloads-link:hover {
+    background: #f8f8f8;
+}
+
+.guide-modern .guide-sidebar__downloads-link:focus {
+    outline: 3px solid #fd0;
+    outline-offset: 2px;
+}
+
+.guide-modern .guide-sidebar__downloads-link-inner {
+    flex: 1;
+    min-width: 0;
+}
+
+.guide-modern .guide-sidebar__downloads-filename {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.35;
+    color: var(--guide-accent, #1d70b8);
+    word-break: break-word;
+}
+
+.guide-modern .guide-sidebar__downloads-link:hover .guide-sidebar__downloads-filename {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.guide-modern .guide-sidebar__downloads-meta {
+    display: block;
+    font-size: 0.8125rem;
+    color: #505a5f;
+    margin-top: 0.25rem;
+}
+
+.guide-modern .guide-sidebar__downloads-type {
+    font-weight: 600;
+    color: #505a5f;
+}
+
+.guide-modern .guide-sidebar__downloads-caption {
+    display: block;
+    font-size: 0.875rem;
+    color: #505a5f;
+    margin-top: 0.25rem;
+    line-height: 1.4;
+}
+
+.guide-modern .guide-sidebar__downloads-icon {
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 0.2rem;
+    background: currentColor;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='7 10 12 15 17 10'/%3E%3Cline x1='12' y1='15' x2='12' y2='3'/%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='7 10 12 15 17 10'/%3E%3Cline x1='12' y1='15' x2='12' y2='3'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    color: var(--guide-accent, #1d70b8);
+}
+
 /* Pagination: clearer separation */
 .guide-modern .guide-pagination {
     margin-top: 2.5rem;
@@ -5278,4 +5401,10 @@ a:focus-visible {
     border-top: 1px solid #e8e8e8;
 }
 
+.govuk-summary-card{
+    border-color: var(--govuk-colour-surface-border);
+}
   
+.govuk-summary-card__title-wrapper{
+    background-color: var(--govuk-colour-surface-bg);
+}

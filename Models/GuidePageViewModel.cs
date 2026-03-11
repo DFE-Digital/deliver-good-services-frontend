@@ -30,6 +30,8 @@ namespace ServiceManual.Models
         public string? PaginationNextUrl { get; set; }
         public string? PaginationNextLabel { get; set; }
         public List<RelatedContentItem> RelatedContent { get; set; } = [];
+        /// <summary>Related files for the Downloads sidebar section.</summary>
+        public List<RelatedFileItem> RelatedFiles { get; set; } = [];
         /// <summary>When true, apply guide-content-section--no-contents (overview only, when contents hidden).</summary>
         public bool ApplyNoContentsSectionStyle { get; set; }
     }

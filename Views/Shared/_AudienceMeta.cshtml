@@ -1,0 +1,23 @@
+@using ServiceManual.Models
+@model IReadOnlyList<TagRef>
+@{
+    var tags = Model ?? Array.Empty<TagRef>();
+    if (tags.Count == 0) { return; }
+    var showExpand = tags.Count > 2;
+    var extraCount = showExpand ? tags.Count - 2 : 0;
+    string Link(TagRef t) => $"<a href=\"/content/profession/{Uri.EscapeDataString(t.Slug)}\">{System.Net.WebUtility.HtmlEncode(t.Title)}</a>";
+}
+<span class="guide-meta__item">
+    <strong>Audience:</strong>
+    @if (showExpand)
+    {
+        <span class="guide-meta__audience">
+            @Html.Raw(Link(tags[0])), @Html.Raw(Link(tags[1]))<span class="guide-meta__audience-extra" aria-hidden="true">, @Html.Raw(string.Join(", ", tags.Skip(2).Select(Link)))</span>
+            <button type="button" class="guide-meta__audience-toggle govuk-link" data-extra-count="@extraCount" aria-expanded="false">+@extraCount more</button>
+        </span>
+    }
+    else
+    {
+        @Html.Raw(string.Join(", ", tags.Select(Link)))
+    }
+</span>

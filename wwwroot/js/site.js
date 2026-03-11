@@ -453,4 +453,29 @@ document.addEventListener('DOMContentLoaded', function() {
           closeAllMenus();
       }
   });
+});
+
+// Guide/Collection meta: expand/collapse audience "+N more"
+document.addEventListener('DOMContentLoaded', function() {
+  document.body.addEventListener('click', function(e) {
+    var btn = e.target && e.target.closest && e.target.closest('.guide-meta__audience-toggle');
+    if (!btn) return;
+    e.preventDefault();
+    var wrapper = btn.closest('.guide-meta__audience');
+    if (!wrapper) return;
+    var extra = wrapper.querySelector('.guide-meta__audience-extra');
+    var extraCount = btn.getAttribute('data-extra-count') || '';
+    var isExpanded = wrapper.classList.contains('guide-meta__audience--expanded');
+    if (isExpanded) {
+      wrapper.classList.remove('guide-meta__audience--expanded');
+      btn.textContent = '+' + extraCount + ' more';
+      btn.setAttribute('aria-expanded', 'false');
+      if (extra) extra.setAttribute('aria-hidden', 'true');
+    } else {
+      wrapper.classList.add('guide-meta__audience--expanded');
+      btn.textContent = 'Show less';
+      btn.setAttribute('aria-expanded', 'true');
+      if (extra) extra.setAttribute('aria-hidden', 'false');
+    }
+  });
 }); 

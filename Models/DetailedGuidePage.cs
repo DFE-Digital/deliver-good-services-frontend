@@ -35,5 +35,7 @@ namespace ServiceManual.Models
         public string? OwnerUrl { get; set; }
         /// <summary>Audience (profession tags) from parent guide for meta strip.</summary>
         public List<TagRef> AudienceTags { get; set; } = [];
+        /// <summary>Related files for the Downloads sidebar section.</summary>
+        public List<RelatedFileItem> RelatedFiles { get; set; } = [];
     }
 }

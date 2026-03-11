@@ -71,7 +71,7 @@
                         }
                         @if (vm.AudienceTags.Count > 0)
                         {
-                            <span class="guide-meta__item"><strong>Audience:</strong> @Html.Raw(string.Join(", ", vm.AudienceTags.Select(t => $"<a href=\"/content/profession/{Uri.EscapeDataString(t.Slug)}\">{System.Net.WebUtility.HtmlEncode(t.Title)}</a>")))</span>
+                            @await Html.PartialAsync("~/Views/Shared/_AudienceMeta.cshtml", vm.AudienceTags)
                         }
                     </div>
                 </div>
@@ -183,6 +183,31 @@
                             }
                         </div>
                     }
+                </aside>
+            }
+            @if (vm.RelatedFiles.Count > 0)
+            {
+                <aside class="guide-sidebar__card guide-sidebar__card--downloads" aria-label="Downloads">
+                    <h3 class="govuk-heading-s">Downloads</h3>
+                    <ul class="guide-sidebar__downloads-list">
+                        @foreach (var file in vm.RelatedFiles)
+                        {
+                            <li class="guide-sidebar__downloads-item">
+                                <a class="guide-sidebar__downloads-link" href="@file.Url" target="_blank" rel="noopener noreferrer">
+                                    <span class="guide-sidebar__downloads-link-inner">
+                                        <span class="guide-sidebar__downloads-filename">@System.Net.WebUtility.HtmlEncode(file.Name)</span>
+                                        <span class="guide-sidebar__downloads-meta"><span class="guide-sidebar__downloads-type">@System.Net.WebUtility.HtmlEncode(file.FileType)</span> · @System.Net.WebUtility.HtmlEncode(file.SizeDisplay)</span>
+                                        @if (!string.IsNullOrWhiteSpace(file.Caption))
+                                        {
+                                            <span class="guide-sidebar__downloads-caption">@System.Net.WebUtility.HtmlEncode(file.Caption)</span>
+                                        }
+                                    </span>
+                                    <span class="guide-sidebar__downloads-icon" aria-hidden="true"></span>
+                                    <span class="govuk-visually-hidden"> (opens in new tab)</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 </aside>
             }
         </div>
