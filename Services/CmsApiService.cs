@@ -136,7 +136,9 @@ namespace ServiceManual.Services
                         ? new JobSpecificationProfession
                         {
                             Title = item.Profession.Title,
-                            Slug = item.Profession.Slug
+                            Slug = item.Profession.Slug,
+                            Plural = item.Profession.Plural,
+                            ProfessionDescription = item.Profession.ProfessionDescription
                         }
                         : null,
                     SiblingJobSpecifications = (item.SiblingJobSpecifications ?? [])
@@ -1758,8 +1760,14 @@ namespace ServiceManual.Services
 
         private class StrapiJobSpecificationProfession
         {
+            [JsonPropertyName("title")]
             public string? Title { get; set; }
+            [JsonPropertyName("slug")]
             public string? Slug { get; set; }
+            [JsonPropertyName("plural")]
+            public string? Plural { get; set; }
+            [JsonPropertyName("professionDescription")]
+            public string? ProfessionDescription { get; set; }
         }
 
         private class StrapiJobSpecificationSibling

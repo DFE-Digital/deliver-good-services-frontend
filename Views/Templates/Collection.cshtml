@@ -99,7 +99,8 @@
         </div>
     </div>
 
-    @* Content + sidebar: same two-thirds / one-third layout as DetailedGuide *@
+    @* Content + sidebar: same two-thirds / one-third layout as DetailedGuide.
+       Do not show professionDescription (from tags-profession) here — it is only shown on the job specification page. *@
     <div class="govuk-grid-row guide-content-row">
         <div class="govuk-grid-column-two-thirds">
             <section class="dfe-f-content-section guide-content-section" aria-label="Content">
@@ -126,10 +127,7 @@
                             var addSectionMargin = !string.IsNullOrEmpty(collection.Body) || i > 0;
                             <section class="dfe-collection-group @(addSectionMargin ? "govuk-!-margin-top-6" : "")" id="@id" aria-labelledby="@titleId">
                                 <h2 class="govuk-heading-l" id="@titleId">@grp.Title</h2>
-                                @if (!string.IsNullOrEmpty(grp.Summary))
-                                {
-                                    <div class="govuk-body dfe-collection-group__summary">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(grp.Summary))</div>
-                                }
+                                @* Section summary (description) is not shown on the collection page; profession description is only shown on the job specification page. *@
                                 @if (grp.Items.Any())
                                 {
                                     var guidanceItems = grp.Items.Where(l => l.ContentType != "External link").ToList();

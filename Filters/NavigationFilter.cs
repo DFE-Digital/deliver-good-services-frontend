@@ -52,9 +52,23 @@ namespace ServiceManual.Filters
                             nav = [lifecycleNav, ..nav];
                         }
                     }
+                    if (nav is null || nav.Count == 0)
+                    {
+                        nav = GetDefaultSiteNavigation();
+                    }
                     controller.ViewData["Navigation"] = nav;
                 }
             }
+        }
+
+        private static List<NavigationItem> GetDefaultSiteNavigation()
+        {
+            return
+            [
+                new NavigationItem { Title = "Browse guidance", Url = "/content", Order = 0 },
+                new NavigationItem { Title = "Documentation", Url = "/documentation", Order = 1 },
+                new NavigationItem { Title = "DDT standards", Url = "/standards/ddt-standards", Order = 2 }
+            ];
         }
 
         private static List<NavigationItem> BuildDocumentationNavigation(List<DocumentationSection> sections)

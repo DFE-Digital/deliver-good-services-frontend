@@ -2,50 +2,97 @@
 @using ServiceManual.Models
 @{
   ViewData["Title"] = Model.Title;
-  var sectionTitle = ViewData["DocSectionTitle"] as string ?? Model.Title;
+  var contentsItems = ViewData["DocContentsItems"] as List<GuideContentsItem> ?? new List<GuideContentsItem>();
+  var heroTitle = ViewData["DocHeroTitle"] as string ?? Model.Title;
+  var heroIntro = ViewData["DocHeroIntro"] as string;
 }
 
 @section Styles {
   <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
 }
 
-@section Breadcrumbs {
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
-  <li class="govuk-breadcrumbs__list-item" aria-current="page">@sectionTitle</li>
-}
-
 @section Scripts {
   <script src="/js/documentation.js"></script>
 }
 
-<div class="doc-wrapper">
-  <div class="doc-layout">
-    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
-    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
-    <main class="doc-content" id="main-content">
-      <div class="doc-content__header">
-        <span class="doc-content__tag">@sectionTitle</span>
-        <h1 class="govuk-heading-l doc-content__title">@Model.Title</h1>
-        <p class="doc-content__lead">Pages in this section. Use the side nav to open a page.</p>
-      </div>
-      @if (Model.Documentations.Count > 0)
+<div class="guide-modern">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <header class="guide-hero">
+        <div class="govuk-width-container">
+          <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+            <ol class="govuk-breadcrumbs__list">
+              <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+              <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+              <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
+            </ol>
+          </nav>
+          <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+              <span class="guide-hero__label">Documentation</span>
+              <h1 class="govuk-heading-xl">@heroTitle</h1>
+              @if (!string.IsNullOrEmpty(heroIntro))
+              {
+                <p class="govuk-body-l">@heroIntro</p>
+              }
+            </div>
+          </div>
+        </div>
+      </header>
+
+      @if (contentsItems.Count > 0)
       {
-        <div class="doc-card-grid" style="margin-top: 24px;">
-          @foreach (var docPage in Model.Documentations)
-          {
-            <a href="/documentation/@Model.Slug/@docPage.Slug" class="doc-card">
-              <span class="doc-card__category">@sectionTitle</span>
-              <h3 class="doc-card__title">@docPage.Title</h3>
-              <p class="doc-card__description">View this page.</p>
-            </a>
-          }
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-two-thirds">
+            <nav class="guide-contents" aria-label="Pages in this section">
+              <h2 class="guide-contents__title">Contents</h2>
+              <ul class="guide-contents__list">
+                @foreach (var item in contentsItems)
+                {
+                  <li class="guide-contents__item @(item.IsCurrent ? "guide-contents__item--current" : "")">
+                    <span class="guide-contents__num" aria-hidden="true">@item.Number</span>
+                    @if (item.IsCurrent || item.Url == null)
+                    {
+                      <span aria-current="page">@item.Title</span>
+                    }
+                    else
+                    {
+                      <a href="@item.Url">@item.Title</a>
+                    }
+                  </li>
+                }
+              </ul>
+            </nav>
+          </div>
         </div>
       }
-      else
-      {
-        <p class="govuk-body" style="margin-top: 24px;">No pages in this section yet.</p>
-      }
-    </main>
+    </div>
+  </div>
+
+  <div class="govuk-grid-row guide-content-row">
+    <div class="govuk-grid-column-two-thirds">
+      <section class="dfe-f-content-section guide-content-section" aria-label="Content">
+        @if (Model.Documentations.Count > 0)
+        {
+          <p class="govuk-body">Select a page from the contents above.</p>
+        }
+        else
+        {
+          <p class="govuk-body">No pages in this section yet.</p>
+        }
+      </section>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <aside class="guide-sidebar__card" aria-label="In this section">
+        <h3 class="govuk-heading-s">In this section</h3>
+        <ul class="govuk-list">
+          <li><a href="/documentation/@Model.Slug">Overview</a></li>
+          @foreach (var docPage in Model.Documentations)
+          {
+            <li><a href="/documentation/@Model.Slug/@docPage.Slug">@docPage.Title</a></li>
+          }
+        </ul>
+      </aside>
+    </div>
   </div>
 </div>

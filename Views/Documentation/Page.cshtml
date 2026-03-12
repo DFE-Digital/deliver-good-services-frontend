@@ -1,4 +1,5 @@
 @model ServiceManual.Models.DocumentationPageViewModel
+@using System.Linq
 @{
   ViewData["Title"] = Model.Title + " – Documentation";
 }
@@ -7,37 +8,135 @@
   <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
 }
 
-@section Breadcrumbs {
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/@Model.SectionSlug">@Model.SectionTitle</a></li>
-  <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
-}
-
 @section Scripts {
   <script src="/js/documentation.js"></script>
 }
 
-<div class="doc-wrapper">
-  <div class="doc-layout">
-    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
-    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
-    <main class="doc-content" id="main-content">
-      <div class="doc-content__header">
-        <span class="doc-content__tag">@Model.SectionTitle</span>
-        <h1 class="govuk-heading-l doc-content__title">@Model.Title</h1>
-        @if (!string.IsNullOrEmpty(Model.MetaDescription))
+<div class="guide-modern">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <header class="guide-hero">
+        <div class="govuk-width-container">
+          <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+            <ol class="govuk-breadcrumbs__list">
+              <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+              <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+              <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/@Model.SectionSlug">@Model.SectionTitle</a></li>
+              <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
+            </ol>
+          </nav>
+          <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+              <span class="guide-hero__label">Documentation</span>
+              <h1 class="govuk-heading-xl">@Model.SectionTitle</h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      @if (Model.ContentsItems.Count > 0)
+      {
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-two-thirds">
+            <nav class="guide-contents" aria-label="Pages in this section">
+              <h2 class="guide-contents__title">Contents</h2>
+              <ul class="guide-contents__list">
+                @foreach (var item in Model.ContentsItems)
+                {
+                  <li class="guide-contents__item @(item.IsCurrent ? "guide-contents__item--current" : "")">
+                    <span class="guide-contents__num" aria-hidden="true">@item.Number</span>
+                    @if (item.IsCurrent || item.Url == null)
+                    {
+                      <span aria-current="page">@item.Title</span>
+                    }
+                    else
+                    {
+                      <a href="@item.Url">@item.Title</a>
+                    }
+                  </li>
+                }
+              </ul>
+            </nav>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="govuk-grid-row guide-content-row">
+    <div class="govuk-grid-column-two-thirds">
+      <section class="dfe-f-content-section guide-content-section" aria-label="Content">
+        <header class="dfe-f-content-header">
+          <h2 class="govuk-heading-l">@Model.Title</h2>
+          @if (!string.IsNullOrEmpty(Model.MetaDescription))
+          {
+            <div class="dfe-f-content-header__intro govuk-body">
+              <p class="govuk-body">@Model.MetaDescription</p>
+            </div>
+          }
+          @if (!string.IsNullOrEmpty(Model.LastReviewedDateDisplay))
+          {
+            <p class="govuk-body-s govuk-!-margin-top-2">Last reviewed: @Model.LastReviewedDateDisplay</p>
+          }
+        </header>
+
+        @if (!string.IsNullOrEmpty(Model.BodyHtml))
         {
-          <p class="doc-content__lead">@Model.MetaDescription</p>
+          <div class="dfe-f-body">
+            @Html.Raw(Model.BodyHtml)
+          </div>
         }
-        @if (!string.IsNullOrEmpty(Model.LastReviewedDateDisplay))
+
+        @if (Model.PaginationPrevUrl != null || Model.PaginationNextUrl != null)
         {
-          <p class="govuk-body-s govuk-!-margin-top-2">Last reviewed: @Model.LastReviewedDateDisplay</p>
+          <nav class="govuk-pagination govuk-pagination--block guide-pagination" aria-label="Pages in this section">
+            @if (Model.PaginationPrevUrl != null)
+            {
+              <div class="govuk-pagination__prev">
+                <a class="govuk-link govuk-pagination__link" href="@Model.PaginationPrevUrl" rel="prev">
+                  <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" focusable="false" aria-hidden="true" viewBox="0 0 15 13"><path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"/></svg>
+                  <span class="govuk-pagination__link-title">Previous<span class="govuk-visually-hidden"> page</span></span>
+                  <span class="govuk-visually-hidden">:</span>
+                  <span class="govuk-pagination__link-label">@(Model.PaginationPrevLabel ?? "Previous")</span>
+                </a>
+              </div>
+            }
+            @if (Model.PaginationNextUrl != null)
+            {
+              <div class="govuk-pagination__next">
+                <a class="govuk-link govuk-pagination__link" href="@Model.PaginationNextUrl" rel="next">
+                  <span class="govuk-pagination__link-title">Next<span class="govuk-visually-hidden"> page</span></span>
+                  <span class="govuk-visually-hidden">:</span>
+                  <span class="govuk-pagination__link-label">@(Model.PaginationNextLabel ?? "Next")</span>
+                  <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" focusable="false" aria-hidden="true" viewBox="0 0 15 13"><path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7246z"/></svg>
+                </a>
+              </div>
+            }
+          </nav>
         }
-      </div>
-      <div class="doc-content__body govuk-prose-scope">
-        @Html.Raw(Model.BodyHtml)
-      </div>
-    </main>
+      </section>
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+      <aside class="guide-sidebar__card" aria-label="In this section">
+        <h3 class="govuk-heading-s">In this section</h3>
+        <ul class="govuk-list">
+          <li><a href="/documentation/@Model.SectionSlug">Overview</a></li>
+          @foreach (var item in Model.ContentsItems.Where(c => c.Number > 1))
+          {
+            <li>
+              @if (item.IsCurrent)
+              {
+                <span aria-current="page">@item.Title</span>
+              }
+              else
+              {
+                <a href="@item.Url">@item.Title</a>
+              }
+            </li>
+          }
+        </ul>
+      </aside>
+    </div>
   </div>
 </div>

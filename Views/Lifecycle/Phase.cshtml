@@ -4,11 +4,9 @@
     var phase = ViewBag.Phase as Phase ?? new Phase();
     var allPhases = ViewBag.AllPhases as List<string> ?? new List<string>();
     var phaseSlug = phase.Slug.ToLowerInvariant();
-    var phaseCss = $"dfe-f-phase-hero--{phaseSlug}";
-    var sectionCss = $"dfe-f-content-section--{phaseSlug}";
-    var summaryHtml = GovUkMarkdownHelper.ToGovUkHtml(phase.Summary);
-    var purposeHtml = GovUkMarkdownHelper.ToGovUkHtml(phase.Purpose);
-    var intentHtml = GovUkMarkdownHelper.ToGovUkHtml(phase.Intent);
+    var summaryHtml = GovUkMarkdownHelper.ToGovUkHtml(phase.Summary ?? "");
+    var purposeHtml = GovUkMarkdownHelper.ToGovUkHtml(phase.Purpose ?? "");
+    var intentHtml = GovUkMarkdownHelper.ToGovUkHtml(phase.Intent ?? "");
     ViewData["Title"] = phase.Title;
 
     var idx = allPhases.IndexOf(phaseSlug);
@@ -22,266 +20,258 @@
     if (phase.Outputs.Any()) sectionIds.Add("outputs");
     if (phase.Assurance != null) sectionIds.Add("assurance");
     if (phase.RelatedGuidance.Any() || phase.RelatedStandards.Any() || phase.RelatedTools.Any() || phase.RelatedTraining.Any()) sectionIds.Add("related");
+
+    string TitleCase(string s) => string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + s[1..];
 }
 
 @section Masthead {
-<div class="dfe-f-page dfe-f-page--active" id="page-@phaseSlug">
-  <div class="dfe-f-phase-hero @phaseCss">
-    <div class="dfe-f-phase-hero__inner govuk-width-container">
-      <nav class="govuk-breadcrumbs dfe-f-phase-hero__breadcrumbs" aria-label="Breadcrumb">
-        <ol class="govuk-breadcrumbs__list">
-          <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-          <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/lifecycle">What to do when</a></li>
-          <li class="govuk-breadcrumbs__list-item" aria-current="page">@phase.Title</li>
-        </ol>
-      </nav>
-      <span class="dfe-f-phase-hero__tag @phaseCss">@phase.Title</span>
-      <h1 class="govuk-heading-xl dfe-f-phase-hero__title">@phase.Title</h1>
-      @if (!string.IsNullOrEmpty(phase.Summary))
-      {
-        <p class="govuk-body-l dfe-f-phase-hero__lead">@Html.Raw(summaryHtml)</p>
-      }
-      <div class="dfe-f-phase-hero__stats">
-        <div class="dfe-f-phase-stat"><span class="dfe-f-phase-stat__label">Duration</span><span class="dfe-f-phase-stat__val">@(phase.Duration ?? "—")</span></div>
-        @if (!string.IsNullOrEmpty(phase.TeamSize))
+<header class="guide-hero homepage-hero">
+  <div class="govuk-width-container">
+    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+      <ol class="govuk-breadcrumbs__list">
+        <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+        <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/lifecycle">What to do when</a></li>
+        <li class="govuk-breadcrumbs__list-item" aria-current="page">@phase.Title</li>
+      </ol>
+    </nav>
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+        <span class="guide-hero__label">Lifecycle</span>
+        <h1 class="govuk-heading-xl">@phase.Title</h1>
+        @if (!string.IsNullOrEmpty(phase.Summary))
         {
-          <div class="dfe-f-phase-stat"><span class="dfe-f-phase-stat__label">Team</span><span class="dfe-f-phase-stat__val">@phase.TeamSize</span></div>
+          <p class="govuk-body-l homepage-hero__intro">@Html.Raw(summaryHtml)</p>
         }
-        <div class="dfe-f-phase-stat"><span class="dfe-f-phase-stat__label">Ends with</span><span class="dfe-f-phase-stat__val">Portfolio board decision</span></div>
-        <div class="dfe-f-phase-stat"><span class="dfe-f-phase-stat__label">Assessment</span><span class="dfe-f-phase-stat__val">@(phase.Assurance?.AssuranceType ?? "Not required")</span></div>
+        @if (!string.IsNullOrEmpty(phase.Duration) || !string.IsNullOrEmpty(phase.TeamSize))
+        {
+          <p class="govuk-body-s govuk-!-margin-top-2 govuk-!-margin-bottom-0" style="opacity:0.9">
+            @if (!string.IsNullOrEmpty(phase.Duration)) { <span>Duration: @phase.Duration</span> }
+            @if (!string.IsNullOrEmpty(phase.Duration) && !string.IsNullOrEmpty(phase.TeamSize)) { <span> · </span> }
+            @if (!string.IsNullOrEmpty(phase.TeamSize)) { <span>Team: @phase.TeamSize</span> }
+          </p>
+        }
       </div>
     </div>
   </div>
-  @if (sectionIds.Any())
-  {
-    var firstId = sectionIds.First();
-    <nav class="dfe-f-section-nav @sectionCss" aria-label="On this page">
-      <div class="dfe-f-section-nav__inner govuk-width-container">
-        @if (sectionIds.Contains("overview")) { <a class="dfe-f-section-nav__link @(firstId == "overview" ? "dfe-f-section-nav__link--active" : "")" href="#overview">Overview</a> }
-        @if (sectionIds.Contains("activities")) { <a class="dfe-f-section-nav__link @(firstId == "activities" ? "dfe-f-section-nav__link--active" : "")" href="#activities">Activities</a> }
-        @if (sectionIds.Contains("requirements")) { <a class="dfe-f-section-nav__link @(firstId == "requirements" ? "dfe-f-section-nav__link--active" : "")" href="#requirements">Mandatory requirements</a> }
-        @if (sectionIds.Contains("outputs")) { <a class="dfe-f-section-nav__link @(firstId == "outputs" ? "dfe-f-section-nav__link--active" : "")" href="#outputs">Outputs</a> }
-        @if (sectionIds.Contains("assurance")) { <a class="dfe-f-section-nav__link @(firstId == "assurance" ? "dfe-f-section-nav__link--active" : "")" href="#assurance">Assurance</a> }
-        @if (sectionIds.Contains("related")) { <a class="dfe-f-section-nav__link @(firstId == "related" ? "dfe-f-section-nav__link--active" : "")" href="#related">Related guidance</a> }
-      </div>
-    </nav>
-  }
-</div>
+</header>
 }
 
-<div class="dfe-f-wrapper dfe-f-wrapper--phase">
-      <div class="dfe-f-grid-with-sidebar">
-        <div>
-          @if (!string.IsNullOrEmpty(phase.Purpose) || !string.IsNullOrEmpty(phase.Intent))
-          {
-            <section class="dfe-f-content-section @sectionCss" id="overview">
-              <div class="dfe-f-content-section__hd"><h2 class="govuk-heading-m">What @phase.Title is for</h2></div>
-              @if (!string.IsNullOrEmpty(phase.Purpose))
-              {
-                <div class="govuk-body">@Html.Raw(purposeHtml)</div>
-              }
-              @if (!string.IsNullOrEmpty(phase.Intent))
-              {
-                <h3 class="govuk-heading-s">Intent</h3>
-                <div class="govuk-body">@Html.Raw(intentHtml)</div>
-              }
-            </section>
-            <hr class="dfe-f-section-divider" />
-          }
+<div class="guide-modern">
+  <div class="govuk-width-container">
+    <div class="govuk-grid-row guide-content-row">
+      <div class="govuk-grid-column-two-thirds">
+        @if (!string.IsNullOrEmpty(phase.Purpose) || !string.IsNullOrEmpty(phase.Intent))
+        {
+          <section class="govuk-!-margin-bottom-8" id="overview">
+            <h2 class="govuk-heading-l govuk-!-margin-bottom-4">What @phase.Title is for</h2>
+            @if (!string.IsNullOrEmpty(phase.Purpose))
+            {
+              <div class="govuk-body">@Html.Raw(purposeHtml)</div>
+            }
+            @if (!string.IsNullOrEmpty(phase.Intent))
+            {
+              <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3">Intent</h3>
+              <div class="govuk-body">@Html.Raw(intentHtml)</div>
+            }
+          </section>
+        }
 
-          @if (phase.Activities.Any())
-          {
-            <section class="dfe-f-content-section @sectionCss" id="activities">
-              <div class="dfe-f-content-section__hd"><h2 class="govuk-heading-m">Activities</h2></div>
-              <p class="govuk-body" style="font-size:.9375rem;color:var(--govuk-colour-secondary-text);margin-bottom:16px">Select any task to see the full guidance and useful resources.</p>
-              @{ var actIndex = 0; }
-              @foreach (var a in phase.Activities)
-              {
-                actIndex++;
-                var panelId = $"phase-activity-{phaseSlug}-{actIndex}";
-                var isFirst = actIndex == 1;
-                var hintText = !string.IsNullOrEmpty(a.ShortDescription) ? a.ShortDescription : (string.IsNullOrEmpty(a.Description) ? "" : (a.Description.Length > 120 ? a.Description.Substring(0, 117) + "..." : a.Description));
-                <div class="dfe-f-task-panel @(isFirst ? "is-open" : "")" id="@panelId">
-                  <button type="button" class="dfe-f-task-panel__trigger" aria-expanded="@(isFirst ? "true" : "false")" aria-controls="@(panelId)-body">
-                    <div class="dfe-f-task-panel__num dfe-f-task-panel__num--green">@actIndex</div>
-                    <div class="dfe-f-task-panel__title-group">
-                      <span class="dfe-f-task-panel__title">@a.Title</span>
-                      @if (a.ProfessionTitles.Any())
-                      {
-                        <span class="dfe-f-task-panel__meta">@string.Join(", ", a.ProfessionTitles)</span>
-                      }
-                      @if (!string.IsNullOrEmpty(hintText))
-                      {
-                        <span class="dfe-f-task-panel__hint">@hintText</span>
-                      }
-                    </div>
-                    <span class="dfe-f-task-panel__chevron" aria-hidden="true">▼</span>
-                  </button>
-                  <div class="dfe-f-task-panel__body" id="@(panelId)-body">
-                    @if (!string.IsNullOrEmpty(a.Description))
+        @if (phase.Activities.Any())
+        {
+          <section class="govuk-!-margin-bottom-8" id="activities">
+            <h2 class="govuk-heading-l govuk-!-margin-bottom-2">Activities</h2>
+            <p class="govuk-body govuk-!-margin-bottom-4">Select a task to see full guidance and resources.</p>
+            @{ var actIndex = 0; }
+            @foreach (var a in phase.Activities)
+            {
+              actIndex++;
+              var panelId = $"phase-activity-{phaseSlug}-{actIndex}";
+              var isFirst = actIndex == 1;
+              var hintText = !string.IsNullOrEmpty(a.ShortDescription) ? a.ShortDescription : (string.IsNullOrEmpty(a.Description) ? "" : (a.Description.Length > 120 ? a.Description.Substring(0, 117) + "..." : a.Description));
+              <div class="dfe-f-task-panel @(isFirst ? "is-open" : "") govuk-!-margin-bottom-4" id="@panelId">
+                <button type="button" class="dfe-f-task-panel__trigger" aria-expanded="@(isFirst ? "true" : "false")" aria-controls="@(panelId)-body">
+                  <div class="dfe-f-task-panel__num dfe-f-task-panel__num--green">@actIndex</div>
+                  <div class="dfe-f-task-panel__title-group">
+                    <span class="dfe-f-task-panel__title">@a.Title</span>
+                    @if (a.ProfessionTitles.Any())
                     {
-                      @Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(a.Description))
+                      <span class="dfe-f-task-panel__meta">@string.Join(", ", a.ProfessionTitles)</span>
                     }
-                    @if (!string.IsNullOrEmpty(a.GuidanceContent))
+                    @if (!string.IsNullOrEmpty(hintText))
                     {
-                      <div class="govuk-!-margin-top-4">
-                        <strong class="govuk-label">What, why, how and guidance</strong>
-                        <div class="govuk-body govuk-!-margin-top-2">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(a.GuidanceContent))</div>
-                      </div>
-                    }
-                    @if (a.Resources.Any())
-                    {
-                      <span class="dfe-f-task-panel__section-hd" style="margin-top:14px">Resources</span>
-                      <ul class="govuk-list govuk-!-margin-bottom-4">
-                        @foreach (var res in a.Resources)
-                        {
-                          var resUrl = !string.IsNullOrEmpty(res.Url) ? res.Url : res.MediaUrl;
-                          var resLabel = res.ResourceType switch { "download" => "Download", "artefact" => "Artefact", "template" => "Template", "case_study" => "Case study", _ => "Link" };
-                          <li class="govuk-!-margin-bottom-2">
-                            @if (!string.IsNullOrEmpty(resUrl))
-                            {
-                              <a class="dfe-f-task-panel__link" href="@resUrl" target="_blank" rel="noopener noreferrer">@res.Title</a>
-                              <span class="govuk-body-s">(@resLabel)</span>
-                            }
-                            else
-                            {
-                              <span>@res.Title</span>
-                              @if (!string.IsNullOrEmpty(res.Description)) { <span class="govuk-body-s">— @res.Description</span> }
-                            }
-                          </li>
-                        }
-                      </ul>
-                    }
-                    @if (a.RelatedContent.Any())
-                    {
-                      <span class="dfe-f-task-panel__section-hd" style="margin-top:14px">Related guidance</span>
-                      <div class="dfe-f-task-panel__links">
-                        @foreach (var link in a.RelatedContent)
-                        {
-                          <a class="dfe-f-task-panel__link" href="@link.Url">@link.Title →</a>
-                        }
-                      </div>
+                      <span class="dfe-f-task-panel__hint">@hintText</span>
                     }
                   </div>
+                  <span class="dfe-f-task-panel__chevron" aria-hidden="true">▼</span>
+                </button>
+                <div class="dfe-f-task-panel__body" id="@(panelId)-body">
+                  @if (!string.IsNullOrEmpty(a.Description))
+                  {
+                    <div class="govuk-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(a.Description))</div>
+                  }
+                  @if (!string.IsNullOrEmpty(a.GuidanceContent))
+                  {
+                    <div class="govuk-!-margin-top-4">
+                      <h4 class="govuk-heading-s">What, why, how and guidance</h4>
+                      <div class="govuk-body govuk-!-margin-top-2">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(a.GuidanceContent))</div>
+                    </div>
+                  }
+                  @if (a.Resources.Any())
+                  {
+                    <p class="govuk-heading-s govuk-!-margin-top-4 govuk-!-margin-bottom-2">Resources</p>
+                    <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
+                      @foreach (var res in a.Resources)
+                      {
+                        var resUrl = !string.IsNullOrEmpty(res.Url) ? res.Url : res.MediaUrl;
+                        var resLabel = res.ResourceType switch { "download" => "Download", "artefact" => "Artefact", "template" => "Template", "case_study" => "Case study", _ => "Link" };
+                        <li class="govuk-!-margin-bottom-2">
+                          @if (!string.IsNullOrEmpty(resUrl))
+                          {
+                            <a class="govuk-link" href="@resUrl" target="_blank" rel="noopener noreferrer">@res.Title</a>
+                            <span class="govuk-body-s"> (@resLabel)</span>
+                          }
+                          else
+                          {
+                            <span>@res.Title</span>
+                            @if (!string.IsNullOrEmpty(res.Description)) { <span class="govuk-body-s">— @res.Description</span> }
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                  @if (a.RelatedContent.Any())
+                  {
+                    <p class="govuk-heading-s govuk-!-margin-top-4 govuk-!-margin-bottom-2">Related guidance</p>
+                    <ul class="govuk-list govuk-list--bullet">
+                      @foreach (var link in a.RelatedContent)
+                      {
+                        <li><a class="govuk-link" href="@link.Url">@link.Title</a></li>
+                      }
+                    </ul>
+                  }
                 </div>
-              }
-            </section>
-            <hr class="dfe-f-section-divider" />
-          }
+              </div>
+            }
+          </section>
+        }
 
-          @if (phase.MandatoryRequirements.Any())
-          {
-            <section class="dfe-f-content-section @sectionCss" id="requirements">
-              <div class="dfe-f-content-section__hd"><h2 class="govuk-heading-m">Mandatory requirements</h2></div>
-              <ul class="govuk-list">
-                @foreach (var r in phase.MandatoryRequirements)
-                {
-                  <li class="govuk-!-margin-bottom-4">
-                    <strong class="govuk-heading-s">@r.RequirementTitle</strong>
-                    @if (!string.IsNullOrEmpty(r.Description)) { <p class="govuk-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(r.Description))</p> }
-                    @if (!string.IsNullOrEmpty(r.EvidenceExamples)) { <p class="govuk-body"><strong>What good looks like:</strong> @Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(r.EvidenceExamples))</p> }
-                    @if (r.RelatedStandard != null) { <p class="govuk-body"><a class="govuk-link" href="@r.RelatedStandard.Url">@r.RelatedStandard.Title</a></p> }
-                  </li>
-                }
+        @if (phase.MandatoryRequirements.Any())
+        {
+          <section class="govuk-!-margin-bottom-8" id="requirements">
+            <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Mandatory requirements</h2>
+            <ul class="govuk-list govuk-list--bullet">
+              @foreach (var r in phase.MandatoryRequirements)
+              {
+                <li class="govuk-!-margin-bottom-4">
+                  <strong class="govuk-!-font-weight-bold">@r.RequirementTitle</strong>
+                  @if (!string.IsNullOrEmpty(r.Description)) { <div class="govuk-body govuk-!-margin-top-1">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(r.Description))</div> }
+                  @if (!string.IsNullOrEmpty(r.EvidenceExamples)) { <p class="govuk-body govuk-!-margin-top-2"><strong>What good looks like:</strong> @Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(r.EvidenceExamples))</p> }
+                  @if (r.RelatedStandard != null) { <p class="govuk-body"><a class="govuk-link" href="@r.RelatedStandard.Url">@r.RelatedStandard.Title</a></p> }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        @if (phase.Outputs.Any())
+        {
+          <section class="govuk-!-margin-bottom-8" id="outputs">
+            <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Outputs and artefacts</h2>
+            <ul class="govuk-list govuk-list--bullet">
+              @foreach (var o in phase.Outputs)
+              {
+                <li class="govuk-!-margin-bottom-3">
+                  <strong>@o.OutputName</strong> @(o.IsMandatory ? "(Mandatory)" : "(Recommended)")
+                  @if (!string.IsNullOrEmpty(o.Description)) { <p class="govuk-body govuk-!-margin-top-1">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(o.Description))</p> }
+                  @if (o.TemplateLink != null) { <p class="govuk-body"><a class="govuk-link" href="@o.TemplateLink.Url">@o.TemplateLink.Title</a></p> }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        @if (phase.Assurance != null)
+        {
+          <section class="govuk-!-margin-bottom-8" id="assurance">
+            <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Assurance and governance</h2>
+            <p class="govuk-body"><strong>@phase.Assurance.AssuranceType</strong></p>
+            @if (!string.IsNullOrEmpty(phase.Assurance.Description)) { <div class="govuk-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(phase.Assurance.Description))</div> }
+            @if (!string.IsNullOrEmpty(phase.Assurance.GovernanceBody)) { <p class="govuk-body">Governance body: @phase.Assurance.GovernanceBody</p> }
+            @if (phase.Assurance.PreparationGuidance != null) { <p class="govuk-body"><a class="govuk-link" href="@phase.Assurance.PreparationGuidance.Url">@phase.Assurance.PreparationGuidance.Title</a></p> }
+          </section>
+        }
+
+        @if (phase.RelatedGuidance.Any() || phase.RelatedStandards.Any() || phase.RelatedTools.Any() || phase.RelatedTraining.Any())
+        {
+          <section class="govuk-!-margin-bottom-8" id="related">
+            <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Related guidance for @phase.Title</h2>
+            @if (phase.RelatedStandards.Any())
+            {
+              <h3 class="govuk-heading-m govuk-!-margin-bottom-2">Standards</h3>
+              <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
+                @foreach (var link in phase.RelatedStandards) { <li><a class="govuk-link" href="@link.Url">@link.Title</a></li> }
               </ul>
-            </section>
-            <hr class="dfe-f-section-divider" />
-          }
-
-          @if (phase.Outputs.Any())
-          {
-            <section class="dfe-f-content-section @sectionCss" id="outputs">
-              <div class="dfe-f-content-section__hd"><h2 class="govuk-heading-m">Outputs and artefacts</h2></div>
-              <ul class="govuk-list">
-                @foreach (var o in phase.Outputs)
-                {
-                  <li class="govuk-!-margin-bottom-3">
-                    <strong>@o.OutputName</strong> @(o.IsMandatory ? "(Mandatory)" : "(Recommended)")
-                    @if (!string.IsNullOrEmpty(o.Description)) { <p class="govuk-body govuk-!-margin-top-1">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(o.Description))</p> }
-                    @if (o.TemplateLink != null) { <p class="govuk-body"><a class="govuk-link" href="@o.TemplateLink.Url">@o.TemplateLink.Title</a></p> }
-                  </li>
-                }
+            }
+            @if (phase.RelatedGuidance.Any())
+            {
+              <h3 class="govuk-heading-m govuk-!-margin-bottom-2">Guidance</h3>
+              <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
+                @foreach (var link in phase.RelatedGuidance) { <li><a class="govuk-link" href="@link.Url">@link.Title</a></li> }
               </ul>
-            </section>
-            <hr class="dfe-f-section-divider" />
-          }
+            }
+            @if (phase.RelatedTools.Any())
+            {
+              <h3 class="govuk-heading-m govuk-!-margin-bottom-2">Tools and templates</h3>
+              <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
+                @foreach (var link in phase.RelatedTools) { <li><a class="govuk-link" href="@link.Url">@link.Title</a></li> }
+              </ul>
+            }
+            @if (phase.RelatedTraining.Any())
+            {
+              <h3 class="govuk-heading-m govuk-!-margin-bottom-2">Training</h3>
+              <ul class="govuk-list govuk-list--bullet">
+                @foreach (var link in phase.RelatedTraining) { <li><a class="govuk-link" href="@link.Url">@link.Title</a></li> }
+              </ul>
+            }
+          </section>
+        }
 
-          @if (phase.Assurance != null)
-          {
-            <section class="dfe-f-content-section @sectionCss" id="assurance">
-              <div class="dfe-f-content-section__hd"><h2 class="govuk-heading-m">Assurance and governance</h2></div>
-              <p class="govuk-body"><strong>@phase.Assurance.AssuranceType</strong></p>
-              @if (!string.IsNullOrEmpty(phase.Assurance.Description)) { <p class="govuk-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(phase.Assurance.Description))</p> }
-              @if (!string.IsNullOrEmpty(phase.Assurance.GovernanceBody)) { <p class="govuk-body">Governance body: @phase.Assurance.GovernanceBody</p> }
-              @if (phase.Assurance.PreparationGuidance != null) { <p class="govuk-body"><a class="govuk-link" href="@phase.Assurance.PreparationGuidance.Url">@phase.Assurance.PreparationGuidance.Title</a></p> }
-            </section>
-            <hr class="dfe-f-section-divider" />
-          }
-
-          @if (phase.RelatedGuidance.Any() || phase.RelatedStandards.Any() || phase.RelatedTools.Any() || phase.RelatedTraining.Any())
-          {
-            <section class="dfe-f-content-section @sectionCss" id="related">
-              <div class="dfe-f-content-section__hd"><h2 class="govuk-heading-m">Related guidance for @phase.Title</h2></div>
-              @if (phase.RelatedStandards.Any())
-              {
-                <h3 class="govuk-heading-s">Standards</h3>
-                <ul class="govuk-list govuk-list--bullet">
-                  @foreach (var link in phase.RelatedStandards) { <li><a class="govuk-link" href="@link.Url">@link.Title</a></li> }
-                </ul>
-              }
-              @if (phase.RelatedGuidance.Any())
-              {
-                <h3 class="govuk-heading-s">Guidance</h3>
-                <ul class="govuk-list govuk-list--bullet">
-                  @foreach (var link in phase.RelatedGuidance) { <li><a class="govuk-link" href="@link.Url">@link.Title</a></li> }
-                </ul>
-              }
-              @if (phase.RelatedTools.Any())
-              {
-                <h3 class="govuk-heading-s">Tools and templates</h3>
-                <ul class="govuk-list govuk-list--bullet">
-                  @foreach (var link in phase.RelatedTools) { <li><a class="govuk-link" href="@link.Url">@link.Title</a></li> }
-                </ul>
-              }
-              @if (phase.RelatedTraining.Any())
-              {
-                <h3 class="govuk-heading-s">Training</h3>
-                <ul class="govuk-list govuk-list--bullet">
-                  @foreach (var link in phase.RelatedTraining) { <li><a class="govuk-link" href="@link.Url">@link.Title</a></li> }
-                </ul>
-              }
-            </section>
-          }
-
-          @if (nextSlug != null)
-          {
-            <div class="dfe-f-next-phase dfe-f-next-phase--@nextSlug" style="margin-top:24px">
-              <div class="dfe-f-next-phase__copy"><strong>Next phase:</strong> @(char.ToUpperInvariant(nextSlug[0]) + nextSlug.Substring(1))</div>
-              <a class="dfe-f-next-phase__btn" href="/lifecycle/@nextSlug">Go to @(char.ToUpperInvariant(nextSlug[0]) + nextSlug.Substring(1)) →</a>
+        @if (nextSlug != null)
+        {
+          <nav class="govuk-pagination govuk-pagination--block govuk-!-margin-top-8" aria-label="Phases">
+            <div class="govuk-pagination__next">
+              <a class="govuk-link govuk-pagination__link" href="/lifecycle/@nextSlug" rel="next">
+                <span class="govuk-pagination__link-title">Next phase</span>
+                <span class="govuk-visually-hidden">:</span>
+                <span class="govuk-pagination__link-label">@TitleCase(nextSlug)</span>
+                <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" viewBox="0 0 15 13"><path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7246z"/></svg>
+              </a>
             </div>
-          }
-        </div>
+          </nav>
+        }
+      </div>
 
-        <aside>
-          <div class="dfe-f-sidebar-block">
-            <span class="dfe-f-sidebar-hd" style="border-bottom-color:var(--dfe-f-ph-@phaseSlug)">On this page</span>
-            <ul class="dfe-f-sidebar-toc">
-              @if (sectionIds.Contains("overview")) { <li><a href="#overview">What @phase.Title is for</a></li> }
-              @if (sectionIds.Contains("activities")) { <li><a href="#activities">Activities</a></li> }
-              @if (sectionIds.Contains("requirements")) { <li><a href="#requirements">Mandatory requirements</a></li> }
-              @if (sectionIds.Contains("outputs")) { <li><a href="#outputs">Outputs</a></li> }
-              @if (sectionIds.Contains("assurance")) { <li><a href="#assurance">Assurance</a></li> }
-              @if (sectionIds.Contains("related")) { <li><a href="#related">Related guidance</a></li> }
-            </ul>
-          </div>
-          <div class="dfe-f-sidebar-block" style="margin-top:20px">
-            <span class="dfe-f-sidebar-hd">Navigate phases</span>
-            <ul class="dfe-f-sidebar-links" style="margin-top:4px">
-              @if (prevSlug != null) { <li><a href="/lifecycle/@prevSlug">← @(char.ToUpperInvariant(prevSlug[0]) + prevSlug.Substring(1))</a></li> }
-              @if (nextSlug != null) { <li><a href="/lifecycle/@nextSlug">@(char.ToUpperInvariant(nextSlug[0]) + nextSlug.Substring(1)) →</a></li> }
-              <li style="border-bottom:none;padding-top:8px"><a href="/lifecycle" style="font-size:.8125rem;color:#505a5f">View all phases</a></li>
-            </ul>
-          </div>
+      <div class="govuk-grid-column-one-third">
+        <aside class="guide-sidebar__card govuk-!-margin-top-0" aria-label="On this page">
+          <h3 class="govuk-heading-s">On this page</h3>
+          <ul class="govuk-list">
+            @if (sectionIds.Contains("overview")) { <li><a class="govuk-link" href="#overview">What @phase.Title is for</a></li> }
+            @if (sectionIds.Contains("activities")) { <li><a class="govuk-link" href="#activities">Activities</a></li> }
+            @if (sectionIds.Contains("requirements")) { <li><a class="govuk-link" href="#requirements">Mandatory requirements</a></li> }
+            @if (sectionIds.Contains("outputs")) { <li><a class="govuk-link" href="#outputs">Outputs</a></li> }
+            @if (sectionIds.Contains("assurance")) { <li><a class="govuk-link" href="#assurance">Assurance</a></li> }
+            @if (sectionIds.Contains("related")) { <li><a class="govuk-link" href="#related">Related guidance</a></li> }
+          </ul>
+        </aside>
+        <aside class="guide-sidebar__card govuk-!-margin-top-6" aria-label="Navigate phases">
+          <h3 class="govuk-heading-s">Navigate phases</h3>
+          <ul class="govuk-list">
+            @if (prevSlug != null) { <li><a class="govuk-link" href="/lifecycle/@prevSlug">← @TitleCase(prevSlug)</a></li> }
+            @if (nextSlug != null) { <li><a class="govuk-link" href="/lifecycle/@nextSlug">@TitleCase(nextSlug) →</a></li> }
+            <li class="govuk-!-margin-top-3"><a class="govuk-link govuk-body-s" href="/lifecycle">View all phases</a></li>
+          </ul>
         </aside>
       </div>
+    </div>
+  </div>
 </div>

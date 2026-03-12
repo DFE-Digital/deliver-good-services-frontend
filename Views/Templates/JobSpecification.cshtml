@@ -2,120 +2,141 @@
 @using ServiceManual.Models
 @{
     var jobSpec = ViewBag.JobSpecification as JobSpecification ?? new JobSpecification();
+    var professionDescriptionHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(jobSpec.Profession?.ProfessionDescription);
     var roleDescriptionHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(jobSpec.RoleDescription);
     var skillsHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(jobSpec.Skills);
     ViewData["Title"] = jobSpec.Title;
     var collectionSlug = ViewBag.CollectionSlug as string;
     var collectionTitle = ViewBag.CollectionTitle as string;
     var hasCollection = !string.IsNullOrEmpty(collectionSlug) && !string.IsNullOrEmpty(collectionTitle);
-    var hasRightPanel = hasCollection || jobSpec.EnableWordDocDownload;
-    var professionTitle = jobSpec.Profession?.Title ?? "Job descriptions";
+    var hasRightPanel = jobSpec.EnableWordDocDownload;
+    var professionTitle = jobSpec.Profession?.Plural ?? jobSpec.Profession?.Title ?? "Job descriptions";
 }
 
-@section Breadcrumbs {
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
-@if (!string.IsNullOrEmpty(professionTitle))
-{
-    <li class="govuk-breadcrumbs__list-item">@professionTitle</li>
-}
-<li class="govuk-breadcrumbs__list-item" aria-current="page">@jobSpec.Title</li>
-}
-
-@* Row 1: header + other roles nav (two-thirds only) *@
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-
-        <div class="dfe-f-header">
-            <span class="govuk-caption-xl govuk-!-margin-top-5">Job description</span>
-            <h1 class="govuk-heading-xl dfe-f-header__title">@jobSpec.Title</h1>
-            @if (!string.IsNullOrEmpty(jobSpec.Grade))
-            {
-                <p class="govuk-body-l govuk-!-margin-top-2 govuk-!-margin-bottom-0">Grade @jobSpec.Grade</p>
-            }
-        </div>
-
-        @if (jobSpec.SiblingJobSpecifications.Count > 0)
-        {
-            <nav class="dfe-f-guide-contents govuk-!-margin-top-6" aria-label="Other roles in this profession">
-                <h2 class="dfe-f-guide-contents__title">Other roles in this profession</h2>
-                <ul class="dfe-f-guide-contents__list">
-                    @foreach (var sibling in jobSpec.SiblingJobSpecifications)
-                    {
-                        var isCurrent = sibling.Slug == jobSpec.Slug;
-                        <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed @(isCurrent ? "dfe-f-guide-contents__item--active" : "")">
-                            <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                            @if (isCurrent)
+<div class="guide-modern">
+    @* Hero: breadcrumb + header (same structure as DetailedGuide) *@
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <header class="guide-hero">
+                <div class="govuk-width-container">
+                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+                        <ol class="govuk-breadcrumbs__list">
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                            @if (!string.IsNullOrEmpty(professionTitle))
                             {
-                                <span aria-current="page">@sibling.Title</span>
+                                <li class="govuk-breadcrumbs__list-item">@professionTitle</li>
                             }
-                            else
+                            <li class="govuk-breadcrumbs__list-item" aria-current="page">@jobSpec.Title</li>
+                        </ol>
+                    </nav>
+                    <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-two-thirds">
+                            <span class="guide-hero__label">Job description</span>
+                            <h1 class="govuk-heading-xl dfe-f-header__title">@jobSpec.Title</h1>
+                            @if (!string.IsNullOrEmpty(jobSpec.Grade))
                             {
-                                var siblingHref = "/guidance/job-specifications/" + sibling.Slug + (hasCollection ? "?collection=" + Uri.EscapeDataString(collectionSlug!) : "");
-                                <a class="govuk-link dfe-f-guide-contents__link" href="@siblingHref">@sibling.Title</a>
+                                <p class="govuk-body-l govuk-!-margin-top-2 govuk-!-margin-bottom-0">Grade @jobSpec.Grade</p>
                             }
-                        </li>
-                    }
-                </ul>
-            </nav>
-        }
-
-    </div>
-</div>
-
-@* Row 2: body content + right panel *@
-<div class="govuk-grid-row govuk-!-margin-top-6">
-    <div class="@(hasRightPanel ? "govuk-grid-column-two-thirds" : "govuk-grid-column-full")">
-
-        @if (!string.IsNullOrWhiteSpace(jobSpec.RoleDescription))
-        {
-            <section class="govuk-!-margin-bottom-8" aria-labelledby="you-will-heading">
-                <h2 id="you-will-heading" class="govuk-heading-l">You will:</h2>
-                <div class="dfe-f-body">
-                    @Html.Raw(roleDescriptionHtml)
+                        </div>
+                    </div>
                 </div>
-            </section>
-        }
+            </header>
 
-        @if (!string.IsNullOrWhiteSpace(jobSpec.Skills))
-        {
-            <section class="govuk-!-margin-bottom-8" aria-labelledby="skills-heading">
-                <h2 id="skills-heading" class="govuk-heading-l">Skills you need</h2>
-                <div class="dfe-f-body">
-                    @Html.Raw(skillsHtml)
-                </div>
-            </section>
-        }
-
-    </div>
-
-    @if (hasRightPanel)
-    {
-        <div class="govuk-grid-column-one-third">
+            @* Meta strip — Part of (same as DetailedGuide) *@
             @if (hasCollection)
             {
-                <aside class="dfe-f-sidebar-box dfe-f-sidebar-box--highlight" aria-label="Part of">
-                    <div class="dfe-f-sidebar-box__section">
-                        <h3>Part of</h3>
-                        <ul class="govuk-list govuk-list--spaced">
-                            <li><a class="govuk-link" href="/guidance/collections/@collectionSlug"><strong>@collectionTitle</strong></a></li>
-                        </ul>
+                <div class="guide-meta">
+                    <div class="govuk-width-container">
+                        <span class="guide-meta__item"><strong>Part of:</strong> <a href="/guidance/collections/@collectionSlug">@System.Net.WebUtility.HtmlEncode(collectionTitle!)</a></span>
                     </div>
-                </aside>
+                </div>
             }
-            @if (jobSpec.EnableWordDocDownload)
+
+            @* Other roles in this profession (same row pattern as guide contents) *@
+            @if (jobSpec.SiblingJobSpecifications.Count > 0)
             {
-                <aside class="dfe-f-sidebar-box" aria-label="Download">
-                    <div class="dfe-f-sidebar-box__section">
-                        <h3>Download</h3>
-                        <p class="govuk-body-s govuk-!-margin-bottom-0">
-                            <a href="/guidance/job-specifications/@jobSpec.Slug/download" class="govuk-link" download>
-                                Word document
-                            </a>
-                        </p>
+                <div class="govuk-grid-row">
+                    <div class="govuk-grid-column-two-thirds">
+                        <nav class="dfe-f-guide-contents govuk-!-margin-top-6" aria-label="Other roles in this profession">
+                            <h2 class="dfe-f-guide-contents__title">Other roles in this profession</h2>
+                            <ul class="dfe-f-guide-contents__list">
+                                @foreach (var sibling in jobSpec.SiblingJobSpecifications)
+                                {
+                                    var isCurrent = sibling.Slug == jobSpec.Slug;
+                                    <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed @(isCurrent ? "dfe-f-guide-contents__item--active" : "")">
+                                        <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
+                                        @if (isCurrent)
+                                        {
+                                            <span aria-current="page">@sibling.Title</span>
+                                        }
+                                        else
+                                        {
+                                            var siblingHref = "/guidance/job-specifications/" + sibling.Slug + (hasCollection ? "?collection=" + Uri.EscapeDataString(collectionSlug!) : "");
+                                            <a class="govuk-link dfe-f-guide-contents__link" href="@siblingHref">@sibling.Title</a>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
                     </div>
-                </aside>
+                </div>
             }
         </div>
-    }
+    </div>
+
+    @* Content + sidebar (same structure as DetailedGuide) *@
+    <div class="govuk-grid-row guide-content-row">
+        <div class="@(hasRightPanel ? "govuk-grid-column-two-thirds" : "govuk-grid-column-full")">
+            <section class="dfe-f-content-section guide-content-section" aria-label="Content">
+        
+                @if (!string.IsNullOrWhiteSpace(jobSpec.Profession?.ProfessionDescription))
+                {
+                    var professionLabel = (jobSpec.Profession?.Plural ?? jobSpec.Profession?.Title ?? "people").ToLowerInvariant();
+                    <h2 id="profession-description-heading" class="govuk-heading-l">What @professionLabel do</h2>
+                    <div class="dfe-f-body govuk-!-margin-bottom-8">
+                        @Html.Raw(professionDescriptionHtml)
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(jobSpec.RoleDescription))
+                {
+                    <h2 id="you-will-heading" class="govuk-heading-l">You will:</h2>
+                    <div class="dfe-f-body">
+                        @Html.Raw(roleDescriptionHtml)
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(jobSpec.Skills))
+                {
+                    <h2 id="skills-heading" class="govuk-heading-l govuk-!-margin-top-8">Skills you need</h2>
+                    <div class="dfe-f-body">
+                        @Html.Raw(skillsHtml)
+                    </div>
+                }
+            </section>
+        </div>
+
+        @if (hasRightPanel)
+        {
+            <div class="govuk-grid-column-one-third">
+                @if (jobSpec.EnableWordDocDownload)
+                {
+                    <aside class="guide-sidebar__card guide-sidebar__card--downloads" aria-label="Downloads">
+                        <h3 class="govuk-heading-s">Downloads</h3>
+                        <ul class="guide-sidebar__downloads-list">
+                            <li class="guide-sidebar__downloads-item">
+                                <a class="guide-sidebar__downloads-link" href="/guidance/job-specifications/@jobSpec.Slug/download" download>
+                                    <span class="guide-sidebar__downloads-link-inner">
+                                        <span class="guide-sidebar__downloads-filename">@(jobSpec.Title ?? "Job description").docx</span>
+                                        <span class="guide-sidebar__downloads-meta"><span class="guide-sidebar__downloads-type">Word document</span></span>
+                                    </span>
+                                    <span class="guide-sidebar__downloads-icon" aria-hidden="true"></span>
+                                </a>
+                            </li>
+                        </ul>
+                    </aside>
+                }
+            </div>
+        }
+    </div>
 </div>

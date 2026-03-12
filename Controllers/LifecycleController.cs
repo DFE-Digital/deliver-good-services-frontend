@@ -38,13 +38,22 @@ namespace ServiceManual.Controllers
         }
 
         /// <summary>
-        /// Stage deep-link: redirect to lifecycle index with hash to stage section.
+        /// Phase detail page (e.g. /lifecycle/discovery). If CMS has phase content, show Phase view; otherwise redirect to hub with hash.
         /// </summary>
         [Route("lifecycle/{slug}")]
         [HttpGet]
-        public IActionResult Phase(string slug)
+        public async Task<IActionResult> Phase(string slug)
         {
-            return RedirectPermanent($"/lifecycle#ph-{slug}");
+            var phase = await _cmsApiService.GetPhaseBySlugAsync(slug);
+            if (phase != null)
+            {
+                var lifecycle = await _cmsApiService.GetLifecycleAsync();
+                var allPhases = lifecycle?.Stages?.OrderBy(s => s.Order).Select(s => s.Slug.ToLowerInvariant()).ToList() ?? new List<string>();
+                ViewBag.Phase = phase;
+                ViewBag.AllPhases = allPhases;
+                return View("~/Views/Lifecycle/Phase.cshtml");
+            }
+            return RedirectPermanent($"/lifecycle#ph-{slug.ToLowerInvariant()}");
         }
     }
 }

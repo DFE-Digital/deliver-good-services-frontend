@@ -2,50 +2,91 @@
 @{
   ViewData["Title"] = "Documentation";
   var sections = ViewData["DocSections"] as List<DocumentationSection> ?? new List<DocumentationSection>();
+  var contentsItems = ViewData["DocContentsItems"] as List<GuideContentsItem> ?? new List<GuideContentsItem>();
+  var heroTitle = ViewData["DocHeroTitle"] as string ?? "Documentation";
+  var heroIntro = ViewData["DocHeroIntro"] as string;
 }
 
 @section Styles {
   <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
 }
 
-@section Breadcrumbs {
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-  <li class="govuk-breadcrumbs__list-item" aria-current="page">Documentation</li>
-}
-
 @section Scripts {
   <script src="/js/documentation.js"></script>
 }
 
-<div class="doc-wrapper">
-  <div class="doc-layout">
-    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
-    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
-    <main class="doc-content" id="main-content">
-      <div class="doc-content__header">
-        <h1 class="govuk-heading-l doc-content__title">Documentation</h1>
-        <p class="doc-content__lead">Use the section tabs above to jump to a topic, then the side nav for specific pages. No secrets or environment-specific values are stored in this documentation.</p>
-      </div>
-      <div class="doc-note">
-        <p class="govuk-body" style="margin:0">Content is managed in the CMS. Each section contains pages that appear in the left-hand navigation.</p>
-      </div>
-      @if (sections.Count > 0)
+<div class="guide-modern">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <header class="guide-hero">
+        <div class="govuk-width-container">
+          <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+            <ol class="govuk-breadcrumbs__list">
+              <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+              <li class="govuk-breadcrumbs__list-item" aria-current="page">Documentation</li>
+            </ol>
+          </nav>
+          <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+              <span class="guide-hero__label">Documentation</span>
+              <h1 class="govuk-heading-xl">@heroTitle</h1>
+              @if (!string.IsNullOrEmpty(heroIntro))
+              {
+                <p class="govuk-body-l">@heroIntro</p>
+              }
+            </div>
+          </div>
+        </div>
+      </header>
+
+      @if (contentsItems.Count > 0)
       {
-        <div class="doc-card-grid" style="margin-top: 32px;">
-          @foreach (var sec in sections)
-          {
-            <a href="/documentation/@sec.Slug" class="doc-card">
-              <span class="doc-card__category">Section</span>
-              <h3 class="doc-card__title">@sec.Title</h3>
-              <p class="doc-card__description">@(sec.Documentations.Count) page@(sec.Documentations.Count == 1 ? "" : "s") in this section.</p>
-            </a>
-          }
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-two-thirds">
+            <nav class="guide-contents" aria-label="Documentation sections">
+              <h2 class="guide-contents__title">Contents</h2>
+              <ul class="guide-contents__list">
+                @foreach (var item in contentsItems)
+                {
+                  <li class="guide-contents__item @(item.IsCurrent ? "guide-contents__item--current" : "")">
+                    <span class="guide-contents__num" aria-hidden="true">@item.Number</span>
+                    @if (item.IsCurrent || item.Url == null)
+                    {
+                      <span aria-current="page">@item.Title</span>
+                    }
+                    else
+                    {
+                      <a href="@item.Url">@item.Title</a>
+                    }
+                  </li>
+                }
+              </ul>
+            </nav>
+          </div>
         </div>
       }
-      else
-      {
-        <p class="govuk-body" style="margin-top: 24px;">No documentation sections are available. Enable sections in the CMS.</p>
-      }
-    </main>
+    </div>
   </div>
+
+  <div class="govuk-grid-row guide-content-row">
+      <div class="govuk-grid-column-two-thirds">
+        <section class="dfe-f-content-section guide-content-section" aria-label="Content">
+          <p class="govuk-body">Select a section above to view its pages. No secrets or environment-specific values are stored in this documentation.</p>
+        </section>
+      </div>
+      <div class="govuk-grid-column-one-third">
+        @if (sections.Count > 0)
+        {
+          <aside class="guide-sidebar__card" aria-label="Sections">
+            <h3 class="govuk-heading-s">Sections</h3>
+            <ul class="govuk-list">
+              @foreach (var sec in sections)
+              {
+                <li><a href="/documentation/@sec.Slug">@sec.Title</a></li>
+              }
+            </ul>
+          </aside>
+        }
+      </div>
+    </div>
 </div>

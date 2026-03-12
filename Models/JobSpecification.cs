@@ -16,6 +16,10 @@ namespace ServiceManual.Models
     {
         public string? Title { get; set; }
         public string? Slug { get; set; }
+        /// <summary>Plural form of the profession name (e.g. "service designers") for headings like "What service designers do".</summary>
+        public string? Plural { get; set; }
+        /// <summary>Richtext/markdown description for the profession (shown at top of job description page).</summary>
+        public string? ProfessionDescription { get; set; }
     }
 
     public class JobSpecificationSibling

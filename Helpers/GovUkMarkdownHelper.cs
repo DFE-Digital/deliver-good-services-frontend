@@ -474,11 +474,11 @@ namespace ServiceManual.Helpers
 
         private static string RenderSingleMetric(string attrs)
         {
-            var num           = Attr(attrs, "num",            "");
-            var label         = Attr(attrs, "label",          "");
-            var change        = Attr(attrs, "change",         "");
+            var num = Attr(attrs, "num", "");
+            var label = Attr(attrs, "label", "");
+            var change = Attr(attrs, "change", "");
             var changeVariant = Attr(attrs, "change-variant", "");
-            var colour        = Attr(attrs, "colour",         "grey");
+            var colour = Attr(attrs, "colour", "grey");
 
             var changeCls = string.IsNullOrWhiteSpace(changeVariant)
                 ? "dfe-f-metric__change"
@@ -550,13 +550,13 @@ namespace ServiceManual.Helpers
 
         private static string RenderSingleStatCard(string attrs)
         {
-            var title    = Attr(attrs, "title",     "");
-            var stat     = Attr(attrs, "stat",      "");
-            var meta     = Attr(attrs, "meta",      "");
-            var progress = Attr(attrs, "progress",  "");
-            var link     = Attr(attrs, "link",      "");
+            var title = Attr(attrs, "title", "");
+            var stat = Attr(attrs, "stat", "");
+            var meta = Attr(attrs, "meta", "");
+            var progress = Attr(attrs, "progress", "");
+            var link = Attr(attrs, "link", "");
             var linkText = Attr(attrs, "link-text", "View details");
-            var colour   = Attr(attrs, "colour",    "teal");
+            var colour = Attr(attrs, "colour", "teal");
 
             var statHtml = string.IsNullOrWhiteSpace(stat)
                 ? ""
@@ -870,15 +870,15 @@ namespace ServiceManual.Helpers
                 @"\[pill([^\]]*)\]",
                 m =>
                 {
-                    var attrs  = m.Groups[1].Value;
-                    var label  = Attr(attrs, "label",  "");
-                    var phase  = Attr(attrs, "phase",  "").ToLowerInvariant();
+                    var attrs = m.Groups[1].Value;
+                    var label = Attr(attrs, "label", "");
+                    var phase = Attr(attrs, "phase", "").ToLowerInvariant();
                     var colour = Attr(attrs, "colour", "").ToLowerInvariant();
 
                     if (string.IsNullOrWhiteSpace(label)) return string.Empty;
 
                     // Phase takes priority over colour
-                    var modifier = !string.IsNullOrWhiteSpace(phase)  ? $"dfe-pill--{phase}"
+                    var modifier = !string.IsNullOrWhiteSpace(phase) ? $"dfe-pill--{phase}"
                                  : !string.IsNullOrWhiteSpace(colour) ? $"dfe-pill--{colour}"
                                  : "dfe-pill--grey";
 
@@ -980,8 +980,8 @@ namespace ServiceManual.Helpers
                 @"\[([^\]]+)\]\(([^)]+)\)\{new-tab\s+""([^""]*)""\}",
                 m =>
                 {
-                    var text   = m.Groups[1].Value;
-                    var url    = m.Groups[2].Value;
+                    var text = m.Groups[1].Value;
+                    var url = m.Groups[2].Value;
                     var suffix = HtmlEncode(m.Groups[3].Value.Trim());
                     return $"<a href=\"{HtmlEncode(url)}\" class=\"govuk-link\" target=\"_blank\" rel=\"noopener noreferrer\">{text} <span class=\"dfe-link-suffix\">({suffix})</span></a>";
                 },
@@ -994,7 +994,7 @@ namespace ServiceManual.Helpers
                 m =>
                 {
                     var text = m.Groups[1].Value;
-                    var url  = m.Groups[2].Value;
+                    var url = m.Groups[2].Value;
                     return $"<a href=\"{HtmlEncode(url)}\" class=\"govuk-link\" target=\"_blank\" rel=\"noopener noreferrer\">{text} <span class=\"govuk-visually-hidden\">(link opens in new tab)</span></a>";
                 },
                 RegexOptions.IgnoreCase);
@@ -1024,9 +1024,9 @@ namespace ServiceManual.Helpers
                 @"(<a\b[^>]*>)(.*?)(</a>)\{new-tab\s+""([^""]*)""\}",
                 m =>
                 {
-                    var openTag  = AddNewTabAttrs(m.Groups[1].Value);
-                    var text     = m.Groups[2].Value;
-                    var suffix   = HtmlEncode(m.Groups[4].Value.Trim());
+                    var openTag = AddNewTabAttrs(m.Groups[1].Value);
+                    var text = m.Groups[2].Value;
+                    var suffix = HtmlEncode(m.Groups[4].Value.Trim());
                     return $"{openTag}{text} <span class=\"dfe-link-suffix\">({suffix})</span></a>";
                 },
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
@@ -1038,7 +1038,7 @@ namespace ServiceManual.Helpers
                 m =>
                 {
                     var openTag = AddNewTabAttrs(m.Groups[1].Value);
-                    var text    = m.Groups[2].Value;
+                    var text = m.Groups[2].Value;
                     return $"{openTag}{text} <span class=\"govuk-visually-hidden\">(link opens in new tab)</span></a>";
                 },
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
@@ -1058,16 +1058,16 @@ namespace ServiceManual.Helpers
 
         private static string RenderPanelShortcode(string attrs, string body)
         {
-            var id          = Attr(attrs, "id",          $"panel-{Guid.NewGuid():N}");
-            var colour      = Attr(attrs, "colour",      "blue");
-            var title       = Attr(attrs, "title",       "");
+            var id = Attr(attrs, "id", $"panel-{Guid.NewGuid():N}");
+            var colour = Attr(attrs, "colour", "blue");
+            var title = Attr(attrs, "title", "");
             var description = Attr(attrs, "description", "");
-            var tagsRaw     = Attr(attrs, "tags",        "");
-            var phasesRaw   = Attr(attrs, "phases",      "");
-            var columnsAttr = Attr(attrs, "columns",     "2");
-            var singleCol   = columnsAttr.Trim() == "1";
+            var tagsRaw = Attr(attrs, "tags", "");
+            var phasesRaw = Attr(attrs, "phases", "");
+            var columnsAttr = Attr(attrs, "columns", "2");
+            var singleCol = columnsAttr.Trim() == "1";
 
-            var bodyId   = $"gbody-{id}";
+            var bodyId = $"gbody-{id}";
             var toggleId = $"gtog-{id}";
 
             // ── Tags ──────────────────────────────────────────────────────────────
@@ -1106,9 +1106,9 @@ namespace ServiceManual.Helpers
 
             // ── Body sections ─────────────────────────────────────────────────────
             // [steps] and [checks] support an optional label="..." attribute
-            var stepsMatch  = Regex.Match(body, @"\[steps([^\]]*)\]([\s\S]*?)\[/steps\]",   RegexOptions.IgnoreCase);
+            var stepsMatch = Regex.Match(body, @"\[steps([^\]]*)\]([\s\S]*?)\[/steps\]", RegexOptions.IgnoreCase);
             var checksMatch = Regex.Match(body, @"\[checks([^\]]*)\]([\s\S]*?)\[/checks\]", RegexOptions.IgnoreCase);
-            var linksMatch  = Regex.Match(body, @"\[links\]([\s\S]*?)\[/links\]",            RegexOptions.IgnoreCase);
+            var linksMatch = Regex.Match(body, @"\[links\]([\s\S]*?)\[/links\]", RegexOptions.IgnoreCase);
 
             var hasBody = stepsMatch.Success || checksMatch.Success;
 
@@ -1116,9 +1116,9 @@ namespace ServiceManual.Helpers
             var stepsHtml = "";
             if (stepsMatch.Success)
             {
-                var stepsAttrs  = stepsMatch.Groups[1].Value;
-                var stepsLabel  = Attr(stepsAttrs, "label", "What your team needs to do");
-                var stepsRaw    = stepsMatch.Groups[2].Value;
+                var stepsAttrs = stepsMatch.Groups[1].Value;
+                var stepsLabel = Attr(stepsAttrs, "label", "What your team needs to do");
+                var stepsRaw = stepsMatch.Groups[2].Value;
 
                 // Try numbered-list mode first (lines matching "1. text")
                 var numberedItems = stepsRaw
@@ -1179,10 +1179,10 @@ namespace ServiceManual.Helpers
                     .Select(l =>
                     {
                         var parts = l.Split('|').Select(p => p.Trim()).ToArray();
-                        var label     = parts.Length > 0 ? parts[0] : "";
-                        var href      = parts.Length > 1 ? parts[1] : "#";
+                        var label = parts.Length > 0 ? parts[0] : "";
+                        var href = parts.Length > 1 ? parts[1] : "#";
                         var isPrimary = parts.Length > 2 && parts[2].Equals("primary", StringComparison.OrdinalIgnoreCase);
-                        var cls       = isPrimary ? "dfe-f-panel-component__link dfe-f-panel-component__link--primary" : "dfe-f-panel-component__link";
+                        var cls = isPrimary ? "dfe-f-panel-component__link dfe-f-panel-component__link--primary" : "dfe-f-panel-component__link";
                         return $"<a class=\"{cls}\" href=\"{HtmlEncode(href)}\" rel=\"noopener noreferrer\">{HtmlEncode(label)}</a>";
                     });
                 linksHtml = $"<div class=\"dfe-f-panel-component__links\">{string.Join("", linkItems)}</div>";

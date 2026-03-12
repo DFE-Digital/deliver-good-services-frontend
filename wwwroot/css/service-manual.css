@@ -1280,6 +1280,72 @@ body.has-breadcrumbs .content-page-hero,
     padding: 60px 0;
 }
 
+.homepage-section--primary {
+    padding-top: 48px;
+}
+
+.homepage-section--secondary {
+    padding-top: 48px;
+    padding-bottom: 48px;
+}
+
+.homepage-section--resources {
+    padding-top: 0;
+    padding-bottom: 60px;
+}
+
+/* Homepage cards - 2x2 grid of entry points */
+.homepage-card {
+    display: block;
+    padding: 24px;
+    border: 2px solid var(--govuk-colour-border);
+    background: var(--govuk-colour-white);
+    text-decoration: none;
+    color: var(--govuk-colour-text);
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.homepage-card:hover {
+    border-color: var(--govuk-colour-blue);
+    background: var(--govuk-colour-blue-tint-95);
+}
+
+.homepage-card:hover .homepage-card__title {
+    color: var(--govuk-colour-blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.homepage-card:focus {
+    outline: 3px solid var(--govuk-colour-focus);
+    outline-offset: 2px;
+}
+
+.homepage-card__title {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: var(--govuk-colour-text);
+}
+
+.homepage-card__description {
+    margin: 0;
+    color: var(--govuk-colour-secondary-text);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Homepage CTA - consolidation message */
+.homepage-cta {
+    padding: 24px;
+    background: var(--govuk-colour-blue-tint-95);
+    border-left: 4px solid var(--govuk-colour-blue);
+}
+
+.homepage-cta .govuk-button--secondary {
+    margin-bottom: 0;
+}
+
 /* Card list - simple fully clickable cards (no chevron) */
 .dfe-card-list {
     list-style: none;

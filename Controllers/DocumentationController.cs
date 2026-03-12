@@ -21,10 +21,25 @@ public class DocumentationController : Controller
     public async Task<IActionResult> Index()
     {
         var sections = await _cmsApiService.GetDocumentationSectionsAsync();
+        var contents = new List<GuideContentsItem>
+        {
+            new() { Number = 1, Title = "Overview", Url = null, IsCurrent = true }
+        };
+        for (var i = 0; i < sections.Count; i++)
+        {
+            var sec = sections[i];
+            contents.Add(new GuideContentsItem
+            {
+                Number = i + 2,
+                Title = sec.Title,
+                Url = $"/documentation/{sec.Slug}",
+                IsCurrent = false
+            });
+        }
         ViewData["DocSections"] = sections;
-        ViewData["CurrentDocSectionSlug"] = (string?)null;
-        ViewData["DocSection"] = (DocumentationSection?)null;
-        ViewData["DocPages"] = new List<DocumentationPageSummary>();
+        ViewData["DocContentsItems"] = contents;
+        ViewData["DocHeroTitle"] = "Documentation";
+        ViewData["DocHeroIntro"] = "Styles, components, patterns, CMS templates, publishing lifecycle, and configuration for the DfE Service Manual. Content is managed in the CMS.";
         return View("~/Views/Documentation/Index.cshtml");
     }
 
@@ -36,12 +51,25 @@ public class DocumentationController : Controller
         if (section is null)
             return NotFound();
 
-        var sections = await _cmsApiService.GetDocumentationSectionsAsync();
-        ViewData["DocSections"] = sections;
-        ViewData["CurrentDocSectionSlug"] = section.Slug;
+        var contents = new List<GuideContentsItem>
+        {
+            new() { Number = 1, Title = "Overview", Url = null, IsCurrent = true }
+        };
+        for (var i = 0; i < section.Documentations.Count; i++)
+        {
+            var p = section.Documentations[i];
+            contents.Add(new GuideContentsItem
+            {
+                Number = i + 2,
+                Title = p.Title,
+                Url = $"/documentation/{section.Slug}/{p.Slug}",
+                IsCurrent = false
+            });
+        }
         ViewData["DocSection"] = section;
-        ViewData["DocPages"] = section.Documentations;
-        ViewData["DocSectionTitle"] = section.Title;
+        ViewData["DocContentsItems"] = contents;
+        ViewData["DocHeroTitle"] = section.Title;
+        ViewData["DocHeroIntro"] = $"Pages in this section. {section.Documentations.Count} page{(section.Documentations.Count == 1 ? "" : "s")}.";
         return View("~/Views/Documentation/SectionIndex.cshtml", section);
     }
 
@@ -54,12 +82,48 @@ public class DocumentationController : Controller
             return NotFound();
 
         var section = await _cmsApiService.GetDocumentationSectionBySlugAsync(sectionSlug);
-        var sections = await _cmsApiService.GetDocumentationSectionsAsync();
-        ViewData["DocSections"] = sections;
-        ViewData["CurrentDocSectionSlug"] = sectionSlug;
-        ViewData["DocSection"] = section;
-        ViewData["DocPages"] = section?.Documentations ?? new List<DocumentationPageSummary>();
-        ViewData["DocSectionTitle"] = page.SectionTitle;
+        var pages = section?.Documentations ?? new List<DocumentationPageSummary>();
+
+        var contents = new List<GuideContentsItem>
+        {
+            new() { Number = 1, Title = "Overview", Url = $"/documentation/{sectionSlug}", IsCurrent = false }
+        };
+        var currentIndex = -1;
+        for (var i = 0; i < pages.Count; i++)
+        {
+            var p = pages[i];
+            var isCurrent = string.Equals(p.Slug, pageSlug, StringComparison.OrdinalIgnoreCase);
+            if (isCurrent) currentIndex = i;
+            contents.Add(new GuideContentsItem
+            {
+                Number = i + 2,
+                Title = p.Title,
+                Url = $"/documentation/{sectionSlug}/{p.Slug}",
+                IsCurrent = isCurrent
+            });
+        }
+
+        string? prevUrl = null, prevLabel = null, nextUrl = null, nextLabel = null;
+        if (currentIndex >= 0)
+        {
+            if (currentIndex > 0)
+            {
+                var prev = pages[currentIndex - 1];
+                prevUrl = $"/documentation/{sectionSlug}/{prev.Slug}";
+                prevLabel = prev.Title;
+            }
+            else
+            {
+                prevUrl = $"/documentation/{sectionSlug}";
+                prevLabel = "Overview";
+            }
+            if (currentIndex < pages.Count - 1)
+            {
+                var next = pages[currentIndex + 1];
+                nextUrl = $"/documentation/{sectionSlug}/{next.Slug}";
+                nextLabel = next.Title;
+            }
+        }
 
         var bodyResolved = await GovUkMarkdownHelper.ReplaceDdtStandardCodeShortcodesAsync(page.Body, _standardsApiService);
         var bodyHtml = string.IsNullOrEmpty(bodyResolved)
@@ -74,7 +138,12 @@ public class DocumentationController : Controller
             BodyHtml = bodyHtml,
             LastReviewedDateDisplay = page.LastReviewedDateDisplay,
             SectionSlug = page.SectionSlug,
-            SectionTitle = page.SectionTitle
+            SectionTitle = page.SectionTitle,
+            ContentsItems = contents,
+            PaginationPrevUrl = prevUrl,
+            PaginationPrevLabel = prevLabel,
+            PaginationNextUrl = nextUrl,
+            PaginationNextLabel = nextLabel
         };
         return View("~/Views/Documentation/Page.cshtml", model);
     }

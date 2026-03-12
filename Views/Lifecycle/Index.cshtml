@@ -1,21 +1,13 @@
 @*
-  All sections are rendered from the CMS. No hardcoded content.
-  CMS content types used:
-  - api/lifecycle (lifecycle): title, summary, ownerLabel, audienceLabel, lastUpdatedLabel, defaultView, lucidResources, stages
-  - api/lifecycle-stage (lifecycle-stage): title, slug, summary, durationLabel, order, colourHex, activeTracks, placements
-  - api/stage-task-placement (stage-task-placement): whenLabel, order, task, overrideOutputs, overrideGuidanceLinks
-  - api/task (task): title, slug, what, whyItMatters, howSteps, guidanceLinks, track, roles, leadRole, outputs
-  - api/track (track): task track + stage activeTracks (title, slug, colourHex)
-  - api/role (role): task roles and leadRole (title, slug, shortCode, colourHex)
-  - api/output (output): task outputs + placement overrideOutputs (title, templateLink)
-  Layout follows: frontend/Documentation/dfe-what-to-do-when.html
+  Lifecycle hub – What to do when. All sections from CMS.
+  CMS: lifecycle, lifecycle-stage, stage-task-placement, task, track, role, output.
 *@
 @using ServiceManual.Helpers
 @using ServiceManual.Models
 @{
     var lifecycle = ViewBag.Lifecycle as Lifecycle;
     var fromCms = lifecycle != null;
-    ViewData["Title"] = fromCms ? lifecycle!.Title : "Lifecycle";
+    ViewData["Title"] = fromCms ? lifecycle!.Title : "What to do when";
     var stages = fromCms ? lifecycle!.Stages.OrderBy(s => s.Order).ToList() : new List<LifecycleStage>();
     var allRoles = stages
         .SelectMany(s => s.Placements.SelectMany(p => p.Task.Roles.Concat(p.Task.LeadRole != null ? [p.Task.LeadRole] : [])))
@@ -28,8 +20,33 @@
     {
         ["explore"] = "#4338CA", ["discovery"] = "#1D70B8", ["alpha"] = "#BE185D", ["beta"] = "#C2410C", ["live"] = "#15803D"
     };
+    var heroTitle = fromCms && !string.IsNullOrEmpty(lifecycle!.Title) ? lifecycle.Title : "What to do when";
+    var heroIntro = fromCms && !string.IsNullOrEmpty(lifecycle!.Summary) ? lifecycle.Summary : "Stages and tasks for delivery. Filter by phase, track (Design, Build, Run) or role. Click a task to see what to do, why it matters and how to do it.";
 }
-<link rel="stylesheet" href="~/css/lifecycle-hub.css" asp-append-version="true" />
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/lifecycle-hub.css" asp-append-version="true" />
+}
+
+@section Masthead {
+  <header class="homepage-hero">
+    <div class="govuk-width-container">
+      <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+        <ol class="govuk-breadcrumbs__list">
+          <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+          <li class="govuk-breadcrumbs__list-item" aria-current="page">@heroTitle</li>
+        </ol>
+      </nav>
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <span class="guide-hero__label">Lifecycle</span>
+          <h1 class="govuk-heading-xl">@heroTitle</h1>
+          <p class="govuk-body-l homepage-hero__intro">@heroIntro</p>
+        </div>
+      </div>
+    </div>
+  </header>
+}
 
 @if (fromCms)
 {
@@ -82,7 +99,7 @@
   </div>
 
   <div class="dfe-f-lch-wrap">
-    <p class="dfe-f-lch-intro">Use the filters above to show tasks by <strong>stage</strong>, <strong>track</strong> (Design, Build, Run) or <strong>role</strong>. Click a task to expand it and see what to do, why it matters, how to do it, and links to outputs and guidance.</p>
+    <p class="dfe-f-lch-intro">Filter by <strong>phase</strong>, <strong>track</strong> (Design, Build, Run) or <strong>role</strong>. Click a task to expand details, guidance and outputs.</p>
     <div id="empty-msg" class="dfe-f-lch-empty">No tasks match your filters. <button type="button" onclick="clearAll()">Clear all filters</button></div>
 
     @foreach (var stage in stages)
@@ -250,11 +267,13 @@
 }
 else
 {
-<div class="dfe-f-lifecycle-hub" id="content">
-  <div class="dfe-f-lch-wrap">
-    <div class="dfe-f-lch-empty-state-msg">
-      <p style="margin:0 0 8px"><strong>No lifecycle content yet</strong></p>
-      <p style="margin:0">Content is managed in the CMS. Create and publish a lifecycle (for example with slug <strong>service-delivery-lifecycle</strong>) and add stages and tasks in the CMS.</p>
+<div class="govuk-width-container govuk-!-padding-top-6">
+  <div class="dfe-f-lifecycle-hub" id="content">
+    <div class="dfe-f-lch-wrap">
+      <div class="dfe-f-lch-empty-state-msg">
+        <p class="govuk-body" style="margin:0 0 8px"><strong>No lifecycle content yet</strong></p>
+        <p class="govuk-body govuk-!-margin-bottom-0">Content is managed in the CMS. Create and publish a lifecycle (for example with slug <strong>service-delivery-lifecycle</strong>) and add stages and tasks in the CMS.</p>
+      </div>
     </div>
   </div>
 </div>

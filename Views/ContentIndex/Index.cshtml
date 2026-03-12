@@ -1,6 +1,23 @@
 @model IReadOnlyList<ServiceManual.Models.ContentIndexItem>
+@using System.Linq
 @{
     ViewData["Title"] = "Content index";
+    var hasContent = Model.Count > 0;
+    var groupedBySection = hasContent
+        ? Model
+            .GroupBy(i => i.ContentType == "Phase" ? "Lifecycle" : i.ContentType)
+            .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
+            .ToList()
+        : new List<IGrouping<string, ServiceManual.Models.ContentIndexItem>>();
+    var phaseTags = hasContent
+        ? Model.SelectMany(i => i.ApplicablePhaseTags).DistinctBy(t => t.Slug).OrderBy(t => t.Title, StringComparer.OrdinalIgnoreCase).ToList()
+        : new List<ServiceManual.Models.TagRef>();
+    var professionTags = hasContent
+        ? Model.SelectMany(i => i.ApplicableProfessionTags).DistinctBy(t => t.Slug).OrderBy(t => t.Title, StringComparer.OrdinalIgnoreCase).ToList()
+        : new List<ServiceManual.Models.TagRef>();
+    var hasPhaseSection = phaseTags.Count > 0;
+    var hasProfessionSection = professionTags.Count > 0;
+    var showContents = hasContent && (groupedBySection.Count > 0 || hasPhaseSection || hasProfessionSection);
 }
 
 @section Breadcrumbs {
@@ -8,152 +25,158 @@
   <li class="govuk-breadcrumbs__list-item" aria-current="page">Content index</li>
 }
 
-<div class="govuk-grid-row">
-  <div class="govuk-grid-column-full">
-    <h1 class="govuk-heading-xl">Published content</h1>
-    <p class="govuk-body-l">All published content from the CMS. Click a link to open the page (the correct view is used for each content type).</p>
+<div class="content-index-page govuk-!-padding-top-4">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-xl govuk-!-margin-bottom-4">Published content</h1>
+      <p class="govuk-body-l govuk-!-margin-bottom-0">All published content from the CMS. Click a link to open the page.</p>
+    </div>
+  </div>
 
-    @if (Model.Count == 0)
-    {
-      <p class="govuk-body">No published content found.</p>
-    }
-    else
-    {
-      var groupedBySection = Model
-        .GroupBy(i => i.ContentType == "Detailed Guide Page" ? "Detailed Guide" : i.ContentType == "Phase" ? "Lifecycle" : i.ContentType)
-        .OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
-      var phaseTags = Model
-        .SelectMany(i => i.ApplicablePhaseTags)
-        .DistinctBy(t => t.Slug)
-        .OrderBy(t => t.Title, StringComparer.OrdinalIgnoreCase)
-        .ToList();
-      var professionTags = Model
-        .SelectMany(i => i.ApplicableProfessionTags)
-        .DistinctBy(t => t.Slug)
-        .OrderBy(t => t.Title, StringComparer.OrdinalIgnoreCase)
-        .ToList();
-
-      @foreach (var contentSection in groupedBySection)
-      {
-        <h2 class="govuk-heading-l govuk-!-margin-top-8 govuk-!-margin-bottom-4">@contentSection.Key</h2>
-        <table class="govuk-table">
-          <thead class="govuk-table__head">
-            <tr class="govuk-table__row">
-              <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
-              <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Description</th>
-            </tr>
-          </thead>
-          <tbody class="govuk-table__body">
-            @if (contentSection.Key == "Detailed Guide")
-            {
-              var guides = contentSection.Where(i => i.ContentType == "Detailed Guide").OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
-              foreach (var guide in guides)
-              {
-                <tr class="govuk-table__row">
-                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@guide.Url" class="govuk-link">@guide.Title</a></td>
-                  <td class="govuk-table__cell">@(guide.MetaDescription ?? "—")</td>
-                </tr>
-                var guidePages = contentSection.Where(i => i.ContentType == "Detailed Guide Page" && i.ParentSlug == guide.Slug).OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase);
-                foreach (var guidePage in guidePages)
-                {
-                  <tr class="govuk-table__row">
-                    <td class="govuk-table__cell govuk-!-padding-left-6"><a href="@guidePage.Url" class="govuk-link">@guidePage.Title</a></td>
-                    <td class="govuk-table__cell">@(guidePage.MetaDescription ?? "—")</td>
-                  </tr>
-                }
-              }
-            }
-            else if (contentSection.Key == "Lifecycle")
-            {
-              var lifecycleItem = contentSection.FirstOrDefault(i => i.ContentType == "Lifecycle");
-              if (lifecycleItem != null)
-              {
-                <tr class="govuk-table__row">
-                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@lifecycleItem.Url" class="govuk-link">@lifecycleItem.Title</a></td>
-                  <td class="govuk-table__cell">@(lifecycleItem.MetaDescription ?? "—")</td>
-                </tr>
-              }
-              foreach (var phase in contentSection.Where(i => i.ContentType == "Phase").OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase))
-              {
-                <tr class="govuk-table__row">
-                  <td class="govuk-table__cell govuk-!-padding-left-6"><a href="@phase.Url" class="govuk-link">@phase.Title</a></td>
-                  <td class="govuk-table__cell">@(phase.MetaDescription ?? "—")</td>
-                </tr>
-              }
-            }
-            else
-            {
-              @foreach (var item in contentSection.OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase))
-              {
-                <tr class="govuk-table__row">
-                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
-                  <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
-                </tr>
-              }
-            }
-          </tbody>
-        </table>
-      }
-
-      @if (phaseTags.Count > 0)
-      {
-        <h2 class="govuk-heading-l govuk-!-margin-top-8 govuk-!-margin-bottom-4">Content by tagged phase</h2>
-        <p class="govuk-body">Content tagged with delivery phases (tags-phase).</p>
-        @foreach (var tag in phaseTags)
+  @if (showContents)
+  {
+    <nav class="govuk-!-margin-top-6 govuk-!-margin-bottom-6" aria-label="Contents">
+      <h2 class="govuk-heading-s govuk-!-margin-bottom-3">On this page</h2>
+      <ul class="govuk-list">
+        @if (groupedBySection.Count > 0)
         {
-          var phaseItems = Model.Where(i => i.ApplicablePhaseTags.Any(pt => pt.Slug == tag.Slug)).OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
-          <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3">@tag.Title</h3>
+          <li><a class="govuk-link" href="#content-by-type">Content by type</a></li>
+        }
+        @if (hasPhaseSection)
+        {
+          <li><a class="govuk-link" href="#content-by-phase">Content by phase</a></li>
+        }
+        @if (hasProfessionSection)
+        {
+          <li><a class="govuk-link" href="#content-by-profession">Content by profession</a></li>
+        }
+      </ul>
+    </nav>
+  }
+
+  @if (!hasContent)
+  {
+    <p class="govuk-body govuk-!-margin-top-6">No published content found.</p>
+  }
+  else
+  {
+    @* Content by type *@
+    @if (groupedBySection.Count > 0)
+    {
+      <section id="content-by-type" class="govuk-!-margin-top-6">
+        <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Content by type</h2>
+
+        @foreach (var contentSection in groupedBySection)
+        {
+          <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3">@contentSection.Key</h3>
           <table class="govuk-table">
             <thead class="govuk-table__head">
               <tr class="govuk-table__row">
                 <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
-                <th scope="col" class="govuk-table__header govuk-!-width-one-sixth">Content type</th>
-                <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Description</th>
+                <th scope="col" class="govuk-table__header">Description</th>
+              </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+              @if (contentSection.Key == "Lifecycle")
+              {
+                var lifecycleItem = contentSection.FirstOrDefault(i => i.ContentType == "Lifecycle");
+                if (lifecycleItem != null)
+                {
+                  <tr class="govuk-table__row">
+                    <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@lifecycleItem.Url" class="govuk-link">@lifecycleItem.Title</a></td>
+                    <td class="govuk-table__cell">@(lifecycleItem.MetaDescription ?? "—")</td>
+                  </tr>
+                }
+                foreach (var phase in contentSection.Where(i => i.ContentType == "Phase").OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase))
+                {
+                  <tr class="govuk-table__row">
+                    <td class="govuk-table__cell govuk-!-padding-left-6"><a href="@phase.Url" class="govuk-link">@phase.Title</a></td>
+                    <td class="govuk-table__cell">@(phase.MetaDescription ?? "—")</td>
+                  </tr>
+                }
+              }
+              else
+              {
+                @foreach (var item in contentSection.OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase))
+                {
+                  <tr class="govuk-table__row">
+                    <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
+                    <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        }
+      </section>
+    }
+
+    @* Content by phase *@
+    @if (hasPhaseSection)
+    {
+      <section id="content-by-phase" class="govuk-!-margin-top-8">
+        <h2 class="govuk-heading-l govuk-!-margin-bottom-2">Content by phase</h2>
+        <p class="govuk-body govuk-!-margin-bottom-4">Content tagged with delivery phases.</p>
+
+        @foreach (var tag in phaseTags)
+        {
+          var phaseItems = Model.Where(i => i.ApplicablePhaseTags.Any(pt => pt.Slug == tag.Slug)).OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
+          <h3 class="govuk-heading-m govuk-!-margin-top-5 govuk-!-margin-bottom-2">@tag.Title</h3>
+          <table class="govuk-table govuk-!-margin-bottom-6">
+            <thead class="govuk-table__head">
+              <tr class="govuk-table__row">
+                <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
+                <th scope="col" class="govuk-table__header govuk-!-width-one-sixth">Type</th>
+                <th scope="col" class="govuk-table__header">Description</th>
               </tr>
             </thead>
             <tbody class="govuk-table__body">
               @foreach (var item in phaseItems)
               {
                 <tr class="govuk-table__row">
-                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
-                  <td class="govuk-table__cell">@item.ContentType</td>
+                  <td class="govuk-table__cell"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
+                  <td class="govuk-table__cell govuk-body-s">@item.ContentType</td>
                   <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
                 </tr>
               }
             </tbody>
           </table>
         }
-      }
+      </section>
+    }
 
-      @if (professionTags.Count > 0)
-      {
-        <h2 class="govuk-heading-l govuk-!-margin-top-8 govuk-!-margin-bottom-4">Content by tagged profession</h2>
-        <p class="govuk-body">Content tagged with professions (tags-profession).</p>
+    @* Content by profession *@
+    @if (hasProfessionSection)
+    {
+      <section id="content-by-profession" class="govuk-!-margin-top-8">
+        <h2 class="govuk-heading-l govuk-!-margin-bottom-2">Content by profession</h2>
+        <p class="govuk-body govuk-!-margin-bottom-4">Content tagged with professions.</p>
+
         @foreach (var tag in professionTags)
         {
           var professionItems = Model.Where(i => i.ApplicableProfessionTags.Any(pt => pt.Slug == tag.Slug)).OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
-          <h3 class="govuk-heading-m govuk-!-margin-top-6 govuk-!-margin-bottom-3"><a href="/content/profession/@Uri.EscapeDataString(tag.Slug)" class="govuk-link">@tag.Title</a></h3>
-          <table class="govuk-table">
+          <h3 class="govuk-heading-m govuk-!-margin-top-5 govuk-!-margin-bottom-2"><a href="/content/profession/@Uri.EscapeDataString(tag.Slug)" class="govuk-link">@tag.Title</a></h3>
+          <table class="govuk-table govuk-!-margin-bottom-6">
             <thead class="govuk-table__head">
               <tr class="govuk-table__row">
                 <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
-                <th scope="col" class="govuk-table__header govuk-!-width-one-sixth">Content type</th>
-                <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Description</th>
+                <th scope="col" class="govuk-table__header govuk-!-width-one-sixth">Type</th>
+                <th scope="col" class="govuk-table__header">Description</th>
               </tr>
             </thead>
             <tbody class="govuk-table__body">
               @foreach (var item in professionItems)
               {
                 <tr class="govuk-table__row">
-                  <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
-                  <td class="govuk-table__cell">@item.ContentType</td>
+                  <td class="govuk-table__cell"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
+                  <td class="govuk-table__cell govuk-body-s">@item.ContentType</td>
                   <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
                 </tr>
               }
             </tbody>
           </table>
         }
-      }
+      </section>
     }
-  </div>
+  }
 </div>
