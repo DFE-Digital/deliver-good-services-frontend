@@ -1,9 +1,57 @@
+@using Microsoft.AspNetCore.Html
 @using ServiceManual.Controllers
 @using ServiceManual.Models
 @model SearchViewModel
 @{
     ViewData["Title"] = string.IsNullOrEmpty(Model.Keywords) ? "Search" : $"Search results for \"{Model.Keywords}\"";
     var hasQuery = !string.IsNullOrEmpty(Model.Keywords);
+}
+
+@functions {
+    /// <summary>Returns HTML with search keywords wrapped in &lt;mark class="search-result-highlight"&gt;. Text is HTML-encoded.</summary>
+    static IHtmlContent HighlightKeywords(string? text, string? keywords)
+    {
+        if (string.IsNullOrEmpty(text)) return new HtmlString(System.Net.WebUtility.HtmlEncode(text ?? ""));
+        if (string.IsNullOrWhiteSpace(keywords)) return new HtmlString(System.Net.WebUtility.HtmlEncode(text));
+
+        var words = keywords.Split((char[]?)[' ', '\t', '\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length == 0) return new HtmlString(System.Net.WebUtility.HtmlEncode(text));
+
+        var ranges = new List<(int Start, int End)>();
+        foreach (var word in words)
+        {
+            if (string.IsNullOrEmpty(word)) continue;
+            var pattern = System.Text.RegularExpressions.Regex.Escape(word);
+            var matches = System.Text.RegularExpressions.Regex.Matches(text, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            foreach (System.Text.RegularExpressions.Match m in matches)
+                ranges.Add((m.Index, m.Index + m.Length));
+        }
+        if (ranges.Count == 0) return new HtmlString(System.Net.WebUtility.HtmlEncode(text));
+
+        ranges.Sort((a, b) => a.Start.CompareTo(b.Start));
+        var merged = new List<(int Start, int End)> { ranges[0] };
+        for (int i = 1; i < ranges.Count; i++)
+        {
+            var last = merged[^1];
+            if (ranges[i].Start <= last.End)
+                merged[^1] = (last.Start, Math.Max(last.End, ranges[i].End));
+            else
+                merged.Add(ranges[i]);
+        }
+
+        var sb = new System.Text.StringBuilder();
+        int pos = 0;
+        foreach (var (start, end) in merged)
+        {
+            sb.Append(System.Net.WebUtility.HtmlEncode(text[pos..start]));
+            sb.Append("<mark class=\"search-result-highlight\">");
+            sb.Append(System.Net.WebUtility.HtmlEncode(text[start..end]));
+            sb.Append("</mark>");
+            pos = end;
+        }
+        sb.Append(System.Net.WebUtility.HtmlEncode(text[pos..]));
+        return new HtmlString(sb.ToString());
+    }
 }
 
 @section Breadcrumbs {
@@ -63,6 +111,10 @@ else
         <div class="dfe-standards-filter__panel">
           <h2 class="dfe-standards-filter__title">Filter results</h2>
           <form method="get" action="/search" class="dfe-standards-filter__form" role="search">
+            @if (Model.HighlightKeywords)
+            {
+              <input type="hidden" name="highlight" value="1">
+            }
             <div class="dfe-standards-filter__field">
               <label class="dfe-standards-filter__label" for="search-page-keywords">Keyword search</label>
               <input class="govuk-input govuk-input--width-full" id="search-page-keywords" name="keywords" type="search" value="@Model.Keywords" placeholder="e.g. accessibility" autocomplete="off">
@@ -91,7 +143,7 @@ else
             }
             <div class="dfe-standards-filter__actions">
               <button type="submit" class="govuk-button govuk-button--primary govuk-!-margin-bottom-0" data-module="govuk-button">Apply filters</button>
-              <a href="/search?keywords=@Uri.EscapeDataString(Model.Keywords)" class="dfe-standards-filter__secondary-link govuk-link govuk-link--no-visited-state">Clear all filters</a>
+              <a href="/search?keywords=@Uri.EscapeDataString(Model.Keywords)@(Model.HighlightKeywords ? "&highlight=1" : "")" class="dfe-standards-filter__secondary-link govuk-link govuk-link--no-visited-state">Clear all filters</a>
             </div>
           </form>
         </div>
@@ -108,7 +160,7 @@ else
             {
               var otherTypes = Model.Types.Where(t => !string.Equals(t, type, StringComparison.OrdinalIgnoreCase)).ToList();
               var query = string.Join("&", otherTypes.Select(t => "type=" + Uri.EscapeDataString(t)));
-              var clearTypeUrl = "/search?keywords=" + Uri.EscapeDataString(Model.Keywords) + (query.Length > 0 ? "&" + query : "");
+              var clearTypeUrl = "/search?keywords=" + Uri.EscapeDataString(Model.Keywords) + (query.Length > 0 ? "&" + query : "") + (Model.HighlightKeywords ? "&highlight=1" : "");
               <li>
                 <span class="dfe-standards-filter__chip">
                   <span class="dfe-standards-filter__chip-text">@type</span>
@@ -117,25 +169,32 @@ else
               </li>
             }
           </ul>
-          <a href="/search?keywords=@Uri.EscapeDataString(Model.Keywords)" class="dfe-standards-filter__clear-all govuk-link govuk-link--no-visited-state">Clear all filters</a>
+          <a href="/search?keywords=@Uri.EscapeDataString(Model.Keywords)@(Model.HighlightKeywords ? "&highlight=1" : "")" class="dfe-standards-filter__clear-all govuk-link govuk-link--no-visited-state">Clear all filters</a>
         </div>
       }
-      <p class="govuk-body govuk-!-margin-bottom-4"><strong>@Model.Results.Count</strong> result@(Model.Results.Count == 1 ? "" : "s") for @Model.Keywords</p>
+      @{
+        var searchBase = "/search?keywords=" + Uri.EscapeDataString(Model.Keywords);
+        var typeParams = Model.Types.Count > 0 ? "&" + string.Join("&", Model.Types.Select(t => "type=" + Uri.EscapeDataString(t))) : "";
+        var urlWithHighlight = searchBase + typeParams + "&highlight=1";
+        var urlWithoutHighlight = searchBase + typeParams;
+      }
+      <p class="govuk-body govuk-!-margin-bottom-2"><strong>@Model.Results.Count</strong> result@(Model.Results.Count == 1 ? "" : "s") for @Model.Keywords</p>
+
       <ul class="govuk-list">
         @foreach (var item in Model.Results)
         {
           <li class="govuk-!-margin-bottom-4">
             <h2 class="govuk-heading-m govuk-!-margin-bottom-1">
-              <a href="@item.Url" class="govuk-link">@item.Title</a>
+              <a href="@item.Url" class="govuk-link">@(Model.HighlightKeywords ? HighlightKeywords(item.Title, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.Title)))</a>
             </h2>
-            <span class="govuk-body-s govuk-!-margin-right-2" style="color: #505a5f;">@item.ContentType</span>
+            <span class="govuk-body-s govuk-!-margin-right-2" style="color: var(--govuk-colour-secondary-text);">@item.ContentType</span>
             @if (!string.IsNullOrWhiteSpace(item.PartOfCollectionTitle) && !string.IsNullOrWhiteSpace(item.PartOfCollectionUrl))
             {
-              <span class="govuk-body-s govuk-!-margin-right-2" style="color: #505a5f;">Part of collection: <a href="@item.PartOfCollectionUrl" class="govuk-link">@item.PartOfCollectionTitle</a></span>
+              <span class="govuk-body-s govuk-!-margin-right-2" style="color: var(--govuk-colour-secondary-text);">Part of collection: <a href="@item.PartOfCollectionUrl" class="govuk-link">@(Model.HighlightKeywords ? HighlightKeywords(item.PartOfCollectionTitle, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.PartOfCollectionTitle!)))</a></span>
             }
             @if (!string.IsNullOrWhiteSpace(item.Summary))
             {
-              <p class="govuk-body govuk-body-s govuk-!-margin-top-1">@item.Summary</p>
+              <p class="govuk-body govuk-body-s govuk-!-margin-top-1">@(Model.HighlightKeywords ? HighlightKeywords(item.Summary, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.Summary)))</p>
             }
           </li>
         }

@@ -26,7 +26,8 @@ namespace ServiceManual.Filters
 
                 if (path.StartsWith("/documentation", StringComparison.OrdinalIgnoreCase))
                 {
-                    controller.ViewData["Navigation"] = GetDocumentationNavigation();
+                    var sections = await _cmsApiService.GetDocumentationSectionsAsync();
+                    controller.ViewData["Navigation"] = BuildDocumentationNavigation(sections);
                     controller.ViewData["IsDocumentationNav"] = true;
                 }
                 else
@@ -56,19 +57,24 @@ namespace ServiceManual.Filters
             }
         }
 
-        private static List<NavigationItem> GetDocumentationNavigation()
+        private static List<NavigationItem> BuildDocumentationNavigation(List<DocumentationSection> sections)
         {
-            return
-            [
-                new NavigationItem { Title = "Back to site", Url = "/", Order = 0 },
-                new NavigationItem { Title = "Documentation", Url = "/documentation", Order = 1 },
-                new NavigationItem { Title = "Styles", Url = "/documentation/styles", Order = 2 },
-                new NavigationItem { Title = "Components", Url = "/documentation/components", Order = 3 },
-                new NavigationItem { Title = "Patterns", Url = "/documentation/patterns", Order = 4 },
-                new NavigationItem { Title = "Templates", Url = "/documentation/templates", Order = 5 },
-                new NavigationItem { Title = "Publishing", Url = "/documentation/publishing", Order = 6 },
-                new NavigationItem { Title = "Configuration", Url = "/documentation/configuration", Order = 7 }
-            ];
+            var nav = new List<NavigationItem>
+            {
+                new() { Title = "Back to site", Url = "/", Order = 0 },
+                new() { Title = "Documentation", Url = "/documentation", Order = 1 }
+            };
+            var order = 2;
+            foreach (var section in sections)
+            {
+                nav.Add(new NavigationItem
+                {
+                    Title = section.Title,
+                    Url = $"/documentation/{section.Slug}",
+                    Order = order++
+                });
+            }
+            return nav;
         }
     }
 }

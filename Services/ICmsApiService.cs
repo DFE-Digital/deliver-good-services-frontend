@@ -24,5 +24,14 @@ namespace ServiceManual.Services
 
         /// <summary>Gets an active page notification for the given content type and slug, when validFrom &lt;= now &lt;= validTo and enabled is true. relationFilter: collections, detailed_guides, or detailed_guide_pages.</summary>
         Task<PageNotification?> GetActivePageNotificationAsync(string relationFilter, string slug);
+
+        /// <summary>Gets all enabled documentation sections for the doc nav (top tabs), with page summaries for side nav.</summary>
+        Task<List<DocumentationSection>> GetDocumentationSectionsAsync();
+
+        /// <summary>Gets a single documentation section by slug (for section index and side nav).</summary>
+        Task<DocumentationSection?> GetDocumentationSectionBySlugAsync(string sectionSlug);
+
+        /// <summary>Gets a single documentation page by section and page slug.</summary>
+        Task<DocumentationPage?> GetDocumentationBySlugAsync(string sectionSlug, string pageSlug);
     }
 }

@@ -3,7 +3,7 @@
 @using System.Text.RegularExpressions
 @{
     var collection = ViewBag.Collection as Collection ?? new Collection();
-    var bodyHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(collection.Body);
+    var bodyHtml = ViewBag.CollectionBodyHtml as string ?? GovUkMarkdownHelper.ToGovUkHtmlForBody(collection.Body);
     var hasSections = collection.Sections.Count > 0;
     var hasRightPanel = collection.RelatedContent.Count > 0 || collection.RelatedFiles.Count > 0;
     var showContentsNav = hasSections && collection.Sections.Count >= 2;
@@ -45,13 +45,13 @@
 
             @* Meta strip: Last reviewed, Owner, Audience (same structure as DetailedGuide) *@
             @{
-                var hasMeta = !string.IsNullOrEmpty(collection.LastReviewedDateDisplay) || !string.IsNullOrWhiteSpace(collection.Owner) || collection.AudienceTags.Count > 0;
+                var hasMeta = (collection.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(collection.LastReviewedDateDisplay)) || !string.IsNullOrWhiteSpace(collection.Owner) || collection.AudienceTags.Count > 0;
             }
             @if (hasMeta)
             {
                 <div class="guide-meta">
                     <div class="govuk-width-container">
-                        @if (!string.IsNullOrEmpty(collection.LastReviewedDateDisplay))
+                        @if (collection.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(collection.LastReviewedDateDisplay))
                         {
                             <span class="guide-meta__item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(collection.LastReviewedDateDisplay)</span>
                             <span class="guide-meta__dot" aria-hidden="true">·</span>

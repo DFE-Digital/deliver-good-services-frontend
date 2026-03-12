@@ -1,87 +1,81 @@
 using Microsoft.AspNetCore.Mvc;
+using ServiceManual.Helpers;
+using ServiceManual.Models;
+using ServiceManual.Services;
 
 namespace ServiceManual.Controllers;
 
 public class DocumentationController : Controller
 {
+    private readonly ICmsApiService _cmsApiService;
+    private readonly DdtStandardsApiService _standardsApiService;
+
+    public DocumentationController(ICmsApiService cmsApiService, DdtStandardsApiService standardsApiService)
+    {
+        _cmsApiService = cmsApiService;
+        _standardsApiService = standardsApiService;
+    }
+
     [Route("documentation")]
-    public IActionResult Index() => View("~/Views/Documentation/Index.cshtml");
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var sections = await _cmsApiService.GetDocumentationSectionsAsync();
+        ViewData["DocSections"] = sections;
+        ViewData["CurrentDocSectionSlug"] = (string?)null;
+        ViewData["DocSection"] = (DocumentationSection?)null;
+        ViewData["DocPages"] = new List<DocumentationPageSummary>();
+        return View("~/Views/Documentation/Index.cshtml");
+    }
 
-    [Route("documentation/styles")]
-    public IActionResult StylesIndex() => View("~/Views/Documentation/Styles/Index.cshtml");
+    [Route("documentation/{sectionSlug}")]
+    [HttpGet]
+    public async Task<IActionResult> Section(string sectionSlug)
+    {
+        var section = await _cmsApiService.GetDocumentationSectionBySlugAsync(sectionSlug);
+        if (section is null)
+            return NotFound();
 
-    [Route("documentation/styles/typography")]
-    public IActionResult StylesTypography() => View("~/Views/Documentation/Typography.cshtml");
+        var sections = await _cmsApiService.GetDocumentationSectionsAsync();
+        ViewData["DocSections"] = sections;
+        ViewData["CurrentDocSectionSlug"] = section.Slug;
+        ViewData["DocSection"] = section;
+        ViewData["DocPages"] = section.Documentations;
+        ViewData["DocSectionTitle"] = section.Title;
+        return View("~/Views/Documentation/SectionIndex.cshtml", section);
+    }
 
-    [Route("documentation/styles/headings")]
-    public IActionResult StylesHeadings() => View("~/Views/Documentation/Headings.cshtml");
+    [Route("documentation/{sectionSlug}/{pageSlug}")]
+    [HttpGet]
+    public async Task<IActionResult> Page(string sectionSlug, string pageSlug)
+    {
+        var page = await _cmsApiService.GetDocumentationBySlugAsync(sectionSlug, pageSlug);
+        if (page is null)
+            return NotFound();
 
-    [Route("documentation/styles/links")]
-    public IActionResult StylesLinks() => View("~/Views/Documentation/Links.cshtml");
+        var section = await _cmsApiService.GetDocumentationSectionBySlugAsync(sectionSlug);
+        var sections = await _cmsApiService.GetDocumentationSectionsAsync();
+        ViewData["DocSections"] = sections;
+        ViewData["CurrentDocSectionSlug"] = sectionSlug;
+        ViewData["DocSection"] = section;
+        ViewData["DocPages"] = section?.Documentations ?? new List<DocumentationPageSummary>();
+        ViewData["DocSectionTitle"] = page.SectionTitle;
 
-    [Route("documentation/styles/inset-text")]
-    public IActionResult StylesInsetText() => View("~/Views/Documentation/InsetText.cshtml");
+        var bodyResolved = await GovUkMarkdownHelper.ReplaceDdtStandardCodeShortcodesAsync(page.Body, _standardsApiService);
+        var bodyHtml = string.IsNullOrEmpty(bodyResolved)
+            ? string.Empty
+            : GovUkMarkdownHelper.ToGovUkHtmlForBody(bodyResolved);
 
-    [Route("documentation/styles/tables")]
-    public IActionResult StylesTables() => View("~/Views/Documentation/Tables.cshtml");
-
-    [Route("documentation/styles/horizontal-rule")]
-    public IActionResult StylesHorizontalRule() => View("~/Views/Documentation/HorizontalRule.cshtml");
-
-    [Route("documentation/styles/colour")]
-    public IActionResult StylesColour() => View("~/Views/Documentation/Colour.cshtml");
-
-    [Route("documentation/components")]
-    public IActionResult ComponentsIndex() => View("~/Views/Documentation/Components/Index.cshtml");
-
-    [Route("documentation/components/markdown")]
-    public IActionResult ComponentsMarkdown() => View("~/Views/Documentation/Markdown.cshtml");
-
-    [Route("documentation/components/action-link")]
-    public IActionResult ComponentsActionLink() => View("~/Views/Documentation/ActionLink.cshtml");
-
-    [Route("documentation/components/panel")]
-    public IActionResult ComponentsPanel() => View("~/Views/Documentation/PanelComponent.cshtml");
-
-    [Route("documentation/components/pill")]
-    public IActionResult ComponentsPill() => View("~/Views/Documentation/PillComponent.cshtml");
-
-    [Route("documentation/components/cards")]
-    public IActionResult ComponentsCards() => View("~/Views/Documentation/Cards.cshtml");
-
-    [Route("documentation/components/card-list")]
-    public IActionResult ComponentsCardList() => View("~/Views/Documentation/ChevronCards.cshtml");
-
-    [Route("documentation/components/related-content")]
-    public IActionResult ComponentsRelatedContent() => View("~/Views/Documentation/RelatedContent.cshtml");
-
-    [Route("documentation/components/phase-components")]
-    public IActionResult ComponentsPhaseComponents() => View("~/Views/Documentation/PhaseComponents.cshtml");
-
-    [Route("documentation/patterns")]
-    public IActionResult PatternsIndex() => View("~/Views/Documentation/Patterns/Index.cshtml");
-
-    [Route("documentation/templates")]
-    public IActionResult TemplatesIndex() => View("~/Views/Documentation/Templates/Index.cshtml");
-
-    [Route("documentation/templates/collection")]
-    public IActionResult TemplatesCollection() => View("~/Views/Documentation/Templates/Collection.cshtml");
-
-    [Route("documentation/templates/detailed-guide")]
-    public IActionResult TemplatesDetailedGuide() => View("~/Views/Documentation/Templates/DetailedGuide.cshtml");
-
-    [Route("documentation/templates/redirector")]
-    public IActionResult TemplatesRedirector() => View("~/Views/Documentation/Templates/Redirector.cshtml");
-
-    [Route("documentation/publishing")]
-    public IActionResult PublishingIndex() => View("~/Views/Documentation/Publishing/Index.cshtml");
-
-    [Route("documentation/publishing/lifecycle")]
-    public IActionResult PublishingLifecycle() => View("~/Views/Documentation/Publishing/Lifecycle.cshtml");
-
-    [Route("documentation/configuration")]
-    public IActionResult ConfigurationIndex() => View("~/Views/Documentation/Configuration/Index.cshtml");
-
-    [Route("documentation/configuration/cms")]
-    public IActionResult ConfigurationCms() => View("~/Views/Documentation/Configuration/Cms.cshtml");
+        var model = new DocumentationPageViewModel
+        {
+            Title = page.Title,
+            Slug = page.Slug,
+            MetaDescription = page.MetaDescription,
+            BodyHtml = bodyHtml,
+            LastReviewedDateDisplay = page.LastReviewedDateDisplay,
+            SectionSlug = page.SectionSlug,
+            SectionTitle = page.SectionTitle
+        };
+        return View("~/Views/Documentation/Page.cshtml", model);
+    }
 }

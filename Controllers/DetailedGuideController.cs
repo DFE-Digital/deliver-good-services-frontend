@@ -8,10 +8,14 @@ namespace ServiceManual.Controllers
     public class DetailedGuideController : Controller
     {
         private readonly ICmsApiService _cmsApiService;
+        private readonly IBlobMetadataProvider _blobMetadataProvider;
+        private readonly DdtStandardsApiService _standardsApiService;
 
-        public DetailedGuideController(ICmsApiService cmsApiService)
+        public DetailedGuideController(ICmsApiService cmsApiService, IBlobMetadataProvider blobMetadataProvider, DdtStandardsApiService standardsApiService)
         {
             _cmsApiService = cmsApiService;
+            _blobMetadataProvider = blobMetadataProvider;
+            _standardsApiService = standardsApiService;
         }
 
         [Route("guidance/guides/{slug}")]
@@ -22,7 +26,10 @@ namespace ServiceManual.Controllers
             if (guide is null)
                 return NotFound();
 
-            var model = BuildViewModelFromGuide(guide);
+            var bodyResolved = await GovUkMarkdownHelper.ReplaceDdtStandardCodeShortcodesAsync(guide.Body, _standardsApiService);
+            var model = BuildViewModelFromGuide(guide, bodyResolved);
+            if (!string.IsNullOrEmpty(model.BodyHtml))
+                model.BodyHtml = await GovUkMarkdownHelper.EnrichDocumentListWithBlobMetadataAsync(model.BodyHtml, _blobMetadataProvider);
             ViewBag.GuidePage = model;
             ViewBag.PageNotification = await _cmsApiService.GetActivePageNotificationAsync("detailed_guides", slug);
             return View("~/Views/Templates/DetailedGuide.cshtml");
@@ -36,17 +43,24 @@ namespace ServiceManual.Controllers
             if (guidePage is null)
                 return NotFound();
 
-            var model = BuildViewModelFromGuidePage(guidePage);
+            var bodyResolved = await GovUkMarkdownHelper.ReplaceDdtStandardCodeShortcodesAsync(guidePage.Body, _standardsApiService);
+            var beforeContentsResolved = !string.IsNullOrEmpty(guidePage.BeforeContents)
+                ? await GovUkMarkdownHelper.ReplaceDdtStandardCodeShortcodesAsync(guidePage.BeforeContents, _standardsApiService)
+                : null;
+            var model = BuildViewModelFromGuidePage(guidePage, bodyResolved, beforeContentsResolved);
+            if (!string.IsNullOrEmpty(model.BodyHtml))
+                model.BodyHtml = await GovUkMarkdownHelper.EnrichDocumentListWithBlobMetadataAsync(model.BodyHtml, _blobMetadataProvider);
             ViewBag.GuidePage = model;
             ViewBag.PageNotification = await _cmsApiService.GetActivePageNotificationAsync("detailed_guide_pages", pageSlug);
 
             return View("~/Views/Templates/DetailedGuide.cshtml");
         }
 
-        private static GuidePageViewModel BuildViewModelFromGuide(DetailedGuide guide)
+        private static GuidePageViewModel BuildViewModelFromGuide(DetailedGuide guide, string? resolvedBody = null)
         {
-            var bodyHtml = !string.IsNullOrEmpty(guide.Body)
-                ? GovUkMarkdownHelper.ToGovUkHtmlForBody(guide.Body)
+            var bodyMarkdown = resolvedBody ?? guide.Body;
+            var bodyHtml = !string.IsNullOrEmpty(bodyMarkdown)
+                ? GovUkMarkdownHelper.ToGovUkHtmlForBody(bodyMarkdown)
                 : "";
 
             List<GuideContentsItem> contents;
@@ -96,8 +110,7 @@ namespace ServiceManual.Controllers
                 CollectionSlug = guide.CollectionSlug,
                 CollectionTitle = guide.CollectionTitle,
                 Collections = guide.Collections,
-                ShowLastUpdatedDateOnPage = guide.ShowLastUpdatedDateOnPage,
-                UpdatedAtDisplay = guide.UpdatedAtDisplay,
+                ShowLastReviewedDateOnPage = guide.ShowLastReviewedDateOnPage,
                 LastReviewedDateDisplay = guide.LastReviewedDateDisplay,
                 Owner = guide.Owner,
                 OwnerUrl = guide.OwnerUrl,
@@ -116,7 +129,7 @@ namespace ServiceManual.Controllers
             };
         }
 
-        private static GuidePageViewModel BuildViewModelFromGuidePage(DetailedGuidePage guidePage)
+        private static GuidePageViewModel BuildViewModelFromGuidePage(DetailedGuidePage guidePage, string? resolvedBody = null, string? resolvedBeforeContents = null)
         {
             var professionsTagsHtml = "";
             if (guidePage.Professions.Count > 0)
@@ -131,10 +144,11 @@ namespace ServiceManual.Controllers
                 professionsTagsHtml = sb.ToString();
             }
 
-            var bodyForRender = (guidePage.Body ?? "").Replace("[[professions]]", professionsTagsHtml);
-            var bodyHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(bodyForRender);
-            var beforeContentsHtml = !string.IsNullOrWhiteSpace(guidePage.BeforeContents)
-                ? GovUkMarkdownHelper.ToGovUkHtmlForBody(guidePage.BeforeContents.Replace("[[professions]]", professionsTagsHtml))
+            var bodyMarkdown = (resolvedBody ?? guidePage.Body ?? "").Replace("[[professions]]", professionsTagsHtml);
+            var bodyHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(bodyMarkdown);
+            var beforeContentsRaw = resolvedBeforeContents ?? guidePage.BeforeContents ?? "";
+            var beforeContentsHtml = !string.IsNullOrWhiteSpace(beforeContentsRaw)
+                ? GovUkMarkdownHelper.ToGovUkHtmlForBody(beforeContentsRaw.Replace("[[professions]]", professionsTagsHtml))
                 : null;
 
             var contents = new List<GuideContentsItem>
@@ -188,8 +202,7 @@ namespace ServiceManual.Controllers
                 CollectionSlug = guidePage.CollectionSlug,
                 CollectionTitle = guidePage.CollectionTitle,
                 Collections = guidePage.Collections,
-                ShowLastUpdatedDateOnPage = guidePage.ShowLastUpdatedDateOnPage,
-                UpdatedAtDisplay = guidePage.UpdatedAtDisplay,
+                ShowLastReviewedDateOnPage = guidePage.ShowLastReviewedDateOnPage,
                 LastReviewedDateDisplay = guidePage.LastReviewedDateDisplay,
                 Owner = guidePage.Owner,
                 OwnerUrl = guidePage.OwnerUrl,

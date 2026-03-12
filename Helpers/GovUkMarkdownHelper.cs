@@ -1,4 +1,5 @@
 using Markdig;
+using ServiceManual.Services;
 using System.Text.RegularExpressions;
 
 namespace ServiceManual.Helpers
@@ -17,8 +18,17 @@ namespace ServiceManual.Helpers
                 // Pre-process [panel] shortcodes before Markdig runs
                 markdown = ApplyPanelShortcodes(markdown);
 
+                // Pre-process [callout] shortcode before Markdig runs
+                markdown = ApplyCalloutShortcodes(markdown);
+
                 // Pre-process [actionLink] shortcode before Markdig runs
                 markdown = ApplyActionLinkShortcodes(markdown);
+
+                // Pre-process [fileDownload] shortcode before Markdig runs
+                markdown = ApplyFileDownloadShortcodes(markdown);
+
+                // Pre-process [ddtStandard] shortcode before Markdig runs
+                markdown = ApplyDdtStandardShortcodes(markdown);
 
                 // Pre-process [noBullets] shortcode before Markdig runs
                 markdown = ApplyNoBulletsShortcodes(markdown);
@@ -93,6 +103,105 @@ namespace ServiceManual.Helpers
         }
 
         /// <summary>
+        /// Replaces [ddtStandard code=XXX] shortcodes in markdown with rendered HTML. Fetches each standard (by id or slug)
+        /// via the API and renders title, code and description as a link to the standard page. Call this before ToGovUkHtmlForBody
+        /// when the markdown may contain these shortcodes.
+        /// </summary>
+        /// <param name="markdown">Raw markdown that may contain [ddtStandard code=301] or [ddtStandard code=my-slug].</param>
+        /// <param name="standardsService">Service to fetch standard by id or slug.</param>
+        /// <param name="cancellationToken">Optional cancellation.</param>
+        /// <returns>Markdown with [ddtStandard code=X] replaced by HTML blocks; other content unchanged.</returns>
+        public static async Task<string> ReplaceDdtStandardCodeShortcodesAsync(
+            string? markdown,
+            DdtStandardsApiService standardsService,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(markdown) || standardsService == null)
+                return markdown ?? string.Empty;
+
+            // Match [ddtStandard code=301] or [ddtStandard code=my-slug]; code value is digits or slug (no spaces or ])
+            var pattern = new Regex(@"\[ddtStandard\s+code=([^\]\s""]+)\]", RegexOptions.IgnoreCase);
+            var matches = pattern.Matches(markdown).Cast<Match>().ToList();
+            if (matches.Count == 0)
+                return markdown;
+
+            var result = markdown;
+            foreach (var m in matches)
+            {
+                var code = m.Groups[1].Value.Trim();
+                var fullMatch = m.Value;
+                DdtStandardDetailDto? standard = null;
+                if (int.TryParse(code, out var id))
+                {
+                    standard = await standardsService.GetStandardByIdAsync(id).ConfigureAwait(false);
+                    if (standard == null)
+                        standard = await standardsService.GetStandardBySlugAsync(code).ConfigureAwait(false);
+                }
+                else
+                {
+                    standard = await standardsService.GetStandardBySlugAsync(code).ConfigureAwait(false);
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+                var html = standard != null ? RenderSingleDdtStandardBlock(standard) : RenderDdtStandardNotFoundBlock(code);
+                result = result.Replace(fullMatch, html);
+            }
+            return result;
+        }
+
+        /// <summary>Renders one standard as a dfe-f-std-card-a card (block + cards wrapper).</summary>
+        private static string RenderSingleDdtStandardBlock(DdtStandardDetailDto standard)
+        {
+            var slug = standard.Slug ?? standard.Id.ToString();
+            var href = $"/standards/ddt-standards/{Uri.EscapeDataString(slug)}";
+            var title = standard.Title ?? "Standard";
+            var codeDisplay = !string.IsNullOrEmpty(standard.Id.ToString()) ? standard.Id.ToString() : (!string.IsNullOrEmpty(slug) ? slug : "STD");
+            var phasesHtml = RenderPhasePills(standard.Phases);
+            return "\n<div class=\"dfe-f-std-block-a\">"
+               + "\n<div class=\"dfe-f-std-cards-a\">\n"
+               + $"<a href=\"{HtmlEncode(href)}\" class=\"dfe-f-std-card-a\">"
+               + $"<span class=\"dfe-f-std-card-a__code\">DDTS-{HtmlEncode(codeDisplay)}</span>"
+               + "<div class=\"dfe-f-std-card-a__body\">"
+               + "<p class=\"dfe-f-std-block-a__label govuk-!-margin-bottom-0\">Digital, data and technology standard</p>"
+               + $"<span class=\"dfe-f-std-card-a__name\">{HtmlEncode(title)}</span>"
+               + (
+                   phasesHtml != ""
+                       ? $"<div class=\"dfe-f-std-card-a__phases\">{phasesHtml}</div>"
+                       : ""
+               )
+               + "</div>"
+               + "<span class=\"dfe-f-std-card-a__arrow\" aria-hidden=\"true\">›</span>"
+               + "</a>\n</div>\n</div>\n";
+        }
+
+        private static string RenderPhasePills(List<DdtStandardPhase>? phases)
+        {
+            if (phases == null || phases.Count == 0) return "";
+            var list = new List<string>();
+            foreach (var p in phases)
+            {
+                if (string.IsNullOrWhiteSpace(p.Name)) continue;
+                var name = p.Name.Trim();
+                var mod = name.ToLowerInvariant() switch
+                {
+                    "discovery" => "dfe-f-phase-pill--discovery",
+                    "alpha" => "dfe-f-phase-pill--alpha",
+                    "beta" => "dfe-f-phase-pill--beta",
+                    "live" => "dfe-f-phase-pill--live",
+                    _ => null
+                };
+                if (mod == null) continue;
+                list.Add($"<span class=\"dfe-f-phase-pill {mod}\">{HtmlEncode(name)}</span>");
+            }
+            return string.Join("", list);
+        }
+
+        /// <summary>Renders a placeholder when the standard cannot be resolved.</summary>
+        private static string RenderDdtStandardNotFoundBlock(string code)
+        {
+            return $"\n<p class=\"govuk-body govuk-!-margin-bottom-4\"><span class=\"govuk-visually-hidden\">Standard reference </span><strong>[ddtStandard code={HtmlEncode(code)}]</strong> — standard not found.</p>\n";
+        }
+
+        /// <summary>
         /// Renders markdown for dfe-f-related-content__section body. Same as ToGovUkHtml but paragraphs and other body text
         /// use govuk-body-s instead of govuk-body so related content is always small.
         /// </summary>
@@ -103,6 +212,76 @@ namespace ServiceManual.Helpers
             var html = ToGovUkHtml(markdown);
             // Replace govuk-body with govuk-body-s so body text is small (don't change govuk-body-l or govuk-body-s)
             return Regex.Replace(html, @"\bgovuk-body\b(?!-)", "govuk-body-s", RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
+        /// Enriches dfe-f-document-list blocks in the HTML with file size and last-modified from blob storage.
+        /// For each document item whose link href points to the provider's blob storage, fetches metadata and
+        /// updates the meta line to "TypeLabel, 120KB, updated 15 Jan 2025". When provider returns null, the meta is left as-is.
+        /// </summary>
+        public static async Task<string> EnrichDocumentListWithBlobMetadataAsync(string? html, IBlobMetadataProvider provider, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(html) || provider == null)
+                return html ?? "";
+
+            var metaTagRegex = new Regex(@"<p class=""dfe-f-document-item__meta"">(.*?)</p>", RegexOptions.Singleline);
+            var hrefRegex = new Regex(@"<a[^>]+href=""([^""]+)""[^>]*>", RegexOptions.Singleline);
+            var matches = metaTagRegex.Matches(html).Cast<Match>().ToList();
+            if (matches.Count == 0)
+                return html;
+
+            var replacements = new List<(int Start, int Length, string NewTag)>();
+
+            foreach (var m in matches)
+            {
+                var typeLabel = m.Groups[1].Value.Trim();
+                var beforeMeta = html[..m.Index];
+                var hrefMatches = hrefRegex.Matches(beforeMeta);
+                if (hrefMatches.Count == 0)
+                    continue;
+                var lastHref = hrefMatches[^1];
+                var href = lastHref.Groups[1].Value.Trim();
+                if (string.IsNullOrEmpty(href))
+                    continue;
+
+                var metadata = await provider.GetMetadataAsync(href, cancellationToken).ConfigureAwait(false);
+                if (metadata == null)
+                    continue;
+
+                // Strip ", file size and updated unknown" to get the type label only
+                const string unknownSuffix = ", file size and updated unknown";
+                var displayTypeLabel = typeLabel.EndsWith(unknownSuffix, StringComparison.OrdinalIgnoreCase)
+                    ? typeLabel[..typeLabel.IndexOf(unknownSuffix, StringComparison.OrdinalIgnoreCase)].Trim()
+                    : typeLabel;
+
+                var sizeStr = FormatFileSize(metadata.SizeBytes);
+                var dateStr = FormatLastModified(metadata.LastModified);
+                var newInner = HtmlEncode($"{displayTypeLabel}, {sizeStr}, updated {dateStr}");
+                var newTag = $"<p class=\"dfe-f-document-item__meta\">{newInner}</p>";
+                replacements.Add((m.Index, m.Length, newTag));
+            }
+
+            // Apply replacements from end to start so indices remain valid
+            var result = html;
+            foreach (var (start, length, newTag) in replacements.OrderByDescending(r => r.Start))
+                result = result[..start] + newTag + result[(start + length)..];
+
+            return result;
+        }
+
+        private static string FormatFileSize(long bytes)
+        {
+            if (bytes >= 1024 * 1024)
+                return $"{(bytes / (1024.0 * 1024)):F1}MB";
+            if (bytes >= 1024)
+                return $"{(bytes / 1024.0):F0}KB";
+            return $"{bytes}B";
+        }
+
+        private static string FormatLastModified(DateTimeOffset d)
+        {
+            // "18 Jan 2025" (day without leading zero, full month name, year)
+            return d.ToString("d MMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-GB"));
         }
 
         /// <summary>
@@ -123,6 +302,53 @@ namespace ServiceManual.Helpers
         {
             var m = Regex.Match(tag, $@"{name}=""([^""]*)""", RegexOptions.IgnoreCase);
             return m.Success ? m.Groups[1].Value.Trim() : fallback;
+        }
+
+        /// <summary>Reads attribute value with optional quotes, e.g. type=warning or title="Legal requirement".</summary>
+        private static string AttrOrUnquoted(string tag, string name, string fallback = "")
+        {
+            var quoted = Regex.Match(tag, $@"{name}=""([^""]*)""", RegexOptions.IgnoreCase);
+            if (quoted.Success) return quoted.Groups[1].Value.Trim();
+            var unquoted = Regex.Match(tag, $@"{name}=([^,\]]+)", RegexOptions.IgnoreCase);
+            return unquoted.Success ? unquoted.Groups[1].Value.Trim() : fallback;
+        }
+
+        // ── [callout] shortcode ───────────────────────────────────────────────────
+
+        /// <summary>
+        /// Converts [callout type=warning] or [callout type=important, title=Legal requirement] ... [/callout]
+        /// into a styled callout panel. type: warning (red), important (orange), information (blue).
+        /// Optional title= renders as strong; inner content is markdown-rendered as paragraphs.
+        /// </summary>
+        private static string ApplyCalloutShortcodes(string markdown)
+        {
+            if (string.IsNullOrEmpty(markdown)) return markdown;
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            return Regex.Replace(
+                markdown,
+                @"\[callout([^\]]*)\]([\s\S]*?)\[/callout\]",
+                m =>
+                {
+                    var attrs = m.Groups[1].Value.Trim();
+                    var inner = m.Groups[2].Value.Trim();
+                    var type = AttrOrUnquoted(attrs, "type", "information").ToLowerInvariant();
+                    if (type != "warning" && type != "important" && type != "information")
+                        type = "information";
+                    var title = AttrOrUnquoted(attrs, "title", "");
+                    var titleHtml = !string.IsNullOrWhiteSpace(title)
+                        ? $"<strong>{HtmlEncode(title.Trim())}</strong>\n"
+                        : "";
+                    var bodyHtml = "";
+                    if (!string.IsNullOrEmpty(inner))
+                    {
+                        inner = string.Join("\n", inner.Replace("\r\n", "\n").Split('\n').Select(line => line.TrimStart()));
+                        inner = NormaliseReversedMarkdownLinks(inner);
+                        bodyHtml = Markdown.ToHtml(inner, pipeline);
+                        bodyHtml = ApplyGovUkClasses(bodyHtml);
+                    }
+                    return "\n<div class=\"dfe-f-callout " + type + "\">\n" + titleHtml + bodyHtml + "</div>\n";
+                },
+                RegexOptions.IgnoreCase);
         }
 
         // ── [panel] shortcode ────────────────────────────────────────────────────
@@ -447,6 +673,138 @@ namespace ServiceManual.Helpers
                    "<span class=\"dfe-f-action-link__link-wrapper\">" +
                    $"<a class=\"govuk-link dfe-f-action-link__link\" href=\"{HtmlEncode(url)}\">{HtmlEncode(text)}</a>" +
                    "</span></div>";
+        }
+
+        // ── [fileDownload] shortcode ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Converts [fileDownload] ... [link text](url) ... [/fileDownload] into a styled document list.
+        /// Each markdown link becomes a document item with file type derived from the URL/link text extension.
+        /// Use in markdown: [fileDownload] [filename.docx](https://example.com/file.docx) [/fileDownload]
+        /// </summary>
+        private static string ApplyFileDownloadShortcodes(string markdown)
+        {
+            if (string.IsNullOrEmpty(markdown)) return markdown;
+            return Regex.Replace(
+                markdown,
+                @"\[fileDownload\]([\s\S]*?)\[/fileDownload\]",
+                m => RenderFileDownloadShortcode(m.Groups[1].Value),
+                RegexOptions.IgnoreCase);
+        }
+
+        private static string RenderFileDownloadShortcode(string inner)
+        {
+            var links = Regex.Matches(inner.Trim(), @"\[([^\]]+)\]\(([^)]+)\)")
+                .Cast<Match>()
+                .Select(m => (Text: m.Groups[1].Value.Trim(), Url: m.Groups[2].Value.Trim()))
+                .Where(x => !string.IsNullOrEmpty(x.Url))
+                .ToList();
+            if (links.Count == 0) return string.Empty;
+
+            var items = links.Select(link =>
+            {
+                var (typeCode, typeLabel) = GetFileTypeFromUrlOrName(link.Url, link.Text);
+                var href = string.IsNullOrEmpty(link.Url) ? "#" : link.Url;
+                var title = link.Text ?? "";
+                var metaText = $"{typeLabel}, file size and updated unknown";
+                return "<div class=\"dfe-f-document-item\">" +
+                       $"<div class=\"dfe-f-document-item__icon\">{HtmlEncode(typeCode)}</div>" +
+                       "<div class=\"dfe-f-document-item__info\">" +
+                       $"<h4 class=\"govuk-heading-s dfe-f-document-item__title\"><a class=\"govuk-link\" href=\"{HtmlEncode(href)}\">{HtmlEncode(title)}</a></h4>" +
+                       $"<p class=\"dfe-f-document-item__meta\">{HtmlEncode(metaText)}</p>" +
+                       "</div></div>";
+            });
+            return "\n<div class=\"dfe-f-document-list\">\n" + string.Join("\n", items) + "\n</div>\n";
+        }
+
+        // ── [ddtStandard] shortcode ───────────────────────────────────────────────────
+
+        /// <summary>
+        /// Converts [ddtStandard] - [Title (DDTS-XXX)](url) ... [/ddtStandard] into a styled standards list.
+        /// Each markdown link becomes an item; optional (DDTS-XXX) in the link text is shown as a code badge.
+        /// </summary>
+        private static string ApplyDdtStandardShortcodes(string markdown)
+        {
+            if (string.IsNullOrEmpty(markdown)) return markdown;
+            return Regex.Replace(
+                markdown,
+                @"\[ddtStandard\]([\s\S]*?)\[/ddtStandard\]",
+                m => RenderDdtStandardShortcode(m.Groups[1].Value),
+                RegexOptions.IgnoreCase);
+        }
+
+        private static readonly Regex DdtStandardCodeInTitle = new(@"^(.+?)\s*\((DDTS-\d+)\)\s*$", RegexOptions.Compiled);
+
+        private static string RenderDdtStandardShortcode(string inner)
+        {
+            var linkMatches = Regex.Matches(inner.Trim(), @"\[([^\]]+)\]\(([^)]+)\)")
+                .Cast<Match>()
+                .Select(m => (Text: m.Groups[1].Value.Trim(), Url: m.Groups[2].Value.Trim()))
+                .Where(x => !string.IsNullOrEmpty(x.Url))
+                .ToList();
+            if (linkMatches.Count == 0) return string.Empty;
+
+            var items = linkMatches.Select(link =>
+            {
+                var title = link.Text ?? "";
+                var href = link.Url ?? "#";
+                string? code = null;
+                var codeMatch = DdtStandardCodeInTitle.Match(title);
+                if (codeMatch.Success)
+                {
+                    title = codeMatch.Groups[1].Value.Trim();
+                    code = codeMatch.Groups[2].Value;
+                }
+                var isExternal = href.Contains("standards.education.gov.uk", StringComparison.OrdinalIgnoreCase);
+                var target = isExternal ? " target=\"_blank\" rel=\"noopener noreferrer\"" : "";
+                var codeDisplay = !string.IsNullOrEmpty(code) ? code : "STD";
+                return "<a href=\"" + HtmlEncode(href) + "\" class=\"dfe-f-std-card-a\"" + target + ">" +
+                       "<span class=\"dfe-f-std-card-a__code\">" + HtmlEncode(codeDisplay) + "</span>" +
+                       "<div class=\"dfe-f-std-card-a__body\">" +
+                       "<span class=\"dfe-f-std-card-a__name\">" + HtmlEncode(title) +
+                       (isExternal ? " <span class=\"govuk-visually-hidden\">(opens in new tab)</span>" : "") + "</span>" +
+                       "</div>" +
+                       "<span class=\"dfe-f-std-card-a__arrow\" aria-hidden=\"true\">›</span>" +
+                       "</a>";
+            });
+            return "\n<div class=\"dfe-f-std-block-a\">" +
+                   "<p class=\"dfe-f-std-block-a__label\">Digital, data and technology standards</p>" +
+                   "\n<div class=\"dfe-f-std-cards-a\">\n" +
+                   string.Join("\n", items) +
+                   "\n</div>\n</div>\n";
+        }
+
+        /// <summary>Returns (short code for icon e.g. PDF, type label e.g. PDF or Spreadsheet).</summary>
+        private static (string Code, string Label) GetFileTypeFromUrlOrName(string url, string linkText)
+        {
+            var ext = GetFileExtension(url ?? "") ?? GetFileExtension(linkText ?? "");
+            var extLower = ext?.ToLowerInvariant() ?? "";
+            return extLower switch
+            {
+                "pdf" => ("PDF", "PDF"),
+                "doc" or "docx" => ("DOCX", "Word document"),
+                "xls" or "xlsx" => ("XLSX", "Spreadsheet"),
+                "csv" => ("CSV", "CSV"),
+                "ppt" or "pptx" => ("PPTX", "Presentation"),
+                "odt" => ("ODT", "OpenDocument text"),
+                "ods" => ("ODS", "OpenDocument spreadsheet"),
+                _ => ("FILE", "Document")
+            };
+        }
+
+        /// <summary>Gets the file extension from a path or URL, ignoring query string and fragment (e.g. .xlsx from "file.xlsx?d=123").</summary>
+        private static string? GetFileExtension(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return null;
+            var pathOnly = path;
+            var q = pathOnly.IndexOf('?');
+            if (q >= 0) pathOnly = pathOnly[..q];
+            var h = pathOnly.IndexOf('#');
+            if (h >= 0) pathOnly = pathOnly[..h];
+            var lastDot = pathOnly.LastIndexOf('.');
+            if (lastDot < 0 || lastDot >= pathOnly.Length - 1) return null;
+            var ext = pathOnly[(lastDot + 1)..].Trim();
+            return string.IsNullOrEmpty(ext) ? null : ext;
         }
 
         // ── [chevroncard ordered] / [chevroncard unordered] action list ───────────

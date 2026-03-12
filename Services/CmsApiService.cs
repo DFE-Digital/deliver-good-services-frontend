@@ -64,6 +64,7 @@ namespace ServiceManual.Services
                     MetaDescription = item.MetaDescription ?? string.Empty,
                     Slug = item.Slug ?? string.Empty,
                     Body = item.Body,
+                    ShowLastReviewedDateOnPage = item.ShowLastReviewedDateOnPage ?? false,
                     LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
                     Owner = item.ContentOwner?.Title?.Trim(),
                     OwnerUrl = item.ContentOwner?.RedirectUrl?.Trim(),
@@ -160,7 +161,7 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastUpdatedDateOnPage&fields[5]=updatedAt&fields[6]=lastReviewedDate&fields[7]=hideContentsOnPrimaryPage" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage" +
                           "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug" +
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
                           "&populate[contentOwner][fields][0]=title&populate[contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
@@ -203,8 +204,7 @@ namespace ServiceManual.Services
                     RelatedContent = item.RelatedContent?
                         .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
                         .ToList() ?? [],
-                    ShowLastUpdatedDateOnPage = item.ShowLastUpdatedDateOnPage ?? false,
-                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null,
+                    ShowLastReviewedDateOnPage = item.ShowLastReviewedDateOnPage ?? false,
                     LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
                     Owner = item.ContentOwner?.Title?.Trim(),
                     OwnerUrl = item.ContentOwner?.RedirectUrl?.Trim(),
@@ -231,9 +231,9 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav&fields[8]=showLastUpdatedDateOnPage&fields[9]=updatedAt" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav&fields[8]=showLastReviewedDateOnPage&fields[9]=lastReviewedDate" +
                           "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug" +
-                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=lastReviewedDate&populate[detailed_guide][fields][4]=hideContentsOnPrimaryPage" +
+                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug" +
                           "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
                           "&populate[detailed_guide][populate][contentOwner][fields][0]=title&populate[detailed_guide][populate][contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
@@ -287,9 +287,8 @@ namespace ServiceManual.Services
                         .Where(p => !string.IsNullOrWhiteSpace(p.Title))
                         .Select(p => p.Title!.Trim())
                         .ToList() ?? [],
-                    ShowLastUpdatedDateOnPage = item.ShowLastUpdatedDateOnPage ?? false,
-                    UpdatedAtDisplay = item.ShowLastUpdatedDateOnPage == true ? FormatDateTime(item.UpdatedAt) : null,
-                    LastReviewedDateDisplay = item.Detailed_Guide != null ? FormatDateTime(item.Detailed_Guide.LastReviewedDate) : null,
+                    ShowLastReviewedDateOnPage = item.ShowLastReviewedDateOnPage ?? false,
+                    LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
                     Owner = item.Detailed_Guide?.ContentOwner?.Title?.Trim(),
                     OwnerUrl = item.Detailed_Guide?.ContentOwner?.RedirectUrl?.Trim(),
                     AudienceTags = item.Detailed_Guide?.ApplicableProfessions?
@@ -341,6 +340,144 @@ namespace ServiceManual.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching html-page for slug '{Slug}'", slug);
+                return null;
+            }
+        }
+
+        public async Task<List<DocumentationSection>> GetDocumentationSectionsAsync()
+        {
+            try
+            {
+                var url = "api/documentation-sections" +
+                          "?filters[enabled][$eq]=true" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=order" +
+                          "&populate[documentations][fields][0]=title&populate[documentations][fields][1]=slug" +
+                          "&sort=order:asc" +
+                          "&pagination[pageSize]=50";
+
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for documentation-sections", response.StatusCode);
+                    return [];
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiDocumentationSection>>(json, JsonOptions);
+                if (result?.Data is null)
+                    return [];
+
+                return result.Data
+                    .Where(s => !string.IsNullOrEmpty(s.Slug))
+                    .Select(s => new DocumentationSection
+                    {
+                        Id = s.Id,
+                        Title = s.Title ?? string.Empty,
+                        Slug = s.Slug ?? string.Empty,
+                        Order = s.Order,
+                        Enabled = s.Enabled,
+                        Documentations = (s.Documentations ?? [])
+                            .Where(d => !string.IsNullOrEmpty(d.Slug))
+                            .OrderBy(d => d.Id)
+                            .Select(d => new DocumentationPageSummary { Title = d.Title ?? string.Empty, Slug = d.Slug ?? string.Empty })
+                            .ToList()
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching documentation sections");
+                return [];
+            }
+        }
+
+        public async Task<DocumentationSection?> GetDocumentationSectionBySlugAsync(string sectionSlug)
+        {
+            try
+            {
+                var url = "api/documentation-sections" +
+                          $"?filters[slug][$eq]={Uri.EscapeDataString(sectionSlug)}" +
+                          "&filters[enabled][$eq]=true" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=order" +
+                          "&populate[documentations][fields][0]=title&populate[documentations][fields][1]=slug&populate[documentations][fields][2]=id" +
+                          "&pagination[pageSize]=1";
+
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for documentation-section slug '{Slug}'", response.StatusCode, sectionSlug);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiDocumentationSection>>(json, JsonOptions);
+                var item = result?.Data?.FirstOrDefault();
+                if (item is null || string.IsNullOrEmpty(item.Slug))
+                    return null;
+
+                return new DocumentationSection
+                {
+                    Id = item.Id,
+                    Title = item.Title ?? string.Empty,
+                    Slug = item.Slug ?? string.Empty,
+                    Order = item.Order,
+                    Enabled = item.Enabled,
+                    Documentations = (item.Documentations ?? [])
+                        .Where(d => !string.IsNullOrEmpty(d.Slug))
+                        .OrderBy(d => d.Id)
+                        .Select(d => new DocumentationPageSummary { Title = d.Title ?? string.Empty, Slug = d.Slug ?? string.Empty })
+                        .ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching documentation section '{Slug}'", sectionSlug);
+                return null;
+            }
+        }
+
+        public async Task<DocumentationPage?> GetDocumentationBySlugAsync(string sectionSlug, string pageSlug)
+        {
+            try
+            {
+                var url = "api/documentations" +
+                          $"?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=lastReviewedDate" +
+                          "&populate[documentationSection][fields][0]=slug&populate[documentationSection][fields][1]=title" +
+                          "&pagination[pageSize]=1";
+
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for documentation slug '{SectionSlug}/{PageSlug}'", response.StatusCode, sectionSlug, pageSlug);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiDocumentation>>(json, JsonOptions);
+                var item = result?.Data?.FirstOrDefault();
+                if (item is null || string.IsNullOrEmpty(item.Slug))
+                    return null;
+
+                var sectionSlugActual = item.DocumentationSection?.Slug ?? string.Empty;
+                if (!string.Equals(sectionSlugActual, sectionSlug, StringComparison.OrdinalIgnoreCase))
+                    return null;
+
+                return new DocumentationPage
+                {
+                    Id = item.Id,
+                    Title = item.Title ?? string.Empty,
+                    Slug = item.Slug ?? string.Empty,
+                    MetaDescription = item.MetaDescription,
+                    Body = item.Body,
+                    LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
+                    SectionSlug = sectionSlugActual,
+                    SectionTitle = item.DocumentationSection?.Title ?? string.Empty
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching documentation '{SectionSlug}/{PageSlug}'", sectionSlug, pageSlug);
                 return null;
             }
         }
@@ -1006,7 +1143,7 @@ namespace ServiceManual.Services
             return isoDate;
         }
 
-        /// <summary>Formats an ISO 8601 datetime (e.g. from Strapi updatedAt) as "7 January 2026".</summary>
+        /// <summary>Formats an ISO 8601 datetime (e.g. from Strapi lastReviewedDate) as "7 January 2026".</summary>
         private static string? FormatDateTime(string? isoDateTime)
         {
             if (string.IsNullOrEmpty(isoDateTime)) return null;
@@ -1559,6 +1696,8 @@ namespace ServiceManual.Services
             public string? Slug { get; set; }
             [JsonPropertyName("body")]
             public string? Body { get; set; }
+            [JsonPropertyName("showLastReviewedDateOnPage")]
+            public bool? ShowLastReviewedDateOnPage { get; set; }
             [JsonPropertyName("lastReviewedDate")]
             public string? LastReviewedDate { get; set; }
             [JsonConverter(typeof(StrapiContentOwnerRefConverter))]
@@ -1665,10 +1804,8 @@ namespace ServiceManual.Services
             [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicableProfessions")]
             public List<StrapiTagRef>? ApplicableProfessions { get; set; }
-            [JsonPropertyName("showLastUpdatedDateOnPage")]
-            public bool? ShowLastUpdatedDateOnPage { get; set; }
-            [JsonPropertyName("updatedAt")]
-            public string? UpdatedAt { get; set; }
+            [JsonPropertyName("showLastReviewedDateOnPage")]
+            public bool? ShowLastReviewedDateOnPage { get; set; }
             [JsonPropertyName("lastReviewedDate")]
             public string? LastReviewedDate { get; set; }
             [JsonConverter(typeof(StrapiRelatedFilesConverter))]
@@ -1699,10 +1836,10 @@ namespace ServiceManual.Services
             [JsonConverter(typeof(StrapiRelatedFilesConverter))]
             [JsonPropertyName("relatedFiles")]
             public List<StrapiFileItem>? RelatedFiles { get; set; }
-            [JsonPropertyName("showLastUpdatedDateOnPage")]
-            public bool? ShowLastUpdatedDateOnPage { get; set; }
-            [JsonPropertyName("updatedAt")]
-            public string? UpdatedAt { get; set; }
+            [JsonPropertyName("showLastReviewedDateOnPage")]
+            public bool? ShowLastReviewedDateOnPage { get; set; }
+            [JsonPropertyName("lastReviewedDate")]
+            public string? LastReviewedDate { get; set; }
         }
 
         private class StrapiDetailedGuideSummary
@@ -1729,6 +1866,9 @@ namespace ServiceManual.Services
             public string? Title { get; set; }
             public string? Slug { get; set; }
             public string? MetaDescription { get; set; }
+            [JsonPropertyName("showLastReviewedDateOnPage")]
+            public bool? ShowLastReviewedDateOnPage { get; set; }
+            [JsonPropertyName("lastReviewedDate")]
             public string? LastReviewedDate { get; set; }
             [JsonPropertyName("hideContentsOnPrimaryPage")]
             public bool? HideContentsOnPrimaryPage { get; set; }
@@ -1763,6 +1903,42 @@ namespace ServiceManual.Services
         private class StrapiNavSlugRef
         {
             public string? Slug { get; set; }
+        }
+
+        private class StrapiDocumentationSection
+        {
+            public int Id { get; set; }
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+            public int Order { get; set; }
+            public bool Enabled { get; set; }
+            public List<StrapiDocumentationSummary>? Documentations { get; set; }
+        }
+
+        private class StrapiDocumentationSummary
+        {
+            public int Id { get; set; }
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+        }
+
+        private class StrapiDocumentation
+        {
+            public int Id { get; set; }
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+            public string? MetaDescription { get; set; }
+            public string? Body { get; set; }
+            [JsonPropertyName("lastReviewedDate")]
+            public string? LastReviewedDate { get; set; }
+            [JsonPropertyName("documentationSection")]
+            public StrapiDocumentationSectionRef? DocumentationSection { get; set; }
+        }
+
+        private class StrapiDocumentationSectionRef
+        {
+            public string? Slug { get; set; }
+            public string? Title { get; set; }
         }
 
         private class StrapiHtmlPage

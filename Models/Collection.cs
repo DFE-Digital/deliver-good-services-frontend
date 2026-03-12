@@ -8,6 +8,8 @@ namespace ServiceManual.Models
         public string? Body { get; set; }
         public List<CollectionSection> Sections { get; set; } = [];
         public List<RelatedContentItem> RelatedContent { get; set; } = [];
+        /// <summary>When true, show "Last reviewed: [date]" under the meta description.</summary>
+        public bool ShowLastReviewedDateOnPage { get; set; }
         /// <summary>Formatted last reviewed date for display (e.g. "7 January 2026").</summary>
         public string? LastReviewedDateDisplay { get; set; }
         /// <summary>Content owner label for meta bar.</summary>

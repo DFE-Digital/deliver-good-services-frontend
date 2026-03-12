@@ -82,6 +82,33 @@ public class DdtStandardsApiService
     }
 
     /// <summary>
+    /// Get a single published standard by numeric id (e.g. 301).
+    /// Calls GET /api/v1/DdtStandards/by-id/{id}. Returns null if not found or API does not support by-id.
+    /// </summary>
+    public async Task<DdtStandardDetailDto?> GetStandardByIdAsync(int id)
+    {
+        try
+        {
+            var url = $"/api/v1/DdtStandards/by-id/{id}";
+            var response = await _httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogDebug("API returned {StatusCode} for standard id {Id}", response.StatusCode, id);
+                return null;
+            }
+            var json = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(json) || (!json.TrimStart().StartsWith("{") && !json.TrimStart().StartsWith("[")))
+                return null;
+            return JsonSerializer.Deserialize<DdtStandardDetailDto>(json, _jsonOptions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Error fetching standard by id {Id}", id);
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Get a single published standard by slug.
     /// </summary>
     public async Task<DdtStandardDetailDto?> GetStandardBySlugAsync(string slug)

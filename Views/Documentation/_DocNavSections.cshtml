@@ -1,30 +1,20 @@
-@* Top-level documentation section nav: Styles | Components | Patterns | Templates | Publishing | Configuration *@
+@* Top-level documentation section nav from CMS (documentation-section) *@
+@using ServiceManual.Models
 @{
   var currentPath = Context.Request.Path.Value?.TrimEnd('/') ?? "";
   var pathSegments = currentPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-  var inDoc = currentPath.StartsWith("/documentation", StringComparison.OrdinalIgnoreCase);
-  var currentSection = pathSegments.Length >= 2 ? pathSegments[1] : ""; // documentation, then section name
+  var currentSectionSlug = pathSegments.Length >= 2 ? pathSegments[1] : "";
+  var sections = ViewData["DocSections"] as List<DocumentationSection> ?? new List<DocumentationSection>();
 }
 
 <nav class="doc-sections" aria-label="Documentation sections">
   <ul class="doc-sections__list">
-    <li class="doc-sections__item">
-      <a class="doc-sections__link @(currentSection == "styles" ? "doc-sections__link--active" : "")" href="/documentation/styles">Styles</a>
-    </li>
-    <li class="doc-sections__item">
-      <a class="doc-sections__link @(currentSection == "components" ? "doc-sections__link--active" : "")" href="/documentation/components">Components</a>
-    </li>
-    <li class="doc-sections__item">
-      <a class="doc-sections__link @(currentSection == "patterns" ? "doc-sections__link--active" : "")" href="/documentation/patterns">Patterns</a>
-    </li>
-    <li class="doc-sections__item">
-      <a class="doc-sections__link @(currentSection == "templates" ? "doc-sections__link--active" : "")" href="/documentation/templates">Templates</a>
-    </li>
-    <li class="doc-sections__item">
-      <a class="doc-sections__link @(currentSection == "publishing" ? "doc-sections__link--active" : "")" href="/documentation/publishing">Publishing</a>
-    </li>
-    <li class="doc-sections__item">
-      <a class="doc-sections__link @(currentSection == "configuration" ? "doc-sections__link--active" : "")" href="/documentation/configuration">Configuration</a>
-    </li>
+    @foreach (var section in sections)
+    {
+      var isActive = string.Equals(currentSectionSlug, section.Slug, StringComparison.OrdinalIgnoreCase);
+      <li class="doc-sections__item">
+        <a class="doc-sections__link @(isActive ? "doc-sections__link--active" : "")" href="/documentation/@section.Slug">@section.Title</a>
+      </li>
+    }
   </ul>
 </nav>

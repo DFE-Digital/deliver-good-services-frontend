@@ -1,83 +1,33 @@
-@* Contextual side nav for the current documentation section *@
+@* Left-hand nav: list of pages in the current documentation section (from CMS) *@
+@using ServiceManual.Models
 @{
   var currentPath = Context.Request.Path.Value?.TrimEnd('/') ?? "";
   var pathSegments = currentPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-  var currentSection = pathSegments.Length >= 2 ? pathSegments[1] : "";
-  var currentPage = pathSegments.Length >= 3 ? string.Join("/", pathSegments.Skip(2)) : "";
+  var currentSectionSlug = pathSegments.Length >= 2 ? pathSegments[1] : "";
+  var currentPageSlug = pathSegments.Length >= 3 ? string.Join("/", pathSegments.Skip(2)) : "";
+  var section = ViewData["DocSection"] as DocumentationSection;
+  var pages = ViewData["DocPages"] as List<DocumentationPageSummary> ?? new List<DocumentationPageSummary>();
+  var sectionTitle = section?.Title ?? "Documentation";
 }
 
 @functions {
-  bool IsActive(string path, string current) => string.Equals(current, path, StringComparison.OrdinalIgnoreCase) || (path.Length > 0 && current.StartsWith(path + "/", StringComparison.OrdinalIgnoreCase));
+  bool IsActive(string sectionSlug, string pageSlug, string currentSection, string currentPage) =>
+    string.Equals(sectionSlug, currentSection, StringComparison.OrdinalIgnoreCase) &&
+    (string.IsNullOrEmpty(pageSlug) ? string.IsNullOrEmpty(currentPage) : string.Equals(pageSlug, currentPage, StringComparison.OrdinalIgnoreCase));
 }
 
 <nav class="doc-nav" aria-label="Section navigation">
-  @if (currentSection == "styles")
-  {
-    <p class="doc-nav__heading">Styles</p>
-    <ul class="doc-nav__list">
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/styles", currentPath) && currentPage == "" ? "doc-nav__link--active" : "")" href="/documentation/styles">Overview</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/styles/typography", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/styles/typography">Typography</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/styles/headings", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/styles/headings">Headings</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/styles/links", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/styles/links">Links</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/styles/inset-text", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/styles/inset-text">Inset text</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/styles/tables", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/styles/tables">Tables</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/styles/horizontal-rule", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/styles/horizontal-rule">Horizontal rule</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/styles/colour", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/styles/colour">Colour</a></li>
-    </ul>
-  }
-  else if (currentSection == "components")
-  {
-    <p class="doc-nav__heading">Components</p>
-    <ul class="doc-nav__list">
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components", currentPath) && currentPage == "" ? "doc-nav__link--active" : "")" href="/documentation/components">Overview</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components/markdown", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/components/markdown">Markdown syntax</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components/action-link", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/components/action-link">Action link</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components/panel", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/components/panel">Panel</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components/pill", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/components/pill">Pill</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components/cards", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/components/cards">Cards</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components/card-list", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/components/card-list">Card list</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components/related-content", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/components/related-content">Related content</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/components/phase-components", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/components/phase-components">Delivery phase components</a></li>
-    </ul>
-  }
-  else if (currentSection == "patterns")
-  {
-    <p class="doc-nav__heading">Patterns</p>
-    <ul class="doc-nav__list">
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/patterns", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/patterns">Overview</a></li>
-    </ul>
-  }
-  else if (currentSection == "templates")
-  {
-    <p class="doc-nav__heading">Templates</p>
-    <ul class="doc-nav__list">
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/templates", currentPath) && currentPage == "" ? "doc-nav__link--active" : "")" href="/documentation/templates">Overview</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/templates/collection", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/templates/collection">Collection</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/templates/detailed-guide", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/templates/detailed-guide">Detailed guide</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/templates/redirector", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/templates/redirector">Redirector</a></li>
-    </ul>
-  }
-  else if (currentSection == "publishing")
-  {
-    <p class="doc-nav__heading">Publishing</p>
-    <ul class="doc-nav__list">
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/publishing", currentPath) && currentPage == "" ? "doc-nav__link--active" : "")" href="/documentation/publishing">Overview</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/publishing/lifecycle", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/publishing/lifecycle">Code and content lifecycle</a></li>
-    </ul>
-  }
-  else if (currentSection == "configuration")
-  {
-    <p class="doc-nav__heading">Configuration</p>
-    <ul class="doc-nav__list">
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/configuration", currentPath) && currentPage == "" ? "doc-nav__link--active" : "")" href="/documentation/configuration">Overview</a></li>
-      <li class="doc-nav__item"><a class="doc-nav__link @(IsActive("/documentation/configuration/cms", currentPath) ? "doc-nav__link--active" : "")" href="/documentation/configuration/cms">CMS</a></li>
-    </ul>
-  }
-  else
-  {
-    <p class="doc-nav__heading">Documentation</p>
-    <ul class="doc-nav__list">
-      <li class="doc-nav__item"><a class="doc-nav__link @(currentPath == "/documentation" ? "doc-nav__link--active" : "")" href="/documentation">Overview</a></li>
-    </ul>
-  }
+  <p class="doc-nav__heading">@sectionTitle</p>
+  <ul class="doc-nav__list">
+    <li class="doc-nav__item">
+      <a class="doc-nav__link @(string.IsNullOrEmpty(currentSectionSlug) && currentPath.TrimEnd('/') == "/documentation" ? "doc-nav__link--active" : "")" href="@(string.IsNullOrEmpty(currentSectionSlug) ? "/documentation" : $"/documentation/{currentSectionSlug}")">Overview</a>
+    </li>
+    @foreach (var page in pages)
+    {
+      var isActive = IsActive(currentSectionSlug, page.Slug, currentSectionSlug, currentPageSlug);
+      <li class="doc-nav__item">
+        <a class="doc-nav__link @(isActive ? "doc-nav__link--active" : "")" href="/documentation/@currentSectionSlug/@page.Slug">@page.Title</a>
+      </li>
+    }
+  </ul>
 </nav>

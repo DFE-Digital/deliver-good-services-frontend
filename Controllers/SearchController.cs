@@ -28,14 +28,15 @@ public class SearchController : Controller
     }
 
     /// <summary>
-    /// Search results page. GET /search/all?keywords=...&type=...&type=...
+    /// Search results page. GET /search/all?keywords=...&type=...&type=...&highlight=1
     /// </summary>
     [HttpGet("all")]
     [HttpGet("")]
-    public async Task<IActionResult> Index(string? keywords, [FromQuery(Name = "type")] List<string>? types = null)
+    public async Task<IActionResult> Index(string? keywords, [FromQuery(Name = "type")] List<string>? types = null, [FromQuery] string? highlight = null)
     {
         var query = keywords?.Trim();
         var typeFilter = types?.Where(t => !string.IsNullOrWhiteSpace(t)).Distinct().ToList();
+        var showHighlight = string.Equals(highlight, "1", StringComparison.OrdinalIgnoreCase) || string.Equals(highlight, "true", StringComparison.OrdinalIgnoreCase);
 
         if (string.IsNullOrEmpty(query))
         {
@@ -44,7 +45,8 @@ public class SearchController : Controller
                 Keywords = "",
                 Types = typeFilter ?? [],
                 Results = [],
-                Facets = []
+                Facets = [],
+                HighlightKeywords = false
             });
         }
 
@@ -62,7 +64,8 @@ public class SearchController : Controller
             Keywords = query,
             Types = typeFilter ?? [],
             Results = results,
-            Facets = facets
+            Facets = facets,
+            HighlightKeywords = showHighlight
         });
     }
 }
@@ -74,4 +77,6 @@ public class SearchViewModel
     public List<SearchResultItem> Results { get; set; } = [];
     /// <summary>Content type facets with counts from the current result set.</summary>
     public List<SearchFacet> Facets { get; set; } = [];
+    /// <summary>When true, wrap matching keywords in results with &lt;mark&gt; for highlighting.</summary>
+    public bool HighlightKeywords { get; set; }
 }

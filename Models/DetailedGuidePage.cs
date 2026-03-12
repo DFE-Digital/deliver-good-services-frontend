@@ -23,11 +23,9 @@ namespace ServiceManual.Models
         public List<DetailedGuidePageSummary> SiblingPages { get; set; } = [];
         public List<RelatedContentItem> RelatedContent { get; set; } = [];
         public List<string> Professions { get; set; } = [];
-        /// <summary>When true, show "Last updated: [date]" under the meta description.</summary>
-        public bool ShowLastUpdatedDateOnPage { get; set; }
-        /// <summary>Formatted last updated date for display (e.g. "7 January 2026"), when ShowLastUpdatedDateOnPage is true.</summary>
-        public string? UpdatedAtDisplay { get; set; }
-        /// <summary>Formatted last reviewed date from the parent guide for display (e.g. "7 January 2026").</summary>
+        /// <summary>When true, show "Last reviewed: [date]" under the meta description.</summary>
+        public bool ShowLastReviewedDateOnPage { get; set; }
+        /// <summary>Formatted last reviewed date for display (e.g. "7 January 2026").</summary>
         public string? LastReviewedDateDisplay { get; set; }
         /// <summary>Owner from parent guide for meta strip.</summary>
         public string? Owner { get; set; }

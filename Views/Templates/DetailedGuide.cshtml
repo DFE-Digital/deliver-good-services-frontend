@@ -36,7 +36,7 @@
 
             @* Meta strip *@
             @{
-                var hasMeta = vm.Collections.Count > 0 || (vm.ShowLastUpdatedDateOnPage && !string.IsNullOrEmpty(vm.UpdatedAtDisplay)) || !string.IsNullOrEmpty(vm.LastReviewedDateDisplay) || !string.IsNullOrWhiteSpace(vm.Owner) || vm.AudienceTags.Count > 0;
+                var hasMeta = vm.Collections.Count > 0 || (vm.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(vm.LastReviewedDateDisplay)) || !string.IsNullOrWhiteSpace(vm.Owner) || vm.AudienceTags.Count > 0;
             }
             @if (hasMeta)
             {
@@ -48,12 +48,7 @@
                             <span class="guide-meta__item"><strong>Part of:</strong> <a href="/guidance/collections/@c.Slug">@System.Net.WebUtility.HtmlEncode(c.Title)</a></span>
                             <span class="guide-meta__dot" aria-hidden="true">·</span>
                         }
-                        @if (vm.ShowLastUpdatedDateOnPage && !string.IsNullOrEmpty(vm.UpdatedAtDisplay))
-                        {
-                            <span class="guide-meta__item"><strong>Last updated:</strong> @System.Net.WebUtility.HtmlEncode(vm.UpdatedAtDisplay)</span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                        }
-                        @if (!string.IsNullOrEmpty(vm.LastReviewedDateDisplay))
+                        @if (vm.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(vm.LastReviewedDateDisplay))
                         {
                             <span class="guide-meta__item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(vm.LastReviewedDateDisplay)</span>
                             <span class="guide-meta__dot" aria-hidden="true">·</span>

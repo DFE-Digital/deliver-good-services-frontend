@@ -17,6 +17,7 @@ builder.Services.AddHttpClient<ServiceManual.Services.DdtStandardsApiService>((s
 });
 builder.Services.AddScoped<ServiceManual.Services.INavigationService, ServiceManual.Services.NavigationService>();
 builder.Services.AddScoped<ServiceManual.Services.ISearchService, ServiceManual.Services.SearchService>();
+builder.Services.AddSingleton<ServiceManual.Services.IBlobMetadataProvider, ServiceManual.Services.AzureBlobMetadataProvider>();
 builder.Services.AddScoped<ServiceManual.Filters.NavigationFilter>();
 builder.Services.AddControllersWithViews(options =>
 {

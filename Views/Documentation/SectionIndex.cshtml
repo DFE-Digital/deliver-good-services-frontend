@@ -1,0 +1,51 @@
+@model ServiceManual.Models.DocumentationSection
+@using ServiceManual.Models
+@{
+  ViewData["Title"] = Model.Title;
+  var sectionTitle = ViewData["DocSectionTitle"] as string ?? Model.Title;
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">@sectionTitle</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">@sectionTitle</span>
+        <h1 class="govuk-heading-l doc-content__title">@Model.Title</h1>
+        <p class="doc-content__lead">Pages in this section. Use the side nav to open a page.</p>
+      </div>
+      @if (Model.Documentations.Count > 0)
+      {
+        <div class="doc-card-grid" style="margin-top: 24px;">
+          @foreach (var page in Model.Documentations)
+          {
+            <a href="/documentation/@Model.Slug/@page.Slug" class="doc-card">
+              <span class="doc-card__category">@sectionTitle</span>
+              <h3 class="doc-card__title">@page.Title</h3>
+              <p class="doc-card__description">View this page.</p>
+            </a>
+          }
+        </div>
+      }
+      else
+      {
+        <p class="govuk-body" style="margin-top: 24px;">No pages in this section yet.</p>
+      }
+    </main>
+  </div>
+</div>

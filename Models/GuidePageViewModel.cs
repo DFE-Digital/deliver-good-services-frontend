@@ -9,8 +9,7 @@ namespace ServiceManual.Models
         public string? CollectionSlug { get; set; }
         public string? CollectionTitle { get; set; }
         public List<CollectionRef> Collections { get; set; } = [];
-        public bool ShowLastUpdatedDateOnPage { get; set; }
-        public string? UpdatedAtDisplay { get; set; }
+        public bool ShowLastReviewedDateOnPage { get; set; }
         public string? LastReviewedDateDisplay { get; set; }
         public string? Owner { get; set; }
         public string? OwnerUrl { get; set; }

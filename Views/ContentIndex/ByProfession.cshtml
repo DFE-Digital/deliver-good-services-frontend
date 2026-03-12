@@ -1,48 +1,206 @@
 @model ServiceManual.Models.ContentByProfessionViewModel
+@using ServiceManual.Models
 @{
     ViewData["Title"] = "Content for " + Model.ProfessionTitle;
-}
+    var items = Model.Items;
+    var hasItems = items.Count > 0;
 
-@section Breadcrumbs {
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/content">Content index</a></li>
-  <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.ProfessionTitle</li>
-}
-
-<div class="govuk-grid-row">
-  <div class="govuk-grid-column-full">
-    <h1 class="govuk-heading-xl">Content for @Model.ProfessionTitle</h1>
-    <p class="govuk-body-l">All published content tagged with this profession (role).</p>
-
-    @if (Model.Items.Count == 0)
+    string SectionId(string name)
     {
-      <p class="govuk-body">No content found for this profession.</p>
+        if (string.IsNullOrWhiteSpace(name)) return "section";
+        var slug = System.Text.RegularExpressions.Regex.Replace(name.ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
+        return string.IsNullOrEmpty(slug) ? "section" : "section-" + slug;
     }
-    else
+
+    string DisplayContentType(string contentType)
     {
-      <table class="govuk-table">
-        <thead class="govuk-table__head">
-          <tr class="govuk-table__row">
-            <th scope="col" class="govuk-table__header govuk-!-width-one-third">Title</th>
-            <th scope="col" class="govuk-table__header govuk-!-width-one-sixth">Content type</th>
-            <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Description</th>
-          </tr>
-        </thead>
-        <tbody class="govuk-table__body">
-          @foreach (var item in Model.Items)
+        if (contentType == "Detailed Guide Page") return "Detailed Guide";
+        if (contentType == "Phase") return "Lifecycle";
+        return contentType;
+    }
+
+    var grouped = hasItems
+        ? items
+            .GroupBy(i => DisplayContentType(i.ContentType))
+            .OrderBy(g => g.Key == "Detailed Guide" ? 0 : g.Key == "Collection" ? 1 : g.Key == "Lifecycle" ? 2 : 3)
+            .ThenBy(g => g.Key, StringComparer.OrdinalIgnoreCase)
+            .ToList()
+        : [];
+    var showContentsNav = grouped.Count >= 2;
+}
+
+<div class="guide-modern">
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <header class="guide-hero">
+        <div class="govuk-width-container">
+          <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+            <ol class="govuk-breadcrumbs__list">
+              <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+              <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/content">Content index</a></li>
+              <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.ProfessionTitle</li>
+            </ol>
+          </nav>
+          <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+              <span class="guide-hero__label">Content index</span>
+              <h1 class="govuk-heading-xl">Content for @Model.ProfessionTitle</h1>
+              <p class="govuk-body-l">All published content tagged with this profession (role). Grouped by content type with phase applicability where available.</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      @if (showContentsNav)
+      {
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-two-thirds">
+            <nav class="guide-contents guide-contents--dashed" aria-label="Content by type">
+              <h2 class="guide-contents__title">Contents</h2>
+              <ul class="guide-contents__list">
+                @foreach (var grp in grouped)
+                {
+                  var id = SectionId(grp.Key);
+                  <li class="guide-contents__item">
+                    <span class="guide-contents__num" aria-hidden="true">—</span>
+                    <a href="#@id">@grp.Key</a>
+                  </li>
+                }
+              </ul>
+            </nav>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="govuk-grid-row guide-content-row">
+    <div class="govuk-grid-column-two-thirds">
+      <section class="dfe-f-content-section guide-content-section" aria-label="Content">
+        @if (!hasItems)
+        {
+          <p class="govuk-body">No content found for this profession.</p>
+        }
+        else
+        {
+          @foreach (var contentSection in grouped)
           {
-            <tr class="govuk-table__row">
-              <td class="govuk-table__cell govuk-!-font-weight-bold"><a href="@item.Url" class="govuk-link">@item.Title</a></td>
-              <td class="govuk-table__cell">@item.ContentType</td>
-              <td class="govuk-table__cell">@(item.MetaDescription ?? "—")</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
+            var sectionId = SectionId(contentSection.Key);
+            var sectionTitleId = sectionId + "-title";
+            <section class="dfe-collection-group govuk-!-margin-top-6" id="@sectionId" aria-labelledby="@sectionTitleId">
+              <h2 class="govuk-heading-l" id="@sectionTitleId">@contentSection.Key</h2>
 
-    <p class="govuk-body govuk-!-margin-top-6">
-      <a href="/content" class="govuk-link">Back to content index</a>
-    </p>
+              @if (contentSection.Key == "Detailed Guide")
+              {
+                var guides = contentSection.Where(i => i.ContentType == "Detailed Guide").OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
+                <ul class="dfe-f-guide-list">
+                  @foreach (var guide in guides)
+                  {
+                    <li class="dfe-f-guide-list__item">
+                      <a class="govuk-link dfe-f-guide-list__item-title" href="@guide.Url">@guide.Title</a>
+                      @if (!string.IsNullOrEmpty(guide.MetaDescription))
+                      {
+                        <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-1 dfe-f-guide-list__item-description">@guide.MetaDescription</p>
+                      }
+                      @if (guide.ApplicablePhaseTags.Count > 0)
+                      {
+                        <p class="govuk-body-s dfe-f-guide-list__item-meta">Applicable phases: @string.Join(", ", guide.ApplicablePhaseTags.Select(p => p.Title))</p>
+                      }
+                    </li>
+                    var guidePages = contentSection.Where(i => i.ContentType == "Detailed Guide Page" && i.ParentSlug == guide.Slug).OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase);
+                    @foreach (var guidePage in guidePages)
+                    {
+                      <li class="dfe-f-guide-list__item" style="padding-left: 1.5rem;">
+                        <a class="govuk-link dfe-f-guide-list__item-title" href="@guidePage.Url">@guidePage.Title</a>
+                        @if (!string.IsNullOrEmpty(guidePage.MetaDescription))
+                        {
+                          <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-1 dfe-f-guide-list__item-description">@guidePage.MetaDescription</p>
+                        }
+                        @if (guidePage.ApplicablePhaseTags.Count > 0)
+                        {
+                          <p class="govuk-body-s dfe-f-guide-list__item-meta">Applicable phases: @string.Join(", ", guidePage.ApplicablePhaseTags.Select(p => p.Title))</p>
+                        }
+                      </li>
+                    }
+                  }
+                </ul>
+              }
+              else if (contentSection.Key == "Lifecycle")
+              {
+                var lifecycleItem = contentSection.FirstOrDefault(i => i.ContentType == "Lifecycle");
+                var phases = contentSection.Where(i => i.ContentType == "Phase").OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase).ToList();
+                <ul class="dfe-f-guide-list">
+                  @if (lifecycleItem != null)
+                  {
+                    <li class="dfe-f-guide-list__item">
+                      <a class="govuk-link dfe-f-guide-list__item-title" href="@lifecycleItem.Url">@lifecycleItem.Title</a>
+                      @if (!string.IsNullOrEmpty(lifecycleItem.MetaDescription))
+                      {
+                        <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-1 dfe-f-guide-list__item-description">@lifecycleItem.MetaDescription</p>
+                      }
+                    </li>
+                  }
+                  @foreach (var phase in phases)
+                  {
+                    <li class="dfe-f-guide-list__item" style="padding-left: 1.5rem;">
+                      <a class="govuk-link dfe-f-guide-list__item-title" href="@phase.Url">@phase.Title</a>
+                      @if (!string.IsNullOrEmpty(phase.MetaDescription))
+                      {
+                        <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-1 dfe-f-guide-list__item-description">@phase.MetaDescription</p>
+                      }
+                      @if (phase.ApplicablePhaseTags.Count > 0)
+                      {
+                        <p class="govuk-body-s dfe-f-guide-list__item-meta">Phases: @string.Join(", ", phase.ApplicablePhaseTags.Select(p => p.Title))</p>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+              else
+              {
+                <ul class="dfe-f-guide-list">
+                  @foreach (var item in contentSection.OrderBy(i => i.Title, StringComparer.OrdinalIgnoreCase))
+                  {
+                    <li class="dfe-f-guide-list__item">
+                      <a class="govuk-link dfe-f-guide-list__item-title" href="@item.Url">@item.Title</a>
+                      <p class="govuk-body-s dfe-f-guide-list__item-meta">@item.ContentType</p>
+                      @if (!string.IsNullOrEmpty(item.MetaDescription))
+                      {
+                        <p class="govuk-body-s govuk-!-margin-top-0 govuk-!-margin-bottom-1 dfe-f-guide-list__item-description">@item.MetaDescription</p>
+                      }
+                      @if (item.CollectionTitle != null && !string.IsNullOrEmpty(item.CollectionSlug))
+                      {
+                        <p class="govuk-body-s govuk-!-margin-top-0 govuk-!-margin-bottom-0">Part of collection: <a class="govuk-link" href="/guidance/collections/@Uri.EscapeDataString(item.CollectionSlug)">@System.Net.WebUtility.HtmlEncode(item.CollectionTitle)</a></p>
+                      }
+                      @if (item.ApplicablePhaseTags.Count > 0)
+                      {
+                        <p class="govuk-body-s dfe-f-guide-list__item-meta">Applicable phases: @string.Join(", ", item.ApplicablePhaseTags.Select(p => p.Title))</p>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+          }
+        }
+      </section>
+    </div>
+
+    <div class="govuk-grid-column-one-third">
+      <aside class="dfe-f-related-content" aria-label="Related links">
+        <div class="dfe-f-related-content__section">
+          <h2 class="dfe-f-related-content__section-title">Content index</h2>
+          <div class="dfe-f-related-content__section-body">
+            <p class="govuk-body-s">
+              <a class="govuk-link" href="/content">Back to content index</a>
+            </p>
+            @if (hasItems)
+            {
+              <p class="govuk-body-s dfe-f-guide-list__item-meta govuk-!-margin-top-2">@items.Count item@(items.Count == 1 ? "" : "s") for this profession</p>
+            }
+          </div>
+        </div>
+      </aside>
+    </div>
   </div>
 </div>

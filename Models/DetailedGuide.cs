@@ -15,10 +15,8 @@ namespace ServiceManual.Models
         public bool HideContentsOnPrimaryPage { get; set; }
         public List<DetailedGuidePageSummary> Pages { get; set; } = [];
         public List<RelatedContentItem> RelatedContent { get; set; } = [];
-        /// <summary>When true, show "Last updated: [date]" under the meta description.</summary>
-        public bool ShowLastUpdatedDateOnPage { get; set; }
-        /// <summary>Formatted last updated date for display (e.g. "7 January 2026"), when ShowLastUpdatedDateOnPage is true.</summary>
-        public string? UpdatedAtDisplay { get; set; }
+        /// <summary>When true, show "Last reviewed: [date]" under the meta description.</summary>
+        public bool ShowLastReviewedDateOnPage { get; set; }
         /// <summary>Formatted last reviewed date for display (e.g. "7 January 2026").</summary>
         public string? LastReviewedDateDisplay { get; set; }
         /// <summary>Owner label for meta (e.g. from CMS).</summary>
