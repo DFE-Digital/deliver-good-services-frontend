@@ -32,11 +32,11 @@
       @if (Model.Documentations.Count > 0)
       {
         <div class="doc-card-grid" style="margin-top: 24px;">
-          @foreach (var page in Model.Documentations)
+          @foreach (var docPage in Model.Documentations)
           {
-            <a href="/documentation/@Model.Slug/@page.Slug" class="doc-card">
+            <a href="/documentation/@Model.Slug/@docPage.Slug" class="doc-card">
               <span class="doc-card__category">@sectionTitle</span>
-              <h3 class="doc-card__title">@page.Title</h3>
+              <h3 class="doc-card__title">@docPage.Title</h3>
               <p class="doc-card__description">View this page.</p>
             </a>
           }

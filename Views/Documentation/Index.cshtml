@@ -32,12 +32,12 @@
       @if (sections.Count > 0)
       {
         <div class="doc-card-grid" style="margin-top: 32px;">
-          @foreach (var section in sections)
+          @foreach (var sec in sections)
           {
-            <a href="/documentation/@section.Slug" class="doc-card">
+            <a href="/documentation/@sec.Slug" class="doc-card">
               <span class="doc-card__category">Section</span>
-              <h3 class="doc-card__title">@section.Title</h3>
-              <p class="doc-card__description">@(section.Documentations.Count) page@(section.Documentations.Count == 1 ? "" : "s") in this section.</p>
+              <h3 class="doc-card__title">@sec.Title</h3>
+              <p class="doc-card__description">@(sec.Documentations.Count) page@(sec.Documentations.Count == 1 ? "" : "s") in this section.</p>
             </a>
           }
         </div>

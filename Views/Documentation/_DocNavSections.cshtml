@@ -1,19 +1,19 @@
 @* Top-level documentation section nav from CMS (documentation-section) *@
 @using ServiceManual.Models
 @{
-  var currentPath = Context.Request.Path.Value?.TrimEnd('/') ?? "";
-  var pathSegments = currentPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-  var currentSectionSlug = pathSegments.Length >= 2 ? pathSegments[1] : "";
+  var currentPath = ViewContext.HttpContext.Request.Path.Value?.TrimEnd('/') ?? "";
+  var pathParts = currentPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+  var currentSectionSlug = pathParts.Length >= 2 ? pathParts[1] : "";
   var sections = ViewData["DocSections"] as List<DocumentationSection> ?? new List<DocumentationSection>();
 }
 
 <nav class="doc-sections" aria-label="Documentation sections">
   <ul class="doc-sections__list">
-    @foreach (var section in sections)
+    @foreach (var sec in sections)
     {
-      var isActive = string.Equals(currentSectionSlug, section.Slug, StringComparison.OrdinalIgnoreCase);
+      var isActive = string.Equals(currentSectionSlug, sec.Slug, StringComparison.OrdinalIgnoreCase);
       <li class="doc-sections__item">
-        <a class="doc-sections__link @(isActive ? "doc-sections__link--active" : "")" href="/documentation/@section.Slug">@section.Title</a>
+        <a class="doc-sections__link @(isActive ? "doc-sections__link--active" : "")" href="/documentation/@sec.Slug">@sec.Title</a>
       </li>
     }
   </ul>

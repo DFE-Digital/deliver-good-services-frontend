@@ -1,0 +1,43 @@
+@model ServiceManual.Models.DocumentationPageViewModel
+@{
+  ViewData["Title"] = Model.Title + " – Documentation";
+}
+
+@section Styles {
+  <link rel="stylesheet" href="~/css/documentation.css" asp-append-version="true" />
+}
+
+@section Breadcrumbs {
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation">Documentation</a></li>
+  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/documentation/@Model.SectionSlug">@Model.SectionTitle</a></li>
+  <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
+}
+
+@section Scripts {
+  <script src="/js/documentation.js"></script>
+}
+
+<div class="doc-wrapper">
+  <div class="doc-layout">
+    @await Html.PartialAsync("~/Views/Documentation/_DocNavSections.cshtml")
+    @await Html.PartialAsync("~/Views/Documentation/_DocSideNav.cshtml")
+    <main class="doc-content" id="main-content">
+      <div class="doc-content__header">
+        <span class="doc-content__tag">@Model.SectionTitle</span>
+        <h1 class="govuk-heading-l doc-content__title">@Model.Title</h1>
+        @if (!string.IsNullOrEmpty(Model.MetaDescription))
+        {
+          <p class="doc-content__lead">@Model.MetaDescription</p>
+        }
+        @if (!string.IsNullOrEmpty(Model.LastReviewedDateDisplay))
+        {
+          <p class="govuk-body-s govuk-!-margin-top-2">Last reviewed: @Model.LastReviewedDateDisplay</p>
+        }
+      </div>
+      <div class="doc-content__body govuk-prose-scope">
+        @Html.Raw(Model.BodyHtml)
+      </div>
+    </main>
+  </div>
+</div>

@@ -1,10 +1,10 @@
 @* Left-hand nav: list of pages in the current documentation section (from CMS) *@
 @using ServiceManual.Models
 @{
-  var currentPath = Context.Request.Path.Value?.TrimEnd('/') ?? "";
-  var pathSegments = currentPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
-  var currentSectionSlug = pathSegments.Length >= 2 ? pathSegments[1] : "";
-  var currentPageSlug = pathSegments.Length >= 3 ? string.Join("/", pathSegments.Skip(2)) : "";
+  var reqPath = ViewContext.HttpContext.Request.Path.Value?.TrimEnd('/') ?? "";
+  var pathParts = reqPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+  var currentSectionSlug = pathParts.Length >= 2 ? pathParts[1] : "";
+  var currentPageSlug = pathParts.Length >= 3 ? string.Join("/", pathParts.Skip(2)) : "";
   var section = ViewData["DocSection"] as DocumentationSection;
   var pages = ViewData["DocPages"] as List<DocumentationPageSummary> ?? new List<DocumentationPageSummary>();
   var sectionTitle = section?.Title ?? "Documentation";
@@ -19,14 +19,15 @@
 <nav class="doc-nav" aria-label="Section navigation">
   <p class="doc-nav__heading">@sectionTitle</p>
   <ul class="doc-nav__list">
+    @{ var isOverviewActive = string.IsNullOrEmpty(currentPageSlug) && reqPath.StartsWith("/documentation", StringComparison.OrdinalIgnoreCase); }
     <li class="doc-nav__item">
-      <a class="doc-nav__link @(string.IsNullOrEmpty(currentSectionSlug) && currentPath.TrimEnd('/') == "/documentation" ? "doc-nav__link--active" : "")" href="@(string.IsNullOrEmpty(currentSectionSlug) ? "/documentation" : $"/documentation/{currentSectionSlug}")">Overview</a>
+      <a class="doc-nav__link @(isOverviewActive ? "doc-nav__link--active" : "")" href="@(string.IsNullOrEmpty(currentSectionSlug) ? "/documentation" : $"/documentation/{currentSectionSlug}")">Overview</a>
     </li>
-    @foreach (var page in pages)
+    @foreach (var docPage in pages)
     {
-      var isActive = IsActive(currentSectionSlug, page.Slug, currentSectionSlug, currentPageSlug);
+      var isActive = IsActive(currentSectionSlug, docPage.Slug, currentSectionSlug, currentPageSlug);
       <li class="doc-nav__item">
-        <a class="doc-nav__link @(isActive ? "doc-nav__link--active" : "")" href="/documentation/@currentSectionSlug/@page.Slug">@page.Title</a>
+        <a class="doc-nav__link @(isActive ? "doc-nav__link--active" : "")" href="/documentation/@currentSectionSlug/@docPage.Slug">@docPage.Title</a>
       </li>
     }
   </ul>
