@@ -99,8 +99,7 @@ public class DdtStandardsController : Controller
                 return View("~/Views/Standards/DdtStandards/Details.cshtml", (DdtStandardDetailDto?)null);
             }
 
-            var compassBaseUrl = _apiService.GetCompassBaseUrl();
-            ViewBag.CompassStandardUrl = $"{compassBaseUrl.TrimEnd('/')}/DdtStandards/Details/{standard.Id}";
+            ViewBag.CompassStandardUrl = _apiService.GetManageStandardUrl(standard.DocumentId);
 
             // Related standards: others in the same category (exclude current), titles only for sidebar
             var categoryNames = standard.Categories?

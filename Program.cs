@@ -9,11 +9,11 @@ builder.Services.AddHttpClient<ServiceManual.Services.ICmsApiService, ServiceMan
 builder.Services.AddHttpClient<ServiceManual.Services.DdtStandardsApiService>((sp, client) =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();
-    var baseUrl = configuration["CompassApi:BaseUrl"] ?? "https://compass.education.gov.uk";
-    var apiKey = configuration["CompassApi:ApiKey"] ?? configuration["CompassApi:AccessToken"] ?? "";
-    client.BaseAddress = new Uri(baseUrl);
-    if (!string.IsNullOrEmpty(apiKey))
-        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+    var baseUrl = configuration["StandardsCMS:BaseUrl"] ?? "https://dfe-standards-cms-217ce4e280a0.herokuapp.com/";
+    var apiToken = configuration["StandardsCMS:ApiToken"] ?? "";
+    client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+    if (!string.IsNullOrEmpty(apiToken))
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiToken);
 });
 builder.Services.AddScoped<ServiceManual.Services.INavigationService, ServiceManual.Services.NavigationService>();
 builder.Services.AddScoped<ServiceManual.Services.ISearchService, ServiceManual.Services.SearchService>();

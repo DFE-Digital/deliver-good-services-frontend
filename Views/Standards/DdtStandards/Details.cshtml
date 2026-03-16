@@ -174,7 +174,7 @@
                                 <p class="govuk-body govuk-!-margin-bottom-1"><strong>@group.Key</strong></p>
                                 @if (subCategories.Any())
                                 {
-                                    <ul class="govuk-list govuk-list--bullet govuk-body-s govuk-!-margin-left-2" style="color: #505a5f;">
+                                    <ul class="govuk-list govuk-list--bullet">
                                         @foreach (var subName in subCategories)
                                         {
                                             <li>@subName</li>
@@ -200,11 +200,14 @@
                     <h2 class="govuk-heading-l" id="related-guidance">Related guidance</h2>
                     <div class="dfe-f-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.RelatedGuidance))</div>
                 }
-                <div class="govuk-inset-text govuk-!-margin-top-6">
-                    <p class="govuk-body">
-                        <strong>To view more details of this standard, view it in <a href="@compassStandardUrl" class="govuk-link" target="_blank" rel="noopener noreferrer">COMPASS</a>.</strong>
-                    </p>
-                </div>
+                @if (!string.IsNullOrEmpty(compassStandardUrl))
+                {
+                    <div class="govuk-inset-text govuk-!-margin-top-6">
+                        <p class="govuk-body">
+                            <strong>View full details of the standard including products and standards owners in the internal <a href="@compassStandardUrl" class="govuk-link" target="_blank" rel="noopener noreferrer">Manage standards service</a>.</strong>
+                        </p>
+                    </div>
+                }
             </section>
         </div>
         <div class="govuk-grid-column-one-third">
