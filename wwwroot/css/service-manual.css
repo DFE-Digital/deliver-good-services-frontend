@@ -5445,11 +5445,9 @@ a:focus-visible {
 }
 
 .guide-modern .guide-contents__title {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 400;
     color: var(--govuk-colour-text);
-    margin: 0 0 0.75rem 0;
-    letter-spacing: 0.02em;
 }
 
 .guide-modern .guide-contents__list {
@@ -5462,9 +5460,8 @@ a:focus-visible {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin: 0;
-    padding: 0.35rem 0;
-    border-bottom: 1px solid var(--govuk-colour-black-tint-95);
+    margin: 0px;
+    padding-bottom: 5px;
 }
 
 .guide-modern .guide-contents__item:last-child {
@@ -5701,6 +5698,7 @@ a:focus-visible {
 
 /* ── Alternative style START ─────────────────────────────────────────────────────── */
 
+
 .govuk-main-wrapper {
     padding: 0 0 60px 0;
     background-color: var(--govuk-colour-black-tint-95);
@@ -5732,5 +5730,7 @@ a:focus-visible {
 .guide-modern .guide-contents{
     margin: 15px 0px;
 }
+
+
 
 /* ── Alternative style END─────────────────────────────────────────────────────── */

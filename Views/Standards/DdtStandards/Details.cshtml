@@ -8,113 +8,136 @@
     var errorMessage = ViewBag.ErrorMessage as string;
 }
 
-@section Breadcrumbs {
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@Url.Action("Index", "DdtStandards")">Standards</a></li>
-}
-
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="govuk-width-container">
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-full">
-                <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
-                    <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
-                    <div class="govuk-error-summary__body">
-                        <ul class="govuk-list govuk-error-summary__list">
-                            <li><a href="#standard-content">@errorMessage</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
 @if (Model != null)
 {
     var hasPurpose = !string.IsNullOrEmpty(Model.Purpose);
     var hasHowToMeet = !string.IsNullOrEmpty(Model.HowToMeet);
     var hasGovernance = !string.IsNullOrEmpty(Model.Governance);
     var hasRelatedGuidance = !string.IsNullOrEmpty(Model.RelatedGuidance);
-    var hasContents = hasPurpose || hasHowToMeet || hasGovernance || hasRelatedGuidance;
+    var hasCategories = Model.Categories != null && Model.Categories.Any(c => !string.IsNullOrEmpty(c.Name));
+    var hasContents = hasPurpose || hasHowToMeet || hasGovernance || hasRelatedGuidance || hasCategories;
     var relatedStandards = ViewBag.RelatedStandards as List<DdtStandardDto> ?? new List<DdtStandardDto>();
+    var hasMeta = true; /* Part of: Standards always; optional: Last updated, Version */
 
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
+<div class="guide-modern">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+                    <h2 class="govuk-error-summary__title" id="error-summary-title">There is a problem</h2>
+                    <div class="govuk-error-summary__body">
+                        <ul class="govuk-list govuk-error-summary__list">
+                            <li><a href="#main-content">@errorMessage</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
-        <div class="dfe-f-header">
+    @* Hero: breadcrumb + header (same structure as DetailedGuide) *@
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <header class="guide-hero">
+                <div class="govuk-width-container">
+                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+                        <ol class="govuk-breadcrumbs__list">
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@Url.Action("Index", "DdtStandards")">Standards</a></li>
+                            <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
+                        </ol>
+                    </nav>
+                    <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-two-thirds">
+                            <span class="guide-hero__label">Standards</span>
+                            <h1 class="govuk-heading-xl">@Model.Title</h1>
+                            @if (!string.IsNullOrEmpty(Model.Summary))
+                            {
+                                <p class="govuk-body-l">@Model.Summary</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-        <span class="govuk-caption-xl  govuk-!-margin-top-5">Standards</span>
-            <h1 class="govuk-heading-xl dfe-f-header__title">@Model.Title</h1>
-             @if (!string.IsNullOrEmpty(Model.Summary))
-                    {
-                        <p class="govuk-body-l dfe-f-header__intro">@Model.Summary</p>
-                    }
+            @* Meta strip *@
+            @if (hasMeta)
+            {
+                <div class="guide-meta">
+                    <div class="govuk-width-container">
+                        <span class="guide-meta__item"><strong>Part of:</strong> <a href="@Url.Action("Index", "DdtStandards")">Standards</a></span>
+                        @if (Model.LastUpdated.HasValue)
+                        {
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                            <span class="guide-meta__item"><strong>Last updated:</strong> @Model.LastUpdated.Value.ToString("dd MMMM yyyy")</span>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Version))
+                        {
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                            <span class="guide-meta__item"><strong>Version:</strong> @Model.Version</span>
+                        }
+                    </div>
+                </div>
+            }
 
-                        @if (hasContents)
-                {
-                    <nav class="dfe-f-guide-contents govuk-!-margin-bottom-8" aria-label="Contents">
-                        <h2 class="dfe-f-guide-contents__title">Contents</h2>
-                        <ol class="dfe-f-guide-contents__list">
+            @* Contents *@
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <nav class="guide-contents guide-contents--dashed" aria-label="Contents">
+                        <h2 class="guide-contents__title">Contents</h2>
+                        <ul class="guide-contents__list">
                             @if (hasPurpose)
                             {
-                                <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
-                                    <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                                    <a class="govuk-link dfe-f-guide-contents__link" href="#purpose">Purpose</a>
+                                <li class="guide-contents__item">
+                                    <span class="guide-contents__num" aria-hidden="true">—</span>
+                                    <a href="#purpose">Purpose</a>
+                                </li>
+                            }
+                            @if (hasCategories)
+                            {
+                                <li class="guide-contents__item">
+                                    <span class="guide-contents__num" aria-hidden="true">—</span>
+                                    <a href="#categories">Categories</a>
                                 </li>
                             }
                             @if (hasHowToMeet)
                             {
-                                <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
-                                    <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                                    <a class="govuk-link dfe-f-guide-contents__link" href="#how-to-meet">How to meet this standard</a>
+                                <li class="guide-contents__item">
+                                    <span class="guide-contents__num" aria-hidden="true">—</span>
+                                    <a href="#how-to-meet">How to meet this standard</a>
                                 </li>
                             }
                             @if (hasGovernance)
                             {
-                                <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
-                                    <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                                    <a class="govuk-link dfe-f-guide-contents__link" href="#governance">Governance</a>
+                                <li class="guide-contents__item">
+                                    <span class="guide-contents__num" aria-hidden="true">—</span>
+                                    <a href="#governance">Governance</a>
                                 </li>
                             }
                             @if (hasRelatedGuidance)
                             {
-                                <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
-                                    <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                                    <a class="govuk-link dfe-f-guide-contents__link" href="#related-guidance">Related guidance</a>
+                                <li class="guide-contents__item">
+                                    <span class="guide-contents__num" aria-hidden="true">—</span>
+                                    <a href="#related-guidance">Related guidance</a>
                                 </li>
                             }
-                            <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
-                                <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                                <a class="govuk-link dfe-f-guide-contents__link" href="#version-history">Version history</a>
+                            <li class="guide-contents__item">
+                                <span class="guide-contents__num" aria-hidden="true">—</span>
+                                <a href="#version-history">Version history</a>
                             </li>
-                        </ol>
+                        </ul>
                     </nav>
-                }
-                else
-                {
-                    <nav class="dfe-f-guide-contents govuk-!-margin-bottom-8" aria-label="Contents">
-                        <h2 class="dfe-f-guide-contents__title">Contents</h2>
-                        <ol class="dfe-f-guide-contents__list">
-                            <li class="dfe-f-guide-contents__item dfe-f-guide-contents__item--dashed">
-                                <span class="dfe-f-guide-contents__dash" aria-hidden="true"></span>
-                                <a class="govuk-link dfe-f-guide-contents__link" href="#version-history">Version history</a>
-                            </li>
-                        </ol>
-                    </nav>
-                }
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-
-
-
-        <div class="govuk-grid-row govuk-!-margin-top-6">
-            <div class="govuk-grid-column-two-thirds">
-
-                @if(Model.LegalStandard == true)
+    @* Content + sidebar *@
+    <div class="govuk-grid-row guide-content-row">
+        <div class="govuk-grid-column-two-thirds">
+            <section class="dfe-f-content-section guide-content-section" aria-label="Content" id="standard-content">
+                @if (Model.LegalStandard == true)
                 {
                     <div class="govuk-warning-text">
                         <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
@@ -124,172 +147,112 @@
                         </strong>
                     </div>
                 }
-            
+
                 @if (hasPurpose)
                 {
                     <h2 class="govuk-heading-l" id="purpose">Purpose</h2>
-                    <div>@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.Purpose))</div>
+                    <div class="dfe-f-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.Purpose))</div>
+                }
+                @if (Model.Categories != null && Model.Categories.Any())
+                {
+                    var categoriesGrouped = Model.Categories
+                        .Where(c => !string.IsNullOrEmpty(c.Name))
+                        .GroupBy(c => c.Name!, StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(g => g.Key);
+                    <h2 class="govuk-heading-l govuk-!-margin-top-6" id="categories">Categories</h2>
+                    <div class="govuk-!-margin-bottom-6">
+                        @foreach (var group in categoriesGrouped)
+                        {
+                            var subCategories = group
+                                .SelectMany(g => g.SubCategories ?? Enumerable.Empty<DdtStandardSubCategoryDto>())
+                                .Where(sc => !string.IsNullOrEmpty(sc.Name))
+                                .Select(sc => sc.Name!)
+                                .Distinct(StringComparer.OrdinalIgnoreCase)
+                                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+                                .ToList();
+                            <div class="govuk-!-margin-bottom-4">
+                                <p class="govuk-body govuk-!-margin-bottom-1"><strong>@group.Key</strong></p>
+                                @if (subCategories.Any())
+                                {
+                                    <ul class="govuk-list govuk-list--bullet govuk-body-s govuk-!-margin-left-2" style="color: #505a5f;">
+                                        @foreach (var subName in subCategories)
+                                        {
+                                            <li>@subName</li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        }
+                    </div>
                 }
                 @if (hasHowToMeet)
                 {
                     <h2 class="govuk-heading-l" id="how-to-meet">How to meet this standard</h2>
-                    <div>@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.HowToMeet))</div>
+                    <div class="dfe-f-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.HowToMeet))</div>
                 }
                 @if (hasGovernance)
                 {
                     <h2 class="govuk-heading-l" id="governance">Governance</h2>
-                    <div>@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.Governance))</div>
+                    <div class="dfe-f-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.Governance))</div>
                 }
                 @if (hasRelatedGuidance)
                 {
                     <h2 class="govuk-heading-l" id="related-guidance">Related guidance</h2>
-                    <div>@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.RelatedGuidance))</div>
+                    <div class="dfe-f-body">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(Model.RelatedGuidance))</div>
                 }
                 <div class="govuk-inset-text govuk-!-margin-top-6">
                     <p class="govuk-body">
                         <strong>To view more details of this standard, view it in <a href="@compassStandardUrl" class="govuk-link" target="_blank" rel="noopener noreferrer">COMPASS</a>.</strong>
                     </p>
                 </div>
-            </div>
-            <div class="govuk-grid-column-one-third">
-                <aside class="dfe-f-sidebar-box dfe-f-sidebar-box--highlight" aria-label="Part of">
-                    <div class="dfe-f-sidebar-box__section">
-                        <h3>Part of</h3>
-                        <ul class="govuk-list govuk-list--spaced">
-                            <li><a class="govuk-link" href="@Url.Action("Index", "DdtStandards")"><strong>Standards</strong></a></li>
-                        </ul>
-                    </div>
-                </aside>
-
-                <aside class="dfe-f-sidebar-box" aria-label="About this standard">
-                    <div class="dfe-f-sidebar-box__section">
-                        <h3>About this standard</h3>
-                        <div class="dfe-standard-meta-card__body">
-                        <dl class="govuk-body-s govuk-!-margin-0 dfe-standard-meta-card__list">
-                            @if (!string.IsNullOrEmpty(Model.Version))
-                            {
-                                <div class="dfe-standard-meta-card__row">
-                                    <dt class="dfe-standard-meta-card__term">Version</dt>
-                                    <dd class="dfe-standard-meta-card__value">
-                                        @Model.Version
-                                        <a href="#version-history" class="govuk-link govuk-!-margin-left-2">View history</a>
-                                    </dd>
-                                </div>
-                            }
-                            @if (Model.Categories != null && Model.Categories.Any())
-                            {
-                                var categoriesGrouped = Model.Categories
-                                    .Where(c => !string.IsNullOrEmpty(c.Name))
-                                    .GroupBy(c => c.Name!, StringComparer.OrdinalIgnoreCase)
-                                    .OrderBy(g => g.Key);
-                                <div class="dfe-standard-meta-card__row">
-                                    <dt class="dfe-standard-meta-card__term">Categories</dt>
-                                    <dd class="dfe-standard-meta-card__value">
-                                        @foreach (var group in categoriesGrouped)
-                                        {
-                                            var subNames = group
-                                                .SelectMany(g => g.SubCategories ?? Enumerable.Empty<DdtStandardSubCategoryDto>())
-                                                .Where(sc => !string.IsNullOrEmpty(sc.Name) && !string.Equals(sc.Name, group.Key, StringComparison.OrdinalIgnoreCase))
-                                                .Select(sc => sc.Name!)
-                                                .Distinct(StringComparer.OrdinalIgnoreCase)
-                                                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
-                                                .ToList();
-                                            <span class="govuk-!-display-block govuk-!-margin-bottom-1">@group.Key</span>
-                                            @if (subNames.Any())
-                                            {
-                                                <span class="govuk-!-display-block govuk-!-margin-left-2 govuk-!-margin-bottom-2" style="color: #505a5f; font-size: 13px;">@string.Join(", ", subNames)</span>
-                                            }
-                                        }
-                                    </dd>
-                                </div>
-                            }
-                            @if (Model.Phases != null && Model.Phases.Any())
-                            {
-                                <div class="dfe-standard-meta-card__row">
-                                    <dt class="dfe-standard-meta-card__term">Phases</dt>
-                                    <dd class="dfe-standard-meta-card__value">@string.Join(", ", Model.Phases.Select(p => p.Name))</dd>
-                                </div>
-                            }
-                            @if (Model.LastUpdated.HasValue)
-                            {
-                                <div class="dfe-standard-meta-card__row">
-                                    <dt class="dfe-standard-meta-card__term">Last updated</dt>
-                                    <dd class="dfe-standard-meta-card__value">@Model.LastUpdated.Value.ToString("dd MMMM yyyy")</dd>
-                                </div>
-                            }
-                            @if (Model.FirstPublished.HasValue)
-                            {
-                                <div class="dfe-standard-meta-card__row">
-                                    <dt class="dfe-standard-meta-card__term">First published</dt>
-                                    <dd class="dfe-standard-meta-card__value">@Model.FirstPublished.Value.ToString("dd MMMM yyyy")</dd>
-                                </div>
-                            }
-                            @if (Model.LegalStandard == true)
-                            {
-                                <div class="dfe-standard-meta-card__row">
-                                    <dt class="dfe-standard-meta-card__term">Legal standard</dt>
-                                    <dd class="dfe-standard-meta-card__value">Yes</dd>
-                                </div>
-                            }
-                            @if (!string.IsNullOrEmpty(Model.LegalBasis))
-                            {
-                                <div class="dfe-standard-meta-card__row">
-                                    <dt class="dfe-standard-meta-card__term">Legal basis</dt>
-                                    <dd class="dfe-standard-meta-card__value">@Model.LegalBasis</dd>
-                                </div>
-                            }
-                        </dl>
-                        </div>
-                    </div>
-                </aside>
-
-                @if (relatedStandards.Any())
-                {
-                    <aside class="dfe-f-sidebar-box" aria-label="Related standards">
-                        <div class="dfe-f-sidebar-box__section">
-                            <h3>Related standards</h3>
-                            <ul class="govuk-list govuk-list--spaced govuk-body-s">
-                                @foreach (var s in relatedStandards)
-                                {
-                                    <li class="govuk-!-margin-bottom-2">
-                                        <a href="@Url.Action("Details", "DdtStandards", new { slug = s.Slug })" class="govuk-link">@(s.Title ?? "Standard")</a>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    </aside>
-                }
-            </div>
+            </section>
         </div>
-
-        <div class="govuk-grid-row govuk-!-margin-top-8 govuk-!-padding-top-6" style="border-top: 1px solid #b1b4b6;">
-            <div class="govuk-grid-column-full">
-                <details class="govuk-details dfe-version-history" id="version-history" data-module="govuk-details">
-                    <summary class="govuk-details__summary">
-                        <span class="govuk-details__summary-text">Version history</span>
-                    </summary>
-                    <div class="govuk-details__text">
-                        <table class="govuk-table dfe-version-history__table">
-                            <thead class="govuk-table__head">
-                                <tr class="govuk-table__row">
-                                    <th scope="col" class="govuk-table__header">Version</th>
-                                    <th scope="col" class="govuk-table__header">Date</th>
-                                    <th scope="col" class="govuk-table__header">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody class="govuk-table__body">
-                                <tr class="govuk-table__row">
-                                    <td class="govuk-table__cell">@(Model.Version ?? "–")</td>
-                                    <td class="govuk-table__cell">@(Model.LastUpdated?.ToString("dd MMMM yyyy") ?? Model.FirstPublished?.ToString("dd MMMM yyyy") ?? "–")</td>
-                                    <td class="govuk-table__cell">Current version</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </details>
-            </div>
+        <div class="govuk-grid-column-one-third">
+            @if (relatedStandards.Any())
+            {
+                <aside class="guide-sidebar__card" aria-label="Related standards">
+                    <h3 class="govuk-heading-s">Related standards</h3>
+                    <ul class="govuk-list govuk-list--spaced govuk-body-s">
+                        @foreach (var s in relatedStandards)
+                        {
+                            <li class="govuk-!-margin-bottom-2">
+                                <a href="@Url.Action("Details", "DdtStandards", new { slug = s.Slug })" class="govuk-link">@(s.Title ?? "Standard")</a>
+                            </li>
+                        }
+                    </ul>
+                </aside>
+            }
         </div>
-  
+    </div>
+
+    <div class="govuk-grid-row govuk-!-margin-top-8 govuk-!-padding-top-6" style="border-top: 1px solid #b1b4b6;">
+        <div class="govuk-grid-column-full">
+            <details class="govuk-details dfe-version-history" id="version-history" data-module="govuk-details">
+                <summary class="govuk-details__summary">
+                    <span class="govuk-details__summary-text">Version history</span>
+                </summary>
+                <div class="govuk-details__text">
+                    <table class="govuk-table dfe-version-history__table">
+                        <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th scope="col" class="govuk-table__header">Version</th>
+                                <th scope="col" class="govuk-table__header">Date</th>
+                                <th scope="col" class="govuk-table__header">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">@(Model.Version ?? "–")</td>
+                                <td class="govuk-table__cell">@(Model.LastUpdated?.ToString("dd MMMM yyyy") ?? Model.FirstPublished?.ToString("dd MMMM yyyy") ?? "–")</td>
+                                <td class="govuk-table__cell">Current version</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+    </div>
+</div>
 }
 else
 {

@@ -27,10 +27,18 @@ namespace ServiceManual.Models
         public bool ShowLastReviewedDateOnPage { get; set; }
         /// <summary>Formatted last reviewed date for display (e.g. "7 January 2026").</summary>
         public string? LastReviewedDateDisplay { get; set; }
+        /// <summary>When true, show owner in the meta strip.</summary>
+        public bool ShowOwnerOnPage { get; set; } = true;
         /// <summary>Owner from parent guide for meta strip.</summary>
         public string? Owner { get; set; }
         /// <summary>Owner link from parent guide (e.g. informationPage redirect).</summary>
         public string? OwnerUrl { get; set; }
+        /// <summary>When true, show applicable phases in the meta strip.</summary>
+        public bool ShowApplicablePhasesOnPage { get; set; }
+        /// <summary>Applicable phases from parent guide for meta strip.</summary>
+        public List<TagRef> PhaseTags { get; set; } = [];
+        /// <summary>When true, show applicable professions (audience) in the meta strip.</summary>
+        public bool ShowApplicableProfessionsOnPage { get; set; }
         /// <summary>Audience (profession tags) from parent guide for meta strip.</summary>
         public List<TagRef> AudienceTags { get; set; } = [];
         /// <summary>Related files for the Downloads sidebar section.</summary>

@@ -19,10 +19,18 @@ namespace ServiceManual.Models
         public bool ShowLastReviewedDateOnPage { get; set; }
         /// <summary>Formatted last reviewed date for display (e.g. "7 January 2026").</summary>
         public string? LastReviewedDateDisplay { get; set; }
+        /// <summary>When true, show owner in the meta strip.</summary>
+        public bool ShowOwnerOnPage { get; set; } = true;
         /// <summary>Owner label for meta (e.g. from CMS).</summary>
         public string? Owner { get; set; }
         /// <summary>When set, the owner is linked (e.g. from content owner's informationPage redirector).</summary>
         public string? OwnerUrl { get; set; }
+        /// <summary>When true, show applicable phases in the meta strip.</summary>
+        public bool ShowApplicablePhasesOnPage { get; set; }
+        /// <summary>Applicable phases for meta strip (phase slug + title).</summary>
+        public List<TagRef> PhaseTags { get; set; } = [];
+        /// <summary>When true, show applicable professions (audience) in the meta strip.</summary>
+        public bool ShowApplicableProfessionsOnPage { get; set; }
         /// <summary>Audience / applicable professions for meta (tags-profession titles).</summary>
         public List<string> Audience { get; set; } = [];
         /// <summary>Audience as tag refs (slug + title) for linking to content-by-profession view.</summary>

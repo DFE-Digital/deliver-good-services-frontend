@@ -1,3 +1,4 @@
+@using System.Linq
 @using ServiceManual.Models
 @using ServiceManual.Helpers
 @{
@@ -34,9 +35,13 @@
                 </div>
             </header>
 
-            @* Meta strip *@
+            @* Meta strip: show items only when their corresponding show* flag is true *@
             @{
-                var hasMeta = vm.Collections.Count > 0 || (vm.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(vm.LastReviewedDateDisplay)) || !string.IsNullOrWhiteSpace(vm.Owner) || vm.AudienceTags.Count > 0;
+                var hasMeta = vm.Collections.Count > 0
+                    || (vm.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(vm.LastReviewedDateDisplay))
+                    || (vm.ShowOwnerOnPage && !string.IsNullOrWhiteSpace(vm.Owner))
+                    || (vm.ShowApplicablePhasesOnPage && vm.PhaseTags.Count > 0)
+                    || (vm.ShowApplicableProfessionsOnPage && vm.AudienceTags.Count > 0);
             }
             @if (hasMeta)
             {
@@ -53,7 +58,7 @@
                             <span class="guide-meta__item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(vm.LastReviewedDateDisplay)</span>
                             <span class="guide-meta__dot" aria-hidden="true">·</span>
                         }
-                        @if (!string.IsNullOrWhiteSpace(vm.Owner))
+                        @if (vm.ShowOwnerOnPage && !string.IsNullOrWhiteSpace(vm.Owner))
                         {
                             <span class="guide-meta__item">
                                 <strong>Owner:</strong>
@@ -64,7 +69,15 @@
                             </span>
                             <span class="guide-meta__dot" aria-hidden="true">·</span>
                         }
-                        @if (vm.AudienceTags.Count > 0)
+                        @if (vm.ShowApplicablePhasesOnPage && vm.PhaseTags.Count > 0)
+                        {
+                            <span class="guide-meta__item">
+                                <strong>Applicable phases:</strong>
+                                @Html.Raw(string.Join(", ", vm.PhaseTags.Select(p => $"<a href=\"/lifecycle#ph-{Uri.EscapeDataString(p.Slug)}\">{System.Net.WebUtility.HtmlEncode(p.Title)}</a>")))
+                            </span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (vm.ShowApplicableProfessionsOnPage && vm.AudienceTags.Count > 0)
                         {
                             @await Html.PartialAsync("~/Views/Shared/_AudienceMeta.cshtml", vm.AudienceTags)
                         }

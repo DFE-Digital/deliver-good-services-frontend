@@ -163,11 +163,12 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage" +
                           "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug" +
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
                           "&populate[contentOwner][fields][0]=title&populate[contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
+                          "&populate[applicablePhases][fields][0]=title&populate[applicablePhases][fields][1]=slug" +
                           "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug" +
                           "&populate[relatedFiles]=true";
 
@@ -208,8 +209,15 @@ namespace ServiceManual.Services
                         .ToList() ?? [],
                     ShowLastReviewedDateOnPage = item.ShowLastReviewedDateOnPage ?? false,
                     LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
+                    ShowOwnerOnPage = item.ShowOwnerOnPage ?? true,
                     Owner = item.ContentOwner?.Title?.Trim(),
                     OwnerUrl = item.ContentOwner?.RedirectUrl?.Trim(),
+                    ShowApplicablePhasesOnPage = item.ShowApplicablePhasesOnPage ?? false,
+                    PhaseTags = item.ApplicablePhases?
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
+                        .ToList() ?? [],
+                    ShowApplicableProfessionsOnPage = item.ShowApplicableProfessionsOnPage ?? false,
                     Audience = item.ApplicableProfessions?
                         .Where(p => !string.IsNullOrWhiteSpace(p.Title))
                         .Select(p => p.Title!.Trim())
@@ -235,10 +243,11 @@ namespace ServiceManual.Services
                 var url = $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
                           "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav&fields[8]=showLastReviewedDateOnPage&fields[9]=lastReviewedDate" +
                           "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug" +
-                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage" +
+                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage&populate[detailed_guide][fields][6]=showOwnerOnPage&populate[detailed_guide][fields][7]=showApplicablePhasesOnPage&populate[detailed_guide][fields][8]=showApplicableProfessionsOnPage" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug" +
                           "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
                           "&populate[detailed_guide][populate][contentOwner][fields][0]=title&populate[detailed_guide][populate][contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
+                          "&populate[detailed_guide][populate][applicablePhases][fields][0]=title&populate[detailed_guide][populate][applicablePhases][fields][1]=slug" +
                           "&populate[detailed_guide][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][applicableProfessions][fields][1]=slug" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
                           "&populate[relatedFiles]=true";
@@ -291,8 +300,15 @@ namespace ServiceManual.Services
                         .ToList() ?? [],
                     ShowLastReviewedDateOnPage = item.ShowLastReviewedDateOnPage ?? false,
                     LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
+                    ShowOwnerOnPage = item.Detailed_Guide?.ShowOwnerOnPage ?? true,
                     Owner = item.Detailed_Guide?.ContentOwner?.Title?.Trim(),
                     OwnerUrl = item.Detailed_Guide?.ContentOwner?.RedirectUrl?.Trim(),
+                    ShowApplicablePhasesOnPage = item.Detailed_Guide?.ShowApplicablePhasesOnPage ?? false,
+                    PhaseTags = item.Detailed_Guide?.ApplicablePhases?
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
+                        .ToList() ?? [],
+                    ShowApplicableProfessionsOnPage = item.Detailed_Guide?.ShowApplicableProfessionsOnPage ?? false,
                     AudienceTags = item.Detailed_Guide?.ApplicableProfessions?
                         .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
                         .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
@@ -1810,12 +1826,21 @@ namespace ServiceManual.Services
             public List<StrapiDetailedGuidePageSummary>? Detailed_Guide_Pages { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
             [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicablePhases")]
+            public List<StrapiTagRef>? ApplicablePhases { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicableProfessions")]
             public List<StrapiTagRef>? ApplicableProfessions { get; set; }
             [JsonPropertyName("showLastReviewedDateOnPage")]
             public bool? ShowLastReviewedDateOnPage { get; set; }
             [JsonPropertyName("lastReviewedDate")]
             public string? LastReviewedDate { get; set; }
+            [JsonPropertyName("showOwnerOnPage")]
+            public bool? ShowOwnerOnPage { get; set; }
+            [JsonPropertyName("showApplicablePhasesOnPage")]
+            public bool? ShowApplicablePhasesOnPage { get; set; }
+            [JsonPropertyName("showApplicableProfessionsOnPage")]
+            public bool? ShowApplicableProfessionsOnPage { get; set; }
             [JsonConverter(typeof(StrapiRelatedFilesConverter))]
             [JsonPropertyName("relatedFiles")]
             public List<StrapiFileItem>? RelatedFiles { get; set; }
@@ -1885,8 +1910,17 @@ namespace ServiceManual.Services
             [JsonPropertyName("contentOwner")]
             public StrapiContentOwnerRef? ContentOwner { get; set; }
             [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicablePhases")]
+            public List<StrapiTagRef>? ApplicablePhases { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicableProfessions")]
             public List<StrapiTagRef>? ApplicableProfessions { get; set; }
+            [JsonPropertyName("showOwnerOnPage")]
+            public bool? ShowOwnerOnPage { get; set; }
+            [JsonPropertyName("showApplicablePhasesOnPage")]
+            public bool? ShowApplicablePhasesOnPage { get; set; }
+            [JsonPropertyName("showApplicableProfessionsOnPage")]
+            public bool? ShowApplicableProfessionsOnPage { get; set; }
             public List<StrapiDetailedGuidePageSummary>? Detailed_Guide_Pages { get; set; }
         }
 

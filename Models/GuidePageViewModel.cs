@@ -11,8 +11,16 @@ namespace ServiceManual.Models
         public List<CollectionRef> Collections { get; set; } = [];
         public bool ShowLastReviewedDateOnPage { get; set; }
         public string? LastReviewedDateDisplay { get; set; }
+        /// <summary>When true, show owner in the meta strip (if Owner is set).</summary>
+        public bool ShowOwnerOnPage { get; set; } = true;
         public string? Owner { get; set; }
         public string? OwnerUrl { get; set; }
+        /// <summary>When true, show applicable phases in the meta strip (if PhaseTags has items).</summary>
+        public bool ShowApplicablePhasesOnPage { get; set; }
+        /// <summary>Applicable phases for meta strip (phase slug + title).</summary>
+        public List<TagRef> PhaseTags { get; set; } = [];
+        /// <summary>When true, show applicable professions (audience) in the meta strip (if AudienceTags has items).</summary>
+        public bool ShowApplicableProfessionsOnPage { get; set; }
         public List<TagRef> AudienceTags { get; set; } = [];
         /// <summary>When false, hide the contents nav (only used on overview when HideContentsOnPrimaryPage).</summary>
         public bool ShowContents { get; set; } = true;
