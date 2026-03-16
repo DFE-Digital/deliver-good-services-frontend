@@ -263,6 +263,21 @@ public class DdtStandardsApiService
         var slug = GetString(attrs, "slug");
         if (string.IsNullOrEmpty(slug) && string.IsNullOrEmpty(title)) return null;
 
+        // Standard's assigned sub_categories (only these should be shown)
+        var standardSubCategories = GetRelationArray(node["sub_categories"] ?? node["subCategories"] ?? attrs["sub_categories"] ?? attrs["subCategories"]);
+        var assignedSubCatIds = new HashSet<int>();
+        var assignedSubCatByTitle = new Dictionary<string, (int Id, string? Desc)>(StringComparer.OrdinalIgnoreCase);
+        foreach (var sc in standardSubCategories)
+        {
+            if (sc == null) continue;
+            var scAttrs = sc["attributes"] ?? sc;
+            var scId = sc["id"]?.GetValue<int>() ?? 0;
+            var scName = GetString(scAttrs, "title");
+            if (string.IsNullOrEmpty(scName)) continue;
+            assignedSubCatIds.Add(scId);
+            assignedSubCatByTitle[scName] = (scId, GetString(scAttrs, "description"));
+        }
+
         var categories = new List<DdtStandardCategoryDto>();
         var catNodes = GetRelationArray(node["categories"] ?? attrs["categories"] ?? attrs["category"]);
         foreach (var c in catNodes)
@@ -273,16 +288,21 @@ public class DdtStandardsApiService
             var catName = GetString(catAttrs, "title");
             if (string.IsNullOrEmpty(catName)) continue;
             var subCats = new List<DdtStandardSubCategoryDto>();
-            var subNodes = GetRelationArray(catAttrs?["sub_categories"] ?? catAttrs?["subCategories"]);
-            foreach (var sc in subNodes)
+            var categorySubNodes = GetRelationArray(catAttrs?["sub_categories"] ?? catAttrs?["subCategories"]);
+            foreach (var sc in categorySubNodes)
             {
                 if (sc == null) continue;
+                var scId = sc["id"]?.GetValue<int>() ?? 0;
+                if (!assignedSubCatIds.Contains(scId)) continue;
                 var scAttrs = sc["attributes"] ?? sc;
+                var scName = GetString(scAttrs, "title");
+                if (string.IsNullOrEmpty(scName)) continue;
+                assignedSubCatByTitle.TryGetValue(scName, out var extra);
                 subCats.Add(new DdtStandardSubCategoryDto
                 {
-                    Id = sc["id"]?.GetValue<int>() ?? 0,
-                    Name = GetString(scAttrs, "title"),
-                    Description = GetString(scAttrs, "description")
+                    Id = scId,
+                    Name = scName,
+                    Description = GetString(scAttrs, "description") ?? extra.Desc
                 });
             }
             categories.Add(new DdtStandardCategoryDto
@@ -294,22 +314,16 @@ public class DdtStandardsApiService
             });
         }
 
-        var subCategoriesDirect = GetRelationArray(node["sub_categories"] ?? node["subCategories"] ?? attrs["sub_categories"] ?? attrs["subCategories"]);
-        foreach (var sc in subCategoriesDirect)
+        // Any assigned sub_category not placed under a category (e.g. category not populated) show under "Other"
+        var placedSubCatTitles = new HashSet<string>(categories.SelectMany(c => c.SubCategories.Select(s => s.Name!).Where(n => n != null)), StringComparer.OrdinalIgnoreCase);
+        foreach (var kv in assignedSubCatByTitle)
         {
-            if (sc == null) continue;
-            var scAttrs = sc["attributes"] ?? sc;
-            var scName = GetString(scAttrs, "title");
-            if (string.IsNullOrEmpty(scName)) continue;
-            var alreadyIn = categories.Any(c => c.SubCategories.Any(s => string.Equals(s.Name, scName, StringComparison.OrdinalIgnoreCase)));
-            if (!alreadyIn)
-            {
-                var firstCat = categories.FirstOrDefault();
-                if (firstCat != null)
-                    firstCat.SubCategories.Add(new DdtStandardSubCategoryDto { Id = sc["id"]?.GetValue<int>() ?? 0, Name = scName });
-                else
-                    categories.Add(new DdtStandardCategoryDto { Name = "Other", SubCategories = new List<DdtStandardSubCategoryDto> { new DdtStandardSubCategoryDto { Name = scName } } });
-            }
+            if (placedSubCatTitles.Contains(kv.Key)) continue;
+            var firstCat = categories.FirstOrDefault();
+            if (firstCat != null)
+                firstCat.SubCategories.Add(new DdtStandardSubCategoryDto { Id = kv.Value.Id, Name = kv.Key, Description = kv.Value.Desc });
+            else
+                categories.Add(new DdtStandardCategoryDto { Name = "Other", SubCategories = new List<DdtStandardSubCategoryDto> { new DdtStandardSubCategoryDto { Id = kv.Value.Id, Name = kv.Key, Description = kv.Value.Desc } } });
         }
 
         var phases = new List<DdtStandardPhase>();
