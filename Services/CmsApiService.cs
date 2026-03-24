@@ -851,6 +851,7 @@ namespace ServiceManual.Services
             {
                 var url = "api/navigation-items" +
                           "?filters[parent][id][$null]=true" +
+                          "&publicationState=live" +
                           "&fields[0]=title&fields[1]=order&fields[2]=externalUrl" +
                           "&populate[collection][fields][0]=slug" +
                           "&populate[detailed_guide][fields][0]=slug" +
@@ -866,7 +867,8 @@ namespace ServiceManual.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning("CMS API returned {StatusCode} for navigation", response.StatusCode);
+                    var body = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning("CMS API returned {StatusCode} for navigation. Response: {Response}", response.StatusCode, body.Length > 200 ? body[..200] + "..." : body);
                     return [];
                 }
 
@@ -943,6 +945,11 @@ namespace ServiceManual.Services
 
             // Phases: /lifecycle/{slug}
             await AddPhaseListAsync(items, pageSize);
+
+            if (items.Count == 0)
+            {
+                _logger.LogWarning("Content index fetch returned 0 items. Check CMS credentials and find permissions for collections, detailed-guides, detailed-guide-pages, html-pages, lifecycle and lifecycle-stages.");
+            }
 
             return items.OrderBy(i => i.ContentType).ThenBy(i => i.Title).ToList();
         }
@@ -1028,7 +1035,12 @@ namespace ServiceManual.Services
             {
                 var url = $"{endpoint}?pagination[pageSize]={pageSize}{fields}";
                 var response = await _httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return;
+                if (!response.IsSuccessStatusCode)
+                {
+                    var body = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning("Content index endpoint {Endpoint} returned {StatusCode}. Response: {Response}", endpoint, response.StatusCode, body.Length > 200 ? body[..200] + "..." : body);
+                    return;
+                }
                 var json = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiContentListItem>>(json, JsonOptions);
                 if (result?.Data == null) return;
@@ -1066,7 +1078,12 @@ namespace ServiceManual.Services
                          "&populate[applicablePhases][fields][0]=slug&populate[applicablePhases][fields][1]=title" +
                          "&populate[applicableProfessions][fields][0]=slug&populate[applicableProfessions][fields][1]=title";
                 var response = await _httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode) return;
+                if (!response.IsSuccessStatusCode)
+                {
+                    var body = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning("Content index endpoint api/detailed-guide-pages returned {StatusCode}. Response: {Response}", response.StatusCode, body.Length > 200 ? body[..200] + "..." : body);
+                    return;
+                }
                 var json = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiDetailedGuidePageListItem>>(json, JsonOptions);
                 if (result?.Data == null) return;
