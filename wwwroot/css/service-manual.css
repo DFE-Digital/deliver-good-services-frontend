@@ -5929,3 +5929,7 @@ ul > li:last-child {
 }
 
 /* ── Alternative style END─────────────────────────────────────────────────────── */
+
+.govuk-width-container {
+  max-width: 1200px;
+}

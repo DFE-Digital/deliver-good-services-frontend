@@ -24,6 +24,7 @@
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
   </script>
 
+
   <a href="#main-content" class="govuk-skip-link">Skip to main content</a>
 
 
@@ -56,10 +57,10 @@
       </div>
     }
   }
-
+<main id="main" id="main-content" role="main">
   @RenderSection("Masthead", required: false)
 
-  <main class="govuk-main-wrapper" id="main-content" role="main">
+  <div class="govuk-main-wrapper">
     @if (IsSectionDefined("Masthead"))
     {
       <div class="content-wrapper">
@@ -74,8 +75,8 @@
         @RenderBody()
       </div>
     }
-  </main>
-
+  </div>
+</main>
   @await Html.PartialAsync("_Footer")
 
   @await RenderSectionAsync("Scripts", required: false)

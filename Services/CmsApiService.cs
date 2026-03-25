@@ -402,7 +402,7 @@ namespace ServiceManual.Services
         {
             try
             {
-                const string url = "api/homepage?fields[0]=title&fields[1]=headline&fields[2]=html";
+                const string url = "api/homepage?fields[0]=title&fields[1]=headline&fields[2]=html&fields[3]=customJS&fields[4]=customCSS";
 
                 var response = await _httpClient.GetAsync(url);
 
@@ -424,6 +424,8 @@ namespace ServiceManual.Services
                     Title = item.Title ?? string.Empty,
                     Headline = item.Headline,
                     Html = item.Html,
+                    CustomJS = item.CustomJS,
+                    CustomCSS = item.CustomCSS
                 };
             }
             catch (Exception ex)
@@ -1354,6 +1356,8 @@ namespace ServiceManual.Services
             public string? Title { get; set; }
             public string? Headline { get; set; }
             public string? Html { get; set; }
+            public string? CustomJS { get; set; }
+            public string? CustomCSS { get; set; }
         }
 
         private class StrapiSlugRef
