@@ -16,6 +16,7 @@ public class SearchController : Controller
         "Detailed Guide",
         "Detailed Guide Page",
         "HTML Page",
+        "Roadmap",
         "Lifecycle",
         "Lifecycle Stage",
         "Standard"

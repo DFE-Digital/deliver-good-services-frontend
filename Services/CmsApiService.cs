@@ -362,6 +362,42 @@ namespace ServiceManual.Services
             }
         }
 
+        public async Task<Roadmap?> GetRoadmapAsync()
+        {
+            try
+            {
+                const string url = "api/roadmap?fields[0]=title&fields[1]=metaDescription&fields[2]=body&fields[3]=updateHistory";
+
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for roadmap single type", response.StatusCode);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiSingleTypeResponse<StrapiRoadmap>>(json, JsonOptions);
+                var item = result?.Data;
+
+                if (item is null)
+                    return null;
+
+                return new Roadmap
+                {
+                    Title = item.Title ?? string.Empty,
+                    MetaDescription = item.MetaDescription,
+                    Body = item.Body,
+                    UpdateHistory = item.UpdateHistory
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching roadmap single type");
+                return null;
+            }
+        }
+
         public async Task<List<DocumentationSection>> GetDocumentationSectionsAsync()
         {
             try
@@ -943,12 +979,25 @@ namespace ServiceManual.Services
                 });
             }
 
+            // Roadmap (single type): /roadmap
+            var roadmap = await GetRoadmapAsync();
+            if (roadmap != null)
+            {
+                items.Add(new ContentIndexItem
+                {
+                    Title = roadmap.Title,
+                    MetaDescription = roadmap.MetaDescription,
+                    ContentType = "Roadmap",
+                    Url = "/roadmap"
+                });
+            }
+
             // Phases: /lifecycle/{slug}
             await AddPhaseListAsync(items, pageSize);
 
             if (items.Count == 0)
             {
-                _logger.LogWarning("Content index fetch returned 0 items. Check CMS credentials and find permissions for collections, detailed-guides, detailed-guide-pages, html-pages, lifecycle and lifecycle-stages.");
+                _logger.LogWarning("Content index fetch returned 0 items. Check CMS credentials and find permissions for collections, detailed-guides, detailed-guide-pages, html-pages, roadmap, lifecycle and lifecycle-stages.");
             }
 
             return items.OrderBy(i => i.ContentType).ThenBy(i => i.Title).ToList();
@@ -987,8 +1036,24 @@ namespace ServiceManual.Services
             var normalizedPath = path.Trim();
             if (!normalizedPath.StartsWith("/", StringComparison.Ordinal))
                 normalizedPath = "/" + normalizedPath;
-            // Try with leading slash first, then without (CMS may store oldPath either way)
-            var pathsToTry = new[] { normalizedPath, normalizedPath.TrimStart('/') };
+            var withSlash = normalizedPath;
+            var withoutSlash = normalizedPath.TrimStart('/');
+
+            var withSlashNoTrailing = withSlash.TrimEnd('/');
+            var withSlashWithTrailing = withSlashNoTrailing + "/";
+            var withoutSlashNoTrailing = withoutSlash.TrimEnd('/');
+            var withoutSlashWithTrailing = withoutSlashNoTrailing + "/";
+
+            // Try common storage variants (leading slash/no leading slash and trailing slash/no trailing slash).
+            var pathsToTry = new[]
+            {
+                withSlash,
+                withoutSlash,
+                withSlashNoTrailing,
+                withSlashWithTrailing,
+                withoutSlashNoTrailing,
+                withoutSlashWithTrailing
+            };
             foreach (var pathToTry in pathsToTry.Distinct())
             {
                 try
@@ -1237,6 +1302,14 @@ namespace ServiceManual.Services
         private class StrapiSingleTypeResponse<T>
         {
             public T? Data { get; set; }
+        }
+
+        private class StrapiRoadmap
+        {
+            public string? Title { get; set; }
+            public string? MetaDescription { get; set; }
+            public string? Body { get; set; }
+            public string? UpdateHistory { get; set; }
         }
 
         private class StrapiSlugRef

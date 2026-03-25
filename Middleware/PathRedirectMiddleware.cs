@@ -41,13 +41,26 @@ public class PathRedirectMiddleware
             return;
         }
 
+        // First pass: pre-routing lookup for direct redirect hits.
+        if (await TryApplyPathRedirectAsync(context, cms, normalizedPath, isFallbackAfter404: false))
+            return;
+
+        await _next(context);
+
+        // Fallback pass: if the request ended in 404, check redirect rules once more.
+        if (!context.Response.HasStarted && context.Response.StatusCode == StatusCodes.Status404NotFound)
+        {
+            _logger.LogDebug("PathRedirectMiddleware: 404 fallback check for path '{Path}'", normalizedPath);
+            await TryApplyPathRedirectAsync(context, cms, normalizedPath, isFallbackAfter404: true);
+        }
+    }
+
+    private async Task<bool> TryApplyPathRedirectAsync(HttpContext context, ICmsApiService cms, string normalizedPath, bool isFallbackAfter404)
+    {
         _logger.LogDebug("PathRedirectMiddleware: checking path '{Path}'", normalizedPath);
         var rule = await cms.GetPathRedirectByOldPathAsync(normalizedPath);
         if (rule == null)
-        {
-            await _next(context);
-            return;
-        }
+            return false;
 
         var newPath = rule.NewPath.Trim();
         var isAbsolute = Uri.TryCreate(newPath, UriKind.Absolute, out var uri)
@@ -59,20 +72,25 @@ public class PathRedirectMiddleware
         if (!isAbsolute && !isRelative)
         {
             _logger.LogWarning("Path redirect: invalid newPath for oldPath '{OldPath}' (must be absolute http(s) or path starting with /)", rule.OldPath);
-            await _next(context);
-            return;
+            return false;
+        }
+
+        if (isFallbackAfter404 && !context.Response.HasStarted)
+        {
+            context.Response.Clear();
         }
 
         if (rule.UseInterimPage)
         {
             var toEncoded = Uri.EscapeDataString(newPath);
             var interimUrl = $"{InterimPagePath}?to={toEncoded}";
-            _logger.LogInformation("Path redirect (interim): {OldPath} -> {InterimUrl}", rule.OldPath, interimUrl);
+            _logger.LogInformation("Path redirect ({Mode}): {OldPath} -> {InterimUrl}", isFallbackAfter404 ? "404-fallback" : "interim", rule.OldPath, interimUrl);
             context.Response.Redirect(interimUrl, permanent: false);
-            return;
+            return true;
         }
 
-        _logger.LogInformation("Path redirect (301): {OldPath} -> {NewPath}", rule.OldPath, newPath);
+        _logger.LogInformation("Path redirect ({Mode}): {OldPath} -> {NewPath}", isFallbackAfter404 ? "404-fallback" : "301", rule.OldPath, newPath);
         context.Response.Redirect(newPath, permanent: true);
+        return true;
     }
 }

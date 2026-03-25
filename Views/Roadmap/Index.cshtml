@@ -1,0 +1,41 @@
+@using ServiceManual.Helpers
+@using ServiceManual.Models
+@{
+    var roadmap = ViewBag.Roadmap as Roadmap ?? new Roadmap();
+    ViewData["Title"] = roadmap.Title;
+    var bodyHtml = GovUkMarkdownHelper.ToGovUkHtml(roadmap.Body ?? string.Empty);
+    var updateHistoryHtml = GovUkMarkdownHelper.ToGovUkHtml(roadmap.UpdateHistory ?? string.Empty);
+}
+
+@section Breadcrumbs {
+<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+<li class="govuk-breadcrumbs__list-item" aria-current="page">@roadmap.Title</li>
+}
+
+<div class="govuk-grid-row govuk-!-margin-top-6">
+    <div class="govuk-grid-column-three-quarters">
+        <h1 class="govuk-heading-xl">@roadmap.Title</h1>
+
+
+        @if (!string.IsNullOrWhiteSpace(roadmap.Body))
+        {
+            <section class="roadmap-section">
+                @Html.Raw(bodyHtml)
+            </section>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(roadmap.UpdateHistory))
+        {
+            <section class="roadmap-section">
+                <h2 class="govuk-heading-l">Update history</h2>
+                @Html.Raw(updateHistoryHtml)
+            </section>
+        }
+    </div>
+</div>
+
+<style>
+    .govuk-table__cell, .govuk-table__header {
+        font-size: 1rem;        
+    }
+</style>
