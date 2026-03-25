@@ -1,17 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
+using ServiceManual.Services;
 
 namespace ServiceManual.Controllers;
 
+
 public class HomeController : Controller
 {
-    public IActionResult Index()
+    private readonly ICmsApiService _cmsApiService;
+
+    public HomeController(ICmsApiService cmsApiService)
     {
-            return View();
+        _cmsApiService = cmsApiService;
     }
 
-    public IActionResult Error()
+    [Route("/")]
+    [HttpGet]
+    public async Task<IActionResult> Index()
     {
-        return View();
+        Console.WriteLine("HomeController.Index called");
+        var homepage = await _cmsApiService.GetHomepageAsync();
+
+        if (homepage is null)
+            return NotFound();
+
+        ViewBag.Homepage = homepage;
+
+        return View("~/Views/Home/Index2.cshtml");
     }
 }
-

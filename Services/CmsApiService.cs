@@ -398,6 +398,43 @@ namespace ServiceManual.Services
             }
         }
 
+        public async Task<Homepage?> GetHomepageAsync()
+        {
+            try
+            {
+                const string url = "api/homepage?fields[0]=title&fields[1]=headline&fields[2]=html";
+
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for homepage single type", response.StatusCode);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiSingleTypeResponse<StrapiHomepage>>(json, JsonOptions);
+                var item = result?.Data;
+
+                if (item is null)
+                    return null;
+
+                return new Homepage
+                {
+                    Title = item.Title ?? string.Empty,
+                    Headline = item.Headline,
+                    Html = item.Html,
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching homepage single type");
+                return null;
+            }
+        }
+
+
+
         public async Task<List<DocumentationSection>> GetDocumentationSectionsAsync()
         {
             try
@@ -1310,6 +1347,13 @@ namespace ServiceManual.Services
             public string? MetaDescription { get; set; }
             public string? Body { get; set; }
             public string? UpdateHistory { get; set; }
+        }
+
+        private class StrapiHomepage
+        {
+            public string? Title { get; set; }
+            public string? Headline { get; set; }
+            public string? Html { get; set; }
         }
 
         private class StrapiSlugRef

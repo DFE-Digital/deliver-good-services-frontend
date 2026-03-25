@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+@section Masthead {
+<div class="homepage-hero">
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <h1 class="govuk-heading-xl">
+                    @ViewBag.Homepage.Title
+                </h1>
+                <p class="govuk-body-l homepage-hero__intro">
+                    @ViewBag.Homepage.Headline
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+
+@Html.Raw(ViewBag.Homepage.Html)
+

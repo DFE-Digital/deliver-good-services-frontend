@@ -11,6 +11,7 @@ namespace ServiceManual.Services
         Task<List<NavigationItem>> GetNavigationAsync();
         Task<HtmlPage?> GetHtmlPageBySlugAsync(string slug);
         Task<Roadmap?> GetRoadmapAsync();
+        Task<Homepage?> GetHomepageAsync();
         Task<Lifecycle?> GetLifecycleAsync();
         /// <summary>Gets a lifecycle by slug (e.g. "service-delivery-lifecycle"). New collection model with stages and task placements.</summary>
         Task<Lifecycle?> GetLifecycleBySlugAsync(string slug);
