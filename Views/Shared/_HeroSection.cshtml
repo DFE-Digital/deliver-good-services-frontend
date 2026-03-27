@@ -1,0 +1,166 @@
+@using ServiceManual.Helpers
+@using ServiceManual.Models
+@{
+    // Hero Section Parameters
+    // Type: "collection" or "guidance" - determines styling and content
+    var heroType = ViewBag.HeroType as string ?? "guidance";
+    var title = ViewBag.HeroTitle as string ?? "";
+    var intro = ViewBag.HeroIntro as string ?? "";
+    var badgeText = ViewBag.HeroBadgeText as string ?? "Guidance";
+    
+    // Collection-specific properties
+    var collection = ViewBag.Collection as Collection;
+    var metaDescription = ViewBag.HeroMetaDescription as string ?? "";
+    var audienceTags = ViewBag.HeroAudienceTags as List<dynamic> ?? new List<dynamic>();
+    
+    // Guidance-specific properties
+    var collections = ViewBag.HeroCollections as List<dynamic> ?? new List<dynamic>();
+    var showLastReviewedDate = (bool?)ViewBag.HeroShowLastReviewedDate ?? false;
+    var lastReviewedDateDisplay = ViewBag.HeroLastReviewedDateDisplay as string ?? "";
+    var showOwner = (bool?)ViewBag.HeroShowOwner ?? false;
+    var owner = ViewBag.HeroOwner as string ?? "";
+    var ownerUrl = ViewBag.HeroOwnerUrl as string ?? "";
+    var showApplicablePhases = (bool?)ViewBag.HeroShowApplicablePhases ?? false;
+    var phaseTags = ViewBag.HeroPhaseTags as List<dynamic> ?? new List<dynamic>();
+    var showApplicableProfessions = (bool?)ViewBag.HeroShowApplicableProfessions ?? false;
+    var collectionSlug = ViewBag.HeroCollectionSlug as string ?? "";
+    var collectionTitle = ViewBag.HeroCollectionTitle as string ?? "";
+    var breadcrumbItems = ViewBag.HeroBreadcrumbItems as List<(string Title, string Url)> ?? new List<(string, string)>();
+
+    var heroClass = heroType == "collection" ? "page-hero--collection" : "page-hero--guidance";
+    var chipColors = new[] { "#5439F9", "#15B187", "#CA357C" };
+}
+
+<section class="page-hero @heroClass" aria-label="@title">
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <div class="page-hero__inner">
+                    @* Breadcrumbs *@
+                    <nav class="govuk-breadcrumbs govuk-breadcrumbs--inverse" aria-label="Breadcrumb">
+                        <ol class="govuk-breadcrumbs__list">
+                            @if (heroType == "collection")
+                            {
+                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                            }
+                            else if (heroType == "guidance")
+                            {
+                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                                @if (!string.IsNullOrEmpty(collectionSlug) && !string.IsNullOrEmpty(collectionTitle))
+                                {
+                                    <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance/collections/@collectionSlug">@collectionTitle</a></li>
+                                }
+                            }
+                            else if (breadcrumbItems.Count > 0)
+                            {
+                                @foreach (var item in breadcrumbItems)
+                                {
+                                    @if (item.Url != null)
+                                    {
+                                        <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@item.Url">@item.Title</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li class="govuk-breadcrumbs__list-item" aria-current="page">@item.Title</li>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                            }
+                        </ol>
+                    </nav>
+
+                    @* Badge *@
+                    <div class="pg-badge">
+                        @if (heroType == "collection")
+                        {
+                            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="4" height="4" fill="currentColor"></rect><rect x="7" y="1" width="4" height="4" fill="currentColor"></rect><rect x="1" y="7" width="4" height="4" fill="currentColor"></rect><rect x="7" y="7" width="4" height="4" fill="currentColor"></rect></svg>
+                        }
+                        @badgeText
+                    </div>
+
+                    @* Title *@
+                    <h1 class="page-hero__h1">@title</h1>
+
+                    @* Intro/Description *@
+                    @if (!string.IsNullOrEmpty(intro))
+                    {
+                        <p class="page-hero__lede">@intro</p>
+                    }
+                    @if (!string.IsNullOrEmpty(metaDescription))
+                    {
+                        <p class="page-hero__lede">@metaDescription</p>
+                    }
+
+                    @* Guidance-specific meta information *@
+                    @if (heroType == "guidance")
+                    {
+                        <div class="page-hero__meta">
+                            @if (collections.Count > 0)
+                            {
+                                var c = collections[0];
+                                <span class="page-hero__meta-item"><strong>Part of:</strong> <a href="/guidance/collections/@c.Slug">@System.Net.WebUtility.HtmlEncode(c.Title)</a></span>
+                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
+                            }
+                            else if (!string.IsNullOrEmpty(collectionSlug) && !string.IsNullOrEmpty(collectionTitle))
+                            {
+                                <span class="page-hero__meta-item"><strong>Part of:</strong> <a href="/guidance/collections/@collectionSlug">@System.Net.WebUtility.HtmlEncode(collectionTitle)</a></span>
+                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
+                            }
+                            @if (showLastReviewedDate && !string.IsNullOrEmpty(lastReviewedDateDisplay))
+                            {
+                                <span class="page-hero__meta-item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(lastReviewedDateDisplay)</span>
+                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
+                            }
+                            @if (showOwner && !string.IsNullOrWhiteSpace(owner))
+                            {
+                                <span class="page-hero__meta-item">
+                                    <strong>Owner:</strong>
+                                    @if (!string.IsNullOrWhiteSpace(ownerUrl))
+                                    { <a href="@System.Net.WebUtility.HtmlEncode(ownerUrl!)">@System.Net.WebUtility.HtmlEncode(owner!)</a> }
+                                    else
+                                    { @System.Net.WebUtility.HtmlEncode(owner!) }
+                                </span>
+                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
+                            }
+                            @if (showApplicablePhases && phaseTags.Count > 0)
+                            {
+                                <span class="page-hero__meta-item">
+                                    <strong>Applicable phases:</strong>
+                                    @Html.Raw(string.Join(", ", phaseTags.Select(p => $"<a href=\"/lifecycle#ph-{Uri.EscapeDataString(p.Slug)}\">{System.Net.WebUtility.HtmlEncode(p.Title)}</a>")))
+                                </span>
+                            }
+                        </div>
+                    }
+
+                    @* Audience chips *@
+                    @{
+                        var tagsToDisplay = audienceTags.Count > 0 ? audienceTags 
+                            : (heroType == "guidance" && showApplicableProfessions ? audienceTags 
+                            : new List<dynamic>());
+                    }
+                    @if (tagsToDisplay.Count > 0)
+                    {
+                        <div class="page-hero__chips">
+                            <span class="page-hero__chips-label">Most relevant to</span>
+                            @for (var i = 0; i < tagsToDisplay.Count && i < 3; i++)
+                            {
+                                var audience = tagsToDisplay[i];
+                                var color = chipColors[i % chipColors.Length];
+                                var diyAttr = heroType == "guidance" ? $" style=\"--dot-color: {color}\"" : "";
+                                var dotAttr = heroType == "guidance" ? $" style=\"background: {color}\"" : "";
+                                <span class="page-hero__chip"@Html.Raw(diyAttr)>
+                                    <span class="page-hero__chip-dot"@Html.Raw(dotAttr)></span>@audience.Title
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

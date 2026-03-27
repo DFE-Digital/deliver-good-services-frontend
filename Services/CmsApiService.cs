@@ -36,6 +36,170 @@ namespace ServiceManual.Services
             return string.IsNullOrEmpty(baseUrl) ? null : baseUrl.TrimEnd('/');
         }
 
+        public async Task<GuidanceIndexPage?> GetGuidanceIndexAsync()
+        {
+            try
+            {
+                const string url = "api/guidance-areas/index";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for guidance index", response.StatusCode);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiGuidanceArea>>(json, JsonOptions);
+
+                return new GuidanceIndexPage
+                {
+                    Areas = result?.Data?
+                        .Where(area => !string.IsNullOrWhiteSpace(area.Slug) && !string.IsNullOrWhiteSpace(area.Name))
+                        .Select(area => new GuidanceAreaGroup
+                        {
+                            Name = area.Name ?? string.Empty,
+                            Slug = area.Slug ?? string.Empty,
+                            Summary = string.IsNullOrWhiteSpace(area.Summary) ? null : area.Summary.Trim(),
+                            Description = string.IsNullOrWhiteSpace(area.Description) ? null : area.Description.Trim(),
+                            ColourHex = NormaliseHex(area.ColourHex),
+                            FeaturedProfessions = (area.FeaturedProfessions ?? [])
+                                .Where(tag => !string.IsNullOrWhiteSpace(tag.Slug) || !string.IsNullOrWhiteSpace(tag.Title))
+                                .Select(tag => new TagRef
+                                {
+                                    Slug = CoalesceSlug(tag.Slug, tag.Title),
+                                    Title = tag.Title ?? string.Empty
+                                })
+                                .ToList(),
+                            Collections = (area.Collections ?? [])
+                                .Where(collection => !string.IsNullOrWhiteSpace(collection.Slug) && !string.IsNullOrWhiteSpace(collection.Title))
+                                .Select(collection => new GuidanceCollectionCard
+                                {
+                                    Title = collection.Title ?? string.Empty,
+                                    Slug = collection.Slug ?? string.Empty,
+                                    Description = string.IsNullOrWhiteSpace(collection.Description)
+                                        ? collection.Title ?? string.Empty
+                                        : collection.Description.Trim(),
+                                    ItemCount = collection.ItemCount,
+                                    Featured = collection.Featured,
+                                    Tags = (collection.Tags ?? [])
+                                        .Where(tag => !string.IsNullOrWhiteSpace(tag))
+                                        .Select(tag => tag.Trim())
+                                        .ToList(),
+                                    ApplicableProfessions = (collection.ApplicableProfessions ?? [])
+                                        .Where(tag => !string.IsNullOrWhiteSpace(tag.Slug) || !string.IsNullOrWhiteSpace(tag.Title))
+                                        .Select(tag => new TagRef
+                                        {
+                                            Slug = CoalesceSlug(tag.Slug, tag.Title),
+                                            Title = tag.Title ?? string.Empty
+                                        })
+                                        .ToList(),
+                                    AlsoInAreas = (collection.AlsoInAreas ?? [])
+                                        .Where(areaRef => !string.IsNullOrWhiteSpace(areaRef.Slug) && !string.IsNullOrWhiteSpace(areaRef.Title))
+                                        .Select(areaRef => new CollectionRef { Slug = areaRef.Slug ?? string.Empty, Title = areaRef.Title ?? string.Empty })
+                                        .ToList()
+                                })
+                                .ToList()
+                        })
+                        .ToList() ?? []
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching guidance index");
+                return null;
+            }
+        }
+
+        public async Task<List<ArticleSummary>> GetArticlesAsync()
+        {
+            var items = await FetchArticlesAsync();
+            return items
+                .Select(a => new { Item = a, RouteKey = ResolveArticleRouteKey(a.Slug, a.DocumentId, a.Id) })
+                .Where(x => !string.IsNullOrEmpty(x.RouteKey))
+                .Select(x => new ArticleSummary
+                {
+                    RouteKey = x.RouteKey!,
+                    Title = x.Item.Title ?? string.Empty,
+                    MetaDescription = x.Item.MetaDescription,
+                    Author = string.IsNullOrWhiteSpace(x.Item.Author) ? null : x.Item.Author.Trim(),
+                    PublishedFromDisplay = FormatDateTime(x.Item.PublishedFrom)
+                })
+                .ToList();
+        }
+
+        public async Task<Article?> GetArticleByRouteKeyAsync(string routeKey)
+        {
+            if (string.IsNullOrWhiteSpace(routeKey))
+                return null;
+
+            try
+            {
+                var url = $"api/articles/by-slug/{Uri.EscapeDataString(routeKey.Trim())}";
+                var response = await _httpClient.GetAsync(url);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    return null;
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for article slug '{Slug}'", response.StatusCode, routeKey);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiArticle>>(json, JsonOptions);
+                var item = result?.Data?.FirstOrDefault();
+
+                if (item is null)
+                    return null;
+
+                return new Article
+                {
+                    RouteKey = item.Slug ?? item.DocumentId ?? item.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    Title = item.Title ?? string.Empty,
+                    MetaDescription = item.MetaDescription,
+                    Body = item.Body,
+                    Author = string.IsNullOrWhiteSpace(item.Author) ? null : item.Author.Trim(),
+                    PublishedFromDisplay = FormatDateTime(item.PublishedFrom),
+                    PublishedToDisplay = FormatDateTime(item.PublishedTo)
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching article for slug '{Slug}'", routeKey);
+                return null;
+            }
+        }
+
+        private async Task<List<StrapiArticle>> FetchArticlesAsync()
+        {
+            try
+            {
+                const string url = "api/articles" +
+                                   "?publicationState=live" +
+                                   "&pagination[pageSize]=200" +
+                                   "&sort[0]=publishedFrom:desc&sort[1]=title:asc" +
+                                   "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=author&fields[4]=publishedFrom";
+
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for articles", response.StatusCode);
+                    return [];
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiArticle>>(json, JsonOptions);
+                return result?.Data ?? [];
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching articles");
+                return [];
+            }
+        }
+
         public async Task<Collection?> GetCollectionBySlugAsync(string slug)
         {
             try
@@ -87,7 +251,8 @@ namespace ServiceManual.Services
                                     MetaDescription = i.MetaDescription,
                                     Url = i.Url ?? string.Empty,
                                     OpenInNewTab = i.NewTab,
-                                    ContentType = ContentTypeLabel(i.Type)
+                                    ContentType = ContentTypeLabel(i.Type),
+                                    Grade = i.Grade
                                 })
                                 .ToList()
                         })
@@ -970,6 +1135,14 @@ namespace ServiceManual.Services
             var items = new List<ContentIndexItem>();
             const int pageSize = 250;
 
+            // Articles: /guidance/articles/{routeKey}
+            await AddListAsync(items, "api/articles",
+                "&fields[0]=title&fields[1]=metaDescription",
+                pageSize,
+                "Article",
+                d => $"/guidance/articles/{Uri.EscapeDataString(ResolveArticleRouteKey(d.Slug, d.DocumentId, d.Id) ?? string.Empty)}",
+                d => ResolveArticleRouteKey(d.Slug, d.DocumentId, d.Id));
+
             // Collections: /guidance/collections/{slug}
             await AddListAsync(items, "api/collections",
                 "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug" +
@@ -1291,6 +1464,15 @@ namespace ServiceManual.Services
             return null;
         }
 
+        private static string? ResolveArticleRouteKey(string? slug, string? documentId, int id)
+        {
+            if (!string.IsNullOrWhiteSpace(slug))
+                return slug.Trim();
+            if (!string.IsNullOrWhiteSpace(documentId))
+                return documentId.Trim();
+            return id > 0 ? id.ToString(System.Globalization.CultureInfo.InvariantCulture) : null;
+        }
+
         private static List<TagRef> ToTagRefs(List<StrapiTagRef>? list) =>
             list?.Where(t => !string.IsNullOrEmpty(t.Slug) || !string.IsNullOrEmpty(t.Title))
                 .Select(t => new TagRef { Slug = t.Slug ?? "", Title = t.Title ?? "" }).ToList() ?? [];
@@ -1349,6 +1531,29 @@ namespace ServiceManual.Services
             public string? MetaDescription { get; set; }
             public string? Body { get; set; }
             public string? UpdateHistory { get; set; }
+        }
+
+        private class StrapiGuidanceArea
+        {
+            public string? Name { get; set; }
+            public string? Slug { get; set; }
+            public string? Summary { get; set; }
+            public string? Description { get; set; }
+            public string? ColourHex { get; set; }
+            public List<StrapiTagRef>? FeaturedProfessions { get; set; }
+            public List<StrapiGuidanceCollection>? Collections { get; set; }
+        }
+
+        private class StrapiGuidanceCollection
+        {
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+            public string? Description { get; set; }
+            public int ItemCount { get; set; }
+            public bool Featured { get; set; }
+            public List<string>? Tags { get; set; }
+            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
+            public List<StrapiSlugRef>? AlsoInAreas { get; set; }
         }
 
         private class StrapiHomepage
@@ -1492,6 +1697,52 @@ namespace ServiceManual.Services
             if (string.IsNullOrWhiteSpace(mime)) return "File";
             var part = mime.Split('/').LastOrDefault();
             return string.IsNullOrEmpty(part) ? "File" : part.ToUpperInvariant();
+        }
+
+        private static string NormaliseHex(string? value)
+        {
+            var trimmed = value?.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+                return "#1d70b8";
+
+            return trimmed.StartsWith('#') ? trimmed : $"#{trimmed}";
+        }
+
+        private static string CoalesceSlug(string? slug, string? title)
+        {
+            if (!string.IsNullOrWhiteSpace(slug))
+                return slug.Trim();
+
+            return ToSlug(title);
+        }
+
+        private static string ToSlug(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            var chars = value.Trim().ToLowerInvariant();
+            var result = new List<char>(chars.Length);
+            var previousDash = false;
+
+            foreach (var ch in chars)
+            {
+                if (char.IsLetterOrDigit(ch))
+                {
+                    result.Add(ch);
+                    previousDash = false;
+                    continue;
+                }
+
+                if (!previousDash)
+                {
+                    result.Add('-');
+                    previousDash = true;
+                }
+            }
+
+            var slug = new string(result.ToArray()).Trim('-');
+            return slug;
         }
 
         private static List<RelatedFileItem> MapRelatedFiles(List<StrapiFileItem>? files, string? cmsBaseUrl)
@@ -1897,6 +2148,8 @@ namespace ServiceManual.Services
             public string? Url { get; set; }
             [JsonPropertyName("newTab")]
             public bool NewTab { get; set; }
+            [JsonPropertyName("grade")]
+            public string? Grade { get; set; }
         }
 
         private class StrapiJobSpecification
@@ -1947,6 +2200,19 @@ namespace ServiceManual.Services
             [JsonPropertyName("newTab")]
             public bool NewTab { get; set; }
             public string? Description { get; set; }
+        }
+
+        private class StrapiArticle
+        {
+            public int Id { get; set; }
+            public string? DocumentId { get; set; }
+            public string? Slug { get; set; }
+            public string? Title { get; set; }
+            public string? MetaDescription { get; set; }
+            public string? Body { get; set; }
+            public string? Author { get; set; }
+            public string? PublishedFrom { get; set; }
+            public string? PublishedTo { get; set; }
         }
 
         private class StrapiDetailedGuide
@@ -2213,6 +2479,8 @@ namespace ServiceManual.Services
 
         private class StrapiContentListItem
         {
+            public int Id { get; set; }
+            public string? DocumentId { get; set; }
             public string? Title { get; set; }
             public string? MetaDescription { get; set; }
             public string? Slug { get; set; }

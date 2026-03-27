@@ -1,3 +1,4 @@
+@using DocumentFormat.OpenXml.Wordprocessing
 <header data-module="ga4-event-tracker ga4-link-tracker" data-ga4-expandable=""
   class="gem-c-layout-super-navigation-header" data-ga4-event-tracker-module-started="true"
   data-ga4-link-tracker-module-started="true">
@@ -272,7 +273,12 @@
   var isDocumentationNav = ViewData["IsDocumentationNav"] as bool? == true;
 }
 
-<section aria-label="Service information" class="govuk-service-navigation @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "govuk-service-navigation--inverse" : "") @(isDocumentationNav ? "govuk-service-navigation--documentation" : "")" data-module="govuk-service-navigation">
+@{
+  var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+  var action = ViewContext.RouteData.Values["action"]?.ToString();
+  var useInverseNav = (controller == "Home" && action == "Index") || controller == "Collection" || ViewData["UseInverseNav"] as bool? == true;
+}
+<section aria-label="Service information" class="govuk-service-navigation @(useInverseNav ? "govuk-service-navigation--inverse" : "") @(isDocumentationNav ? "govuk-service-navigation--documentation" : "")" data-module="govuk-service-navigation">
   <div class="govuk-width-container">
     <div class="govuk-service-navigation__container">
       <span class="govuk-service-navigation__service-name">

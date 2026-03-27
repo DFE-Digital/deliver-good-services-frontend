@@ -17,5 +17,7 @@ namespace ServiceManual.Models
         public bool OpenInNewTab { get; set; }
         /// <summary>Display label for content type (e.g. "Guidance", "External link") for collection listing.</summary>
         public string? ContentType { get; set; }
+        /// <summary>Grade for job specification items (e.g. "G7", "SEO").</summary>
+        public string? Grade { get; set; }
     }
 }

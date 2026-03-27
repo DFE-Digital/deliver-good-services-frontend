@@ -4,116 +4,57 @@
 @{
     var vm = ViewBag.GuidePage as GuidePageViewModel ?? new GuidePageViewModel();
     ViewData["Title"] = vm.IsOverviewPage ? vm.HeroTitle : (vm.PageTitle ?? vm.HeroTitle);
+
+    // Setup hero section parameters
+    ViewBag.HeroType = "guidance";
+    ViewBag.HeroTitle = vm.HeroTitle;
+    ViewBag.HeroIntro = vm.HeroIntro;
+    ViewBag.HeroCollections = vm.Collections;
+    ViewBag.HeroShowLastReviewedDate = vm.ShowLastReviewedDateOnPage;
+    ViewBag.HeroLastReviewedDateDisplay = vm.LastReviewedDateDisplay;
+    ViewBag.HeroShowOwner = vm.ShowOwnerOnPage;
+    ViewBag.HeroOwner = vm.Owner;
+    ViewBag.HeroOwnerUrl = vm.OwnerUrl;
+    ViewBag.HeroShowApplicablePhases = vm.ShowApplicablePhasesOnPage;
+    ViewBag.HeroPhaseTags = vm.PhaseTags;
+    ViewBag.HeroCollectionSlug = vm.CollectionSlug;
+    ViewBag.HeroCollectionTitle = vm.CollectionTitle;
+    ViewBag.HeroShowApplicableProfessions = vm.ShowApplicableProfessionsOnPage;
+    ViewBag.HeroAudienceTags = vm.AudienceTags;
+    ViewBag.HeroBadgeText = "Guidance";
 }
 
 <div class="guide-modern">
-    @* Hero: breadcrumb + header within container *@
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <header class="guide-hero">
-                <div class="govuk-width-container">
-                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
-                        <ol class="govuk-breadcrumbs__list">
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
-                            @if (!string.IsNullOrEmpty(vm.CollectionSlug) && !string.IsNullOrEmpty(vm.CollectionTitle))
-                            {
-                                <li class="govuk-breadcrumbs__list-item" aria-current="page">@vm.CollectionTitle</li>
-                            }
-                        </ol>
-                    </nav>
-                    <div class="govuk-grid-row">
-                        <div class="govuk-grid-column-two-thirds">
-                            <span class="guide-hero__label">Guidance</span>
-                            <h1 class="govuk-heading-xl">@vm.HeroTitle</h1>
-                            @if (!string.IsNullOrEmpty(vm.HeroIntro))
-                            {
-                                <p class="govuk-body-l">@vm.HeroIntro</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </header>
+    @* Guide hero - using standardized hero partial *@
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
-            @* Meta strip: show items only when their corresponding show* flag is true *@
-            @{
-                var hasMeta = vm.Collections.Count > 0
-                    || (vm.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(vm.LastReviewedDateDisplay))
-                    || (vm.ShowOwnerOnPage && !string.IsNullOrWhiteSpace(vm.Owner))
-                    || (vm.ShowApplicablePhasesOnPage && vm.PhaseTags.Count > 0)
-                    || (vm.ShowApplicableProfessionsOnPage && vm.AudienceTags.Count > 0);
-            }
-            @if (hasMeta)
-            {
-                <div class="guide-meta">
-                    <div class="govuk-width-container">
-                        @if (vm.Collections.Count > 0)
+    @* Contents: on overview, respect ShowContents (HideContentsOnPrimaryPage); on child pages always show when we have items *@
+    @if (vm.ShowContents && vm.ContentsItems.Count > 0)
+    {
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <nav class="guide-contents@(vm.ContentsUseNumbers ? "" : " guide-contents--dashed")" aria-label="Guide contents">
+                    <h2 class="guide-contents__title">Contents</h2>
+                    <ul class="guide-contents__list">
+                        @foreach (var item in vm.ContentsItems)
                         {
-                            var c = vm.Collections[0];
-                            <span class="guide-meta__item"><strong>Part of:</strong> <a href="/guidance/collections/@c.Slug">@System.Net.WebUtility.HtmlEncode(c.Title)</a></span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                        }
-                        @if (vm.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(vm.LastReviewedDateDisplay))
-                        {
-                            <span class="guide-meta__item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(vm.LastReviewedDateDisplay)</span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                        }
-                        @if (vm.ShowOwnerOnPage && !string.IsNullOrWhiteSpace(vm.Owner))
-                        {
-                            <span class="guide-meta__item">
-                                <strong>Owner:</strong>
-                                @if (!string.IsNullOrWhiteSpace(vm.OwnerUrl))
-                                { <a href="@System.Net.WebUtility.HtmlEncode(vm.OwnerUrl!)">@System.Net.WebUtility.HtmlEncode(vm.Owner!)</a> }
-                                else
-                                { @System.Net.WebUtility.HtmlEncode(vm.Owner!) }
-                            </span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                        }
-                        @if (vm.ShowApplicablePhasesOnPage && vm.PhaseTags.Count > 0)
-                        {
-                            <span class="guide-meta__item">
-                                <strong>Applicable phases:</strong>
-                                @Html.Raw(string.Join(", ", vm.PhaseTags.Select(p => $"<a href=\"/lifecycle#ph-{Uri.EscapeDataString(p.Slug)}\">{System.Net.WebUtility.HtmlEncode(p.Title)}</a>")))
-                            </span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                        }
-                        @if (vm.ShowApplicableProfessionsOnPage && vm.AudienceTags.Count > 0)
-                        {
-                            @await Html.PartialAsync("~/Views/Shared/_AudienceMeta.cshtml", vm.AudienceTags)
-                        }
-                    </div>
-                </div>
-            }
-
-            @* Contents: on overview, respect ShowContents (HideContentsOnPrimaryPage); on child pages always show when we have items *@
-            @if (vm.ShowContents && vm.ContentsItems.Count > 0)
-            {
-                <div class="govuk-grid-row">
-                    <div class="govuk-grid-column-two-thirds">
-                        <nav class="guide-contents@(vm.ContentsUseNumbers ? "" : " guide-contents--dashed")" aria-label="Guide contents">
-                            <h2 class="guide-contents__title">Contents</h2>
-                            <ul class="guide-contents__list">
-                                @foreach (var item in vm.ContentsItems)
+                            <li class="guide-contents__item @(item.IsCurrent ? "guide-contents__item--current" : "")">
+                                <span class="guide-contents__num" aria-hidden="true">@(vm.ContentsUseNumbers ? item.Number.ToString() : "—")</span>
+                                @if (item.IsCurrent || item.Url == null)
                                 {
-                                    <li class="guide-contents__item @(item.IsCurrent ? "guide-contents__item--current" : "")">
-                                        <span class="guide-contents__num" aria-hidden="true">@(vm.ContentsUseNumbers ? item.Number.ToString() : "—")</span>
-                                        @if (item.IsCurrent || item.Url == null)
-                                        {
-                                            <span aria-current="page">@item.Title</span>
-                                        }
-                                        else
-                                        {
-                                            <a href="@item.Url">@item.Title</a>
-                                        }
-                                    </li>
+                                    <span aria-current="page">@item.Title</span>
                                 }
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            }
+                                else
+                                {
+                                    <a href="@item.Url">@item.Title</a>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
         </div>
-    </div>
+    }
 
     @* Content + sidebar *@
     <div class="govuk-grid-row guide-content-row@(vm.ApplyNoContentsSectionStyle ? " guide-content-row--no-contents" : "")">

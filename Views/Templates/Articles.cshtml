@@ -1,0 +1,74 @@
+@model IReadOnlyList<ServiceManual.Models.ArticleSummary>
+@{
+    ViewData["Title"] = "Articles";
+}
+
+<div class="guide-modern">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <header class="guide-hero">
+                <div class="govuk-width-container">
+                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+                        <ol class="govuk-breadcrumbs__list">
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                            <li class="govuk-breadcrumbs__list-item" aria-current="page">Articles</li>
+                        </ol>
+                    </nav>
+                    <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-two-thirds">
+                            <span class="guide-hero__label">Guidance</span>
+                            <h1 class="govuk-heading-xl">Articles</h1>
+                            <p class="govuk-body-l">Updates, insights, and practical guidance from service delivery teams.</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        </div>
+    </div>
+
+    <div class="govuk-grid-row guide-content-row guide-content-row--no-contents">
+        <div class="govuk-grid-column-two-thirds">
+            <section class="dfe-f-content-section guide-content-section guide-content-section--no-contents" aria-label="Article list">
+                @if (Model.Count == 0)
+                {
+                    <p class="govuk-body">No articles are published yet.</p>
+                }
+                else
+                {
+                    <ul class="guide-article-list">
+                        @foreach (var article in Model)
+                        {
+                            <li class="guide-article-list__item">
+                                <h2 class="govuk-heading-m guide-article-list__title">
+                                    <a class="govuk-link" href="/guidance/articles/@article.RouteKey">@article.Title</a>
+                                </h2>
+                                @if (!string.IsNullOrWhiteSpace(article.MetaDescription))
+                                {
+                                    <p class="govuk-body guide-article-list__summary">@article.MetaDescription</p>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay) || !string.IsNullOrWhiteSpace(article.Author))
+                                {
+                                    <p class="govuk-body-s guide-article-list__meta">
+                                        @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay))
+                                        {
+                                            <span>Published @article.PublishedFromDisplay</span>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(article.Author))
+                                        {
+                                            @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay))
+                                            {
+                                                <span aria-hidden="true"> · </span>
+                                            }
+                                            <span>By @article.Author</span>
+                                        }
+                                    </p>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+        </div>
+    </div>
+</div>

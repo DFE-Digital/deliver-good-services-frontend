@@ -1,0 +1,81 @@
+@model ServiceManual.Models.Article
+@{
+    ViewData["Title"] = Model.Title;
+    var bodyHtml = ViewBag.BodyHtml as string ?? string.Empty;
+    var hasMeta = !string.IsNullOrWhiteSpace(Model.PublishedFromDisplay)
+        || !string.IsNullOrWhiteSpace(Model.Author)
+        || !string.IsNullOrWhiteSpace(Model.PublishedToDisplay);
+}
+
+<div class="guide-modern">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+            <header class="guide-hero">
+                <div class="govuk-width-container">
+                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+                        <ol class="govuk-breadcrumbs__list">
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance/articles">Articles</a></li>
+                            <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
+                        </ol>
+                    </nav>
+                    <div class="govuk-grid-row">
+                        <div class="govuk-grid-column-two-thirds">
+                            <span class="guide-hero__label">Article</span>
+                            <h1 class="govuk-heading-xl">@Model.Title</h1>
+                            @if (!string.IsNullOrWhiteSpace(Model.MetaDescription))
+                            {
+                                <p class="govuk-body-l">@Model.MetaDescription</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            @if (hasMeta)
+            {
+                <div class="guide-meta">
+                    <div class="govuk-width-container">
+                        @if (!string.IsNullOrWhiteSpace(Model.PublishedFromDisplay))
+                        {
+                            <span class="guide-meta__item"><strong>Published:</strong> @System.Net.WebUtility.HtmlEncode(Model.PublishedFromDisplay)</span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.PublishedToDisplay))
+                        {
+                            <span class="guide-meta__item"><strong>Available until:</strong> @System.Net.WebUtility.HtmlEncode(Model.PublishedToDisplay)</span>
+                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.Author))
+                        {
+                            <span class="guide-meta__item"><strong>Author:</strong> @System.Net.WebUtility.HtmlEncode(Model.Author)</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="govuk-grid-row guide-content-row guide-content-row--no-contents">
+        <div class="govuk-grid-column-two-thirds">
+            <section class="dfe-f-content-section guide-content-section guide-content-section--no-contents" aria-label="Article content">
+                <p class="govuk-body govuk-!-margin-bottom-6"><a class="govuk-link" href="/guidance/articles">Back to all articles</a></p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.LeadImageUrl))
+                {
+                    <figure class="guide-article-image govuk-!-margin-bottom-6">
+                        <img src="@Model.LeadImageUrl" alt="@(Model.LeadImageAlt ?? string.Empty)" loading="lazy" />
+                    </figure>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(bodyHtml))
+                {
+                    <div class="dfe-f-body">
+                        @Html.Raw(bodyHtml)
+                    </div>
+                }
+            </section>
+        </div>
+    </div>
+</div>

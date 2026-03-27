@@ -109,7 +109,7 @@ public class SearchService : ISearchService
     private static bool IncludeCms(IReadOnlyList<string>? types)
     {
         if (types == null || types.Count == 0) return true;
-        var cmsTypes = new[] { "Collection", "Detailed Guide", "Detailed Guide Page", "HTML Page", "Roadmap", "Lifecycle", "Lifecycle Stage" };
+        var cmsTypes = new[] { "Article", "Collection", "Detailed Guide", "Detailed Guide Page", "HTML Page", "Roadmap", "Lifecycle", "Lifecycle Stage" };
         return types.Any(t => cmsTypes.Contains(t, StringComparer.OrdinalIgnoreCase));
     }
 

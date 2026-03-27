@@ -12,6 +12,7 @@ public class SearchController : Controller
 
     public static readonly IReadOnlyList<string> AllContentTypes =
     [
+        "Article",
         "Collection",
         "Detailed Guide",
         "Detailed Guide Page",

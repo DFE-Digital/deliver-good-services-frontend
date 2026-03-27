@@ -4,6 +4,9 @@ namespace ServiceManual.Services
 {
     public interface ICmsApiService
     {
+        Task<List<ArticleSummary>> GetArticlesAsync();
+        Task<Article?> GetArticleByRouteKeyAsync(string routeKey);
+        Task<GuidanceIndexPage?> GetGuidanceIndexAsync();
         Task<Collection?> GetCollectionBySlugAsync(string slug);
         Task<JobSpecification?> GetJobSpecificationBySlugAsync(string slug);
         Task<DetailedGuide?> GetDetailedGuideBySlugAsync(string slug);

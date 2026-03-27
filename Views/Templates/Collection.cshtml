@@ -6,8 +6,15 @@
     var bodyHtml = ViewBag.CollectionBodyHtml as string ?? GovUkMarkdownHelper.ToGovUkHtmlForBody(collection.Body);
     var hasSections = collection.Sections.Count > 0;
     var hasRightPanel = collection.RelatedContent.Count > 0 || collection.RelatedFiles.Count > 0;
-    var showContentsNav = hasSections && collection.Sections.Count >= 2;
+    var showContentsNav = hasSections;
     ViewData["Title"] = collection.Title;
+
+    // Setup hero section parameters
+    ViewBag.HeroType = "collection";
+    ViewBag.HeroTitle = collection.Title;
+    ViewBag.HeroMetaDescription = collection.MetaDescription;
+    ViewBag.HeroAudienceTags = collection.AudienceTags;
+    ViewBag.HeroBadgeText = "Collection";
 
     string SectionId(string title)
     {
@@ -18,86 +25,30 @@
 }
 
 <div class="guide-modern">
-    @* Hero: breadcrumb + header within container (same structure as DetailedGuide) *@
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <header class="guide-hero">
-                <div class="govuk-width-container">
-                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
-                        <ol class="govuk-breadcrumbs__list">
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
-                            <li class="govuk-breadcrumbs__list-item" aria-current="page">@collection.Title</li>
-                        </ol>
-                    </nav>
-                    <div class="govuk-grid-row">
-                        <div class="govuk-grid-column-two-thirds">
-                            <span class="guide-hero__label">Collection</span>
-                            <h1 class="govuk-heading-xl">@collection.Title</h1>
-                            @if (!string.IsNullOrEmpty(collection.MetaDescription))
-                            {
-                                <p class="govuk-body-l">@collection.MetaDescription</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </header>
+    @* Collection hero - using standardized hero partial *@
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
-            @* Meta strip: Last reviewed, Owner, Audience (same structure as DetailedGuide) *@
-            @{
-                var hasMeta = (collection.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(collection.LastReviewedDateDisplay)) || !string.IsNullOrWhiteSpace(collection.Owner) || collection.AudienceTags.Count > 0;
-            }
-            @if (hasMeta)
-            {
-                <div class="guide-meta">
-                    <div class="govuk-width-container">
-                        @if (collection.ShowLastReviewedDateOnPage && !string.IsNullOrEmpty(collection.LastReviewedDateDisplay))
+    @* Contents: dashed list of section links (same style as guide when no sub pages) *@
+    @if (showContentsNav)
+    {
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-two-thirds">
+                <nav class="guide-contents guide-contents--dashed" aria-label="@(collection.Title) contents">
+                    <h2 class="guide-contents__title">Contents</h2>
+                    <ul class="guide-contents__list">
+                        @foreach (var grp in collection.Sections)
                         {
-                            <span class="guide-meta__item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(collection.LastReviewedDateDisplay)</span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
+                            var id = SectionId(grp.Title);
+                            <li class="guide-contents__item">
+                                <span class="guide-contents__num" aria-hidden="true">—</span>
+                                <a href="#@id">@grp.Title</a>
+                            </li>
                         }
-                        @if (!string.IsNullOrWhiteSpace(collection.Owner))
-                        {
-                            <span class="guide-meta__item">
-                                <strong>Owner:</strong>
-                                @if (!string.IsNullOrWhiteSpace(collection.OwnerUrl))
-                                { <a href="@System.Net.WebUtility.HtmlEncode(collection.OwnerUrl!)">@System.Net.WebUtility.HtmlEncode(collection.Owner!)</a> }
-                                else
-                                { @System.Net.WebUtility.HtmlEncode(collection.Owner!) }
-                            </span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                        }
-                        @if (collection.AudienceTags.Count > 0)
-                        {
-                            @await Html.PartialAsync("~/Views/Shared/_AudienceMeta.cshtml", collection.AudienceTags)
-                        }
-                    </div>
-                </div>
-            }
-
-            @* Contents: dashed list of section links (same style as guide when no sub pages) *@
-            @if (showContentsNav)
-            {
-                <div class="govuk-grid-row">
-                    <div class="govuk-grid-column-two-thirds">
-                        <nav class="guide-contents guide-contents--dashed" aria-label="@(collection.Title) contents">
-                            <h2 class="guide-contents__title">Contents</h2>
-                            <ul class="guide-contents__list">
-                                @foreach (var grp in collection.Sections)
-                                {
-                                    var id = SectionId(grp.Title);
-                                    <li class="guide-contents__item">
-                                        <span class="guide-contents__num" aria-hidden="true">—</span>
-                                        <a href="#@id">@grp.Title</a>
-                                    </li>
-                                }
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            }
+                    </ul>
+                </nav>
+            </div>
         </div>
-    </div>
+    }
 
     @* Content + sidebar: same two-thirds / one-third layout as DetailedGuide.
        Do not show professionDescription (from tags-profession) here — it is only shown on the job specification page. *@
@@ -139,6 +90,8 @@
                                             @foreach (var link in guidanceItems)
                                             {
                                                 var subText = link.ContentType;
+                                                var isJobDescription = subText == "Job description";
+                                                
                                                 var linkHref = link.Url + (subText == "Job description" && !string.IsNullOrEmpty(collection.Slug) ? "?collection=" + Uri.EscapeDataString(collection.Slug) : "");
                                                 <li class="dfe-f-guide-list__item">
                                                     <a class="govuk-link dfe-f-guide-list__item-title" href="@linkHref" target="@(link.OpenInNewTab ? "_blank" : null)" rel="@(link.OpenInNewTab ? "noopener noreferrer" : null)">
@@ -150,7 +103,7 @@
                                                     </a>
                                                     @if (!string.IsNullOrEmpty(subText))
                                                     {
-                                                        <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">@subText</p>
+                                                        <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">@subText@(isJobDescription && !string.IsNullOrEmpty(link.Grade) ? $" — {link.Grade}" : "")</p>
                                                     }
                                                 </li>
                                             }
@@ -192,7 +145,7 @@
                     @foreach (var item in collection.RelatedContent)
                     {
                         <div class="govuk-!-margin-bottom-4">
-                            <h3>@Html.Raw(GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
+                            <h3 class="govuk-heading-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
                             @if (!string.IsNullOrEmpty(item.Content))
                             {
                                 <div class="govuk-body-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForRelatedContent(item.Content))</div>
