@@ -114,6 +114,7 @@ namespace ServiceManual.Services
         public async Task<List<ArticleSummary>> GetArticlesAsync()
         {
             var items = await FetchArticlesAsync();
+            var cmsBaseUrl = GetCmsBaseUrl();
             return items
                 .Select(a => new { Item = a, RouteKey = ResolveArticleRouteKey(a.Slug, a.DocumentId, a.Id) })
                 .Where(x => !string.IsNullOrEmpty(x.RouteKey))
@@ -123,7 +124,9 @@ namespace ServiceManual.Services
                     Title = x.Item.Title ?? string.Empty,
                     MetaDescription = x.Item.MetaDescription,
                     Author = string.IsNullOrWhiteSpace(x.Item.Author) ? null : x.Item.Author.Trim(),
-                    PublishedFromDisplay = FormatDateTime(x.Item.PublishedFrom)
+                    PublishedFromDisplay = FormatDateTime(x.Item.PublishedFrom),
+                    LeadImageUrl = ResolveArticleLeadImageUrl(x.Item, cmsBaseUrl),
+                    LeadImageAlt = ResolveArticleLeadImageAlt(x.Item)
                 })
                 .ToList();
         }
@@ -135,7 +138,8 @@ namespace ServiceManual.Services
 
             try
             {
-                var url = $"api/articles/by-slug/{Uri.EscapeDataString(routeKey.Trim())}";
+                var url = $"api/articles/by-slug/{Uri.EscapeDataString(routeKey.Trim())}" +
+                          "?populate[leadImage][fields][0]=url&populate[leadImage][fields][1]=alternativeText";
                 var response = await _httpClient.GetAsync(url);
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -154,6 +158,8 @@ namespace ServiceManual.Services
                 if (item is null)
                     return null;
 
+                var cmsBaseUrl = GetCmsBaseUrl();
+
                 return new Article
                 {
                     RouteKey = item.Slug ?? item.DocumentId ?? item.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
@@ -162,7 +168,9 @@ namespace ServiceManual.Services
                     Body = item.Body,
                     Author = string.IsNullOrWhiteSpace(item.Author) ? null : item.Author.Trim(),
                     PublishedFromDisplay = FormatDateTime(item.PublishedFrom),
-                    PublishedToDisplay = FormatDateTime(item.PublishedTo)
+                    PublishedToDisplay = FormatDateTime(item.PublishedTo),
+                    LeadImageUrl = ResolveArticleLeadImageUrl(item, cmsBaseUrl),
+                    LeadImageAlt = ResolveArticleLeadImageAlt(item)
                 };
             }
             catch (Exception ex)
@@ -180,7 +188,8 @@ namespace ServiceManual.Services
                                    "?publicationState=live" +
                                    "&pagination[pageSize]=200" +
                                    "&sort[0]=publishedFrom:desc&sort[1]=title:asc" +
-                                   "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=author&fields[4]=publishedFrom";
+                                   "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=author&fields[4]=publishedFrom" +
+                                   "&populate[leadImage][fields][0]=url&populate[leadImage][fields][1]=alternativeText";
 
                 var response = await _httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
@@ -1473,6 +1482,35 @@ namespace ServiceManual.Services
             return id > 0 ? id.ToString(System.Globalization.CultureInfo.InvariantCulture) : null;
         }
 
+        private static string? ResolveArticleLeadImageUrl(StrapiArticle item, string? cmsBaseUrl)
+        {
+            var candidate = item.LeadImage?.Url ?? item.LeadImageUrl;
+            if (string.IsNullOrWhiteSpace(candidate))
+                return null;
+
+            if (Uri.TryCreate(candidate, UriKind.Absolute, out _))
+                return candidate;
+
+            if (string.IsNullOrWhiteSpace(cmsBaseUrl))
+                return candidate;
+
+            return new Uri(new Uri(cmsBaseUrl.TrimEnd('/') + "/"), candidate.TrimStart('/')).ToString();
+        }
+
+        private static string? ResolveArticleLeadImageAlt(StrapiArticle item)
+        {
+            if (!string.IsNullOrWhiteSpace(item.LeadImageAlt))
+                return item.LeadImageAlt;
+
+            if (!string.IsNullOrWhiteSpace(item.LeadImageAlternativeText))
+                return item.LeadImageAlternativeText;
+
+            if (!string.IsNullOrWhiteSpace(item.LeadImage?.AlternativeText))
+                return item.LeadImage.AlternativeText;
+
+            return null;
+        }
+
         private static List<TagRef> ToTagRefs(List<StrapiTagRef>? list) =>
             list?.Where(t => !string.IsNullOrEmpty(t.Slug) || !string.IsNullOrEmpty(t.Title))
                 .Select(t => new TagRef { Slug = t.Slug ?? "", Title = t.Title ?? "" }).ToList() ?? [];
@@ -1974,6 +2012,7 @@ namespace ServiceManual.Services
         private class StrapiMedia
         {
             public string? Url { get; set; }
+            public string? AlternativeText { get; set; }
         }
 
         private class StrapiPhaseSummary
@@ -2213,6 +2252,14 @@ namespace ServiceManual.Services
             public string? Author { get; set; }
             public string? PublishedFrom { get; set; }
             public string? PublishedTo { get; set; }
+            [JsonPropertyName("leadImage")]
+            public StrapiMedia? LeadImage { get; set; }
+            [JsonPropertyName("leadImageUrl")]
+            public string? LeadImageUrl { get; set; }
+            [JsonPropertyName("leadImageAlt")]
+            public string? LeadImageAlt { get; set; }
+            [JsonPropertyName("leadImageAlternativeText")]
+            public string? LeadImageAlternativeText { get; set; }
         }
 
         private class StrapiDetailedGuide

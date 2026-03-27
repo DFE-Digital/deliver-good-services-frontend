@@ -1,7 +1,7 @@
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
 @{
-  var gtmContainerId = HostEnvironment.IsEnvironment("Test")
+  var gtmContainerId = HostEnvironment.IsEnvironment(environmentName: "Test")
     ? (Configuration["Analytics:GtmContainerId"] ?? "GTM-WFXD8W9G")
     : (HostEnvironment.IsEnvironment("Production") ? Configuration["Analytics:GtmContainerId"] : null);
 }

@@ -2,79 +2,39 @@
 @{
     ViewData["Title"] = Model.Title;
     var bodyHtml = ViewBag.BodyHtml as string ?? string.Empty;
-    var hasMeta = !string.IsNullOrWhiteSpace(Model.PublishedFromDisplay)
-        || !string.IsNullOrWhiteSpace(Model.Author)
-        || !string.IsNullOrWhiteSpace(Model.PublishedToDisplay);
+
+    ViewBag.HeroType = "article";
+    ViewBag.HeroTitle = Model.Title;
+    ViewBag.HeroIntro = Model.MetaDescription ?? string.Empty;
+    ViewBag.HeroBadgeText = "Article";
+    ViewBag.HeroPublishedFromDisplay = Model.PublishedFromDisplay;
+    ViewBag.HeroPublishedToDisplay = Model.PublishedToDisplay;
+    ViewBag.HeroAuthor = Model.Author;
+    ViewBag.HeroBreadcrumbItems = new List<(string Title, string Url)>
+    {
+        ("Home", "/"),
+        ("Articles", "/articles"),
+        (Model.Title, null!)
+    };
+
+    var currentPath = Context?.Request?.Path.Value ?? "/article/" + Model.RouteKey;
+    var requestScheme = Context?.Request?.Scheme ?? "https";
+    var requestHost = Context?.Request?.Host.Value ?? string.Empty;
+    var canonicalCurrentUrl = $"{requestScheme}://{requestHost}{currentPath}";
 }
 
 <div class="guide-modern">
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <header class="guide-hero">
-                <div class="govuk-width-container">
-                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
-                        <ol class="govuk-breadcrumbs__list">
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/articles">Articles</a></li>
-                            <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
-                        </ol>
-                    </nav>
-                    <div class="govuk-grid-row">
-                        <div class="govuk-grid-column-two-thirds">
-                            <span class="guide-hero__label">Article</span>
-                            <h1 class="govuk-heading-xl">@Model.Title</h1>
-                            @if (!string.IsNullOrWhiteSpace(Model.MetaDescription))
-                            {
-                                <p class="govuk-body-l">@Model.MetaDescription</p>
-                            }
-                            @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
-                            {
-                                ["ShareTitle"]     = Model.Title,
-                                ["ShareUrl"]       = $"{Context.Request.Scheme}://{Context.Request.Host}/article/{Model.RouteKey}",
-                                ["LibId"]          = "/article/" + Model.RouteKey,
-                                ["LibTitle"]       = Model.Title,
-                                ["LibUrl"]         = "/article/" + Model.RouteKey,
-                                ["LibType"]        = "Article",
-                                ["LibDescription"] = Model.MetaDescription ?? string.Empty
-                            })
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            @if (hasMeta)
-            {
-                <div class="guide-meta">
-                    <div class="govuk-width-container">
-                        @if (!string.IsNullOrWhiteSpace(Model.PublishedFromDisplay))
-                        {
-                            <span class="guide-meta__item"><strong>Published:</strong> @System.Net.WebUtility.HtmlEncode(Model.PublishedFromDisplay)</span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                        }
-                        @if (!string.IsNullOrWhiteSpace(Model.PublishedToDisplay))
-                        {
-                            <span class="guide-meta__item"><strong>Available until:</strong> @System.Net.WebUtility.HtmlEncode(Model.PublishedToDisplay)</span>
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                        }
-                        @if (!string.IsNullOrWhiteSpace(Model.Author))
-                        {
-                            <span class="guide-meta__item"><strong>Author:</strong> @System.Net.WebUtility.HtmlEncode(Model.Author)</span>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
     <div class="govuk-grid-row guide-content-row guide-content-row--no-contents">
         <div class="govuk-grid-column-two-thirds">
             <section class="dfe-f-content-section guide-content-section guide-content-section--no-contents" aria-label="Article content">
-                <p class="govuk-body govuk-!-margin-bottom-6"><a class="govuk-link" href="/articles">Back to all articles</a></p>
+        
 
                 @if (!string.IsNullOrWhiteSpace(Model.LeadImageUrl))
                 {
-                    <figure class="guide-article-image govuk-!-margin-bottom-6">
-                        <img src="@Model.LeadImageUrl" alt="@(Model.LeadImageAlt ?? string.Empty)" loading="lazy" />
+                    <figure class="guide-article-image govuk-!-margin-bottom-6 govuk-!-margin-top-1">
+                        <img class="article-img" src="@Model.LeadImageUrl" alt="@(Model.LeadImageAlt ?? string.Empty)" alt="" loading="lazy" />
                     </figure>
                 }
 
@@ -85,6 +45,19 @@
                     </div>
                 }
             </section>
+        </div>
+
+        <div class="govuk-grid-column-one-third">
+            @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
+            {
+                ["ShareTitle"]     = Model.Title,
+                ["ShareUrl"]       = canonicalCurrentUrl,
+                ["LibId"]          = currentPath,
+                ["LibTitle"]       = Model.Title,
+                ["LibUrl"]         = currentPath,
+                ["LibType"]        = "Article",
+                ["LibDescription"] = Model.MetaDescription ?? string.Empty
+            })
         </div>
     </div>
 </div>

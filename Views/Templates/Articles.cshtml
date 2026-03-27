@@ -1,30 +1,20 @@
+@using System.Linq
 @model IReadOnlyList<ServiceManual.Models.ArticleSummary>
 @{
     ViewData["Title"] = "Articles";
+
+    ViewBag.HeroType = "collection";
+    ViewBag.HeroTitle = "Articles";
+    ViewBag.HeroIntro = "Updates, insights and practical guidance from service delivery teams.";
+    ViewBag.HeroMetaDescription = string.Empty;
+    ViewBag.HeroAudienceTags = new List<dynamic>();
+    ViewBag.HeroBadgeText = "Article";
+    ViewBag.HideBadge = true;
+    ViewBag.UseInverseNav = true; // Use inverse nav for better contrast with hero
 }
 
 <div class="guide-modern">
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <header class="guide-hero">
-                <div class="govuk-width-container">
-                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
-                        <ol class="govuk-breadcrumbs__list">
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                            <li class="govuk-breadcrumbs__list-item" aria-current="page">Articles</li>
-                        </ol>
-                    </nav>
-                    <div class="govuk-grid-row">
-                        <div class="govuk-grid-column-two-thirds">
-                            <span class="guide-hero__label">Article</span>
-                            <h1 class="govuk-heading-xl">Articles</h1>
-                            <p class="govuk-body-l">Updates, insights, and practical guidance from service delivery teams.</p>
-                        </div>
-                    </div>
-                </div>
-            </header>
-        </div>
-    </div>
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
     <div class="govuk-grid-row guide-content-row guide-content-row--no-contents">
         <div class="govuk-grid-column-two-thirds">
@@ -35,37 +25,102 @@
                 }
                 else
                 {
-                    <ul class="guide-article-list">
-                        @foreach (var article in Model)
+                    var featured = Model.FirstOrDefault();
+                    var latestArticles = Model.Skip(1).ToList();
+
+                    <div class="guide-articles-hub">
+                        @if (featured is not null)
                         {
-                            <li class="guide-article-list__item">
-                                <h2 class="govuk-heading-m guide-article-list__title">
-                                    <a class="govuk-link" href="/article/@article.RouteKey">@article.Title</a>
-                                </h2>
-                                @if (!string.IsNullOrWhiteSpace(article.MetaDescription))
+                            <article class="guide-featured-article" aria-label="Featured article">
+                                @if (!string.IsNullOrWhiteSpace(featured.LeadImageUrl))
                                 {
-                                    <p class="govuk-body guide-article-list__summary">@article.MetaDescription</p>
+                                    <a class="guide-featured-article__image-link" href="/article/@featured.RouteKey" aria-label="Read @featured.Title">
+                                        <img class="guide-featured-article__image" src="@featured.LeadImageUrl" alt="@(featured.LeadImageAlt ?? string.Empty)" loading="eager" />
+                                    </a>
                                 }
-                                @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay) || !string.IsNullOrWhiteSpace(article.Author))
-                                {
-                                    <p class="govuk-body-s guide-article-list__meta">
-                                        @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay))
-                                        {
-                                            <span>Published @article.PublishedFromDisplay</span>
-                                        }
-                                        @if (!string.IsNullOrWhiteSpace(article.Author))
-                                        {
-                                            @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay))
+
+                                <div class="guide-featured-article__content">
+                                    <p class="guide-featured-article__kicker">Featured</p>
+
+                                    @if (!string.IsNullOrWhiteSpace(featured.PublishedFromDisplay) || !string.IsNullOrWhiteSpace(featured.Author))
+                                    {
+                                        <p class="govuk-body-s guide-article-list__meta">
+                                            @if (!string.IsNullOrWhiteSpace(featured.PublishedFromDisplay))
                                             {
-                                                <span aria-hidden="true"> · </span>
+                                                <span>Published @featured.PublishedFromDisplay</span>
                                             }
-                                            <span>By @article.Author</span>
-                                        }
-                                    </p>
-                                }
-                            </li>
+                                            @if (!string.IsNullOrWhiteSpace(featured.Author))
+                                            {
+                                                @if (!string.IsNullOrWhiteSpace(featured.PublishedFromDisplay))
+                                                {
+                                                    <span aria-hidden="true"> · </span>
+                                                }
+                                                <span>By @featured.Author</span>
+                                            }
+                                        </p>
+                                    }
+
+                                    <h2 class="govuk-heading-m guide-featured-article__title">
+                                        <a class="govuk-link" href="/article/@featured.RouteKey">@featured.Title</a>
+                                    </h2>
+
+                                    @if (!string.IsNullOrWhiteSpace(featured.MetaDescription))
+                                    {
+                                        <p class="govuk-body guide-featured-article__summary">@featured.MetaDescription</p>
+                                    }
+                                </div>
+                            </article>
                         }
-                    </ul>
+
+                        @if (latestArticles.Count > 0)
+                        {
+                            <section aria-label="Latest articles">
+                                <h2 class="govuk-heading-m guide-articles-hub__section-title">Latest</h2>
+                                <ul class="guide-article-list guide-article-list--news guide-article-list--stack">
+                                    @foreach (var article in latestArticles)
+                                    {
+                                        <li class="guide-article-list__item">
+                                            @if (!string.IsNullOrWhiteSpace(article.LeadImageUrl))
+                                            {
+                                                <a class="guide-article-list__image-link" href="/article/@article.RouteKey" aria-label="Read @article.Title">
+                                                    <img class="guide-article-list__image" src="@article.LeadImageUrl" alt="@(article.LeadImageAlt ?? string.Empty)" loading="lazy" />
+                                                </a>
+                                            }
+
+                                            <div class="guide-article-list__content">
+                                                @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay) || !string.IsNullOrWhiteSpace(article.Author))
+                                                {
+                                                    <p class="govuk-body-s guide-article-list__meta">
+                                                        @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay))
+                                                        {
+                                                            <span>Published @article.PublishedFromDisplay</span>
+                                                        }
+                                                        @if (!string.IsNullOrWhiteSpace(article.Author))
+                                                        {
+                                                            @if (!string.IsNullOrWhiteSpace(article.PublishedFromDisplay))
+                                                            {
+                                                                <span aria-hidden="true"> · </span>
+                                                            }
+                                                            <span>By @article.Author</span>
+                                                        }
+                                                    </p>
+                                                }
+
+                                                <h3 class="govuk-heading-s guide-article-list__title">
+                                                    <a class="govuk-link" href="/article/@article.RouteKey">@article.Title</a>
+                                                </h3>
+
+                                                @if (!string.IsNullOrWhiteSpace(article.MetaDescription))
+                                                {
+                                                    <p class="govuk-body-s guide-article-list__summary">@article.MetaDescription</p>
+                                                }
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </section>
+                        }
+                    </div>
                 }
             </section>
         </div>

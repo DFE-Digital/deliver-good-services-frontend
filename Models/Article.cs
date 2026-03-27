@@ -20,5 +20,7 @@ namespace ServiceManual.Models
         public string? MetaDescription { get; set; }
         public string? Author { get; set; }
         public string? PublishedFromDisplay { get; set; }
+        public string? LeadImageUrl { get; set; }
+        public string? LeadImageAlt { get; set; }
     }
 }

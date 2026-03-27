@@ -57,9 +57,35 @@ namespace ServiceManual.Filters
                         nav = GetDefaultSiteNavigation();
                     }
 
+                    EnsureGuidanceAfterStandards(nav);
+
                     controller.ViewData["Navigation"] = nav;
                 }
             }
+        }
+
+        private static void EnsureGuidanceAfterStandards(List<NavigationItem> nav)
+        {
+            if (nav is null || nav.Count == 0)
+                return;
+
+            var hasGuidance = nav.Any(i => string.Equals(i.Url, "/guidance", StringComparison.OrdinalIgnoreCase));
+            if (hasGuidance)
+                return;
+
+            var standardsIndex = nav.FindIndex(i =>
+                (i.Url?.StartsWith("/standards", StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (i.Title?.Contains("standard", StringComparison.OrdinalIgnoreCase) ?? false));
+
+            if (standardsIndex < 0)
+                return;
+
+            nav.Insert(standardsIndex + 1, new NavigationItem
+            {
+                Title = "Guidance",
+                Url = "/guidance",
+                Order = nav[standardsIndex].Order + 1
+            });
         }
 
         private static List<NavigationItem> GetDefaultSiteNavigation()
@@ -68,7 +94,8 @@ namespace ServiceManual.Filters
             [
                 new NavigationItem { Title = "Browse guidance", Url = "/content", Order = 0 },
                 new NavigationItem { Title = "Documentation", Url = "/documentation", Order = 1 },
-                new NavigationItem { Title = "DDT standards", Url = "/standards/ddt-standards", Order = 2 }
+                new NavigationItem { Title = "DDT standards", Url = "/standards/ddt-standards", Order = 2 },
+                new NavigationItem { Title = "Guidance", Url = "/guidance", Order = 3 }
             ];
         }
 
