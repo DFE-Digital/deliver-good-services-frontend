@@ -26,7 +26,7 @@
     var collectionSlug = ViewBag.HeroCollectionSlug as string ?? "";
     var collectionTitle = ViewBag.HeroCollectionTitle as string ?? "";
     var breadcrumbItems = ViewBag.HeroBreadcrumbItems as List<(string Title, string Url)> ?? new List<(string, string)>();
-
+    var hideBadge = (bool?)ViewBag.HideBadge ?? false;
     var heroClass = heroType == "collection" ? "page-hero--collection" : "page-hero--guidance";
     var chipColors = new[] { "#5439F9", "#15B187", "#CA357C" };
 }
@@ -75,13 +75,14 @@
                     </nav>
 
                     @* Badge *@
+                    @if (!hideBadge){
                     <div class="pg-badge">
                         @if (heroType == "collection")
                         {
                             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="4" height="4" fill="currentColor"></rect><rect x="7" y="1" width="4" height="4" fill="currentColor"></rect><rect x="1" y="7" width="4" height="4" fill="currentColor"></rect><rect x="7" y="7" width="4" height="4" fill="currentColor"></rect></svg>
                         }
                         @badgeText
-                    </div>
+                    </div>}
 
                     @* Title *@
                     <h1 class="page-hero__h1">@title</h1>

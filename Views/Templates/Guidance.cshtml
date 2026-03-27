@@ -1,5 +1,4 @@
 @model ServiceManual.Models.GuidanceIndexViewModel
-@using DocumentFormat.OpenXml.Wordprocessing
 @using Microsoft.AspNetCore.WebUtilities
 @{
 
@@ -9,9 +8,14 @@
     ViewBag.HeroIntro = "Browse guidance by area — grouped around the disciplines and topics that matter to your team. Each area contains collections of guides, standards, patterns and tools.";
     ViewBag.UseInverseNav = true;
 
-    string BuildFilterUrl(string? areaSlug, IEnumerable<string>? professionSlugs)
+    string BuildFilterUrl(string? areaSlug, IEnumerable<string>? professionSlugs, string? searchTerm)
     {
         var query = new List<KeyValuePair<string, string?>>();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query.Add(new KeyValuePair<string, string?>("search", searchTerm));
+        }
 
         if (!string.IsNullOrWhiteSpace(areaSlug))
         {
@@ -37,10 +41,29 @@
         <div class="guidance-layout">
             <aside class="guidance-filters" aria-label="Filter guidance">
                 <div class="gf-block">
+                    <span class="gf-title">Search this page</span>
+                    <form method="get" action="/guidance" class="gf-search" role="search">
+                        @if (!string.IsNullOrWhiteSpace(Model.SelectedGuidanceAreaSlug))
+                        {
+                            <input type="hidden" name="guidanceArea" value="@Model.SelectedGuidanceAreaSlug" />
+                        }
+                        @foreach (var professionSlug in Model.SelectedProfessionSlugs)
+                        {
+                            <input type="hidden" name="professions" value="@professionSlug" />
+                        }
+                        <label class="govuk-label govuk-visually-hidden" for="guidance-search">Search guidance</label>
+                        <input class="govuk-input" id="guidance-search" name="search" type="text" value="@Model.SelectedSearchTerm" placeholder="Search guidance" autocomplete="off" />
+                        <div class="guidance-filters__actions gf-search__actions">
+                            <button type="submit" class="govuk-button govuk-button--secondary guidance-filters__button">Search</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="gf-block guidance-filters__divider">
                     <span class="gf-title">Filter by area</span>
                     <ul class="gf-list">
                         <li class="gf-item">
-                            <a class="gf-link @(string.IsNullOrWhiteSpace(Model.SelectedGuidanceAreaSlug) ? "active" : null)" href="@BuildFilterUrl(null, Model.SelectedProfessionSlugs)">
+                            <a class="gf-link @(string.IsNullOrWhiteSpace(Model.SelectedGuidanceAreaSlug) ? "active" : null)" href="@BuildFilterUrl(null, Model.SelectedProfessionSlugs, Model.SelectedSearchTerm)">
                                 <span class="gf-dot" style="background:var(--govuk-colour-secondary-text)"></span>
                                 All areas
                                 <span class="gf-count">@Model.TotalCollectionCount</span>
@@ -49,7 +72,7 @@
                         @foreach (var area in Model.AreaFilters)
                         {
                             <li class="gf-item">
-                                <a class="gf-link @(Model.SelectedGuidanceAreaSlug == area.Slug ? "active" : null)" href="@BuildFilterUrl(area.Slug, Model.SelectedProfessionSlugs)">
+                                <a class="gf-link @(Model.SelectedGuidanceAreaSlug == area.Slug ? "active" : null)" href="@BuildFilterUrl(area.Slug, Model.SelectedProfessionSlugs, Model.SelectedSearchTerm)">
                                     <span class="gf-dot" style="background:@area.ColourHex"></span>
                                     @area.Label
                                     <span class="gf-count">@area.Count</span>
@@ -62,6 +85,10 @@
                 <div class="gf-block guidance-filters__divider">
                     <span class="gf-title">Filter by profession</span>
                     <form method="get" action="/guidance">
+                        @if (!string.IsNullOrWhiteSpace(Model.SelectedSearchTerm))
+                        {
+                            <input type="hidden" name="search" value="@Model.SelectedSearchTerm" />
+                        }
                         @if (!string.IsNullOrWhiteSpace(Model.SelectedGuidanceAreaSlug))
                         {
                             <input type="hidden" name="guidanceArea" value="@Model.SelectedGuidanceAreaSlug" />

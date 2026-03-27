@@ -1,4 +1,5 @@
 @using System.Linq
+@using System.Text.RegularExpressions
 @using ServiceManual.Models
 @using ServiceManual.Helpers
 @{
@@ -22,143 +23,293 @@
     ViewBag.HeroShowApplicableProfessions = vm.ShowApplicableProfessionsOnPage;
     ViewBag.HeroAudienceTags = vm.AudienceTags;
     ViewBag.HeroBadgeText = "Guidance";
+
+    var currentPath = Context?.Request?.Path.Value?.TrimEnd('/') ?? string.Empty;
+    var requestScheme = Context?.Request?.Scheme ?? "https";
+    var requestHost = Context?.Request?.Host.Value ?? string.Empty;
+    var canonicalCurrentUrl = string.IsNullOrEmpty(requestHost)
+        ? currentPath
+        : $"{requestScheme}://{requestHost}{currentPath}";
+    var isServiceStandardOverview = vm.IsOverviewPage
+        && currentPath.Equals("/guidance/guides/applying-the-service-standard", StringComparison.OrdinalIgnoreCase);
+
+    var serviceStandardDescriptions = new Dictionary<int, string>
+    {
+        [1] = "Develop a deep understanding of users and the problem you're trying to solve for them.",
+        [2] = "Work across organisational boundaries to create a service that solves a complete problem.",
+        [3] = "Create a service that is accessible and consistent across different channels for all users.",
+        [4] = "Build a service that is simple and intuitive. Users should be able to do what they need to do without difficulty.",
+        [5] = "Ensure your service can be used by people with different physical, mental, social, cultural or learning needs.",
+        [6] = "Build the service using a multidisciplinary team with the right mix of skills.",
+        [7] = "Create the service using agile, iterative, user-centred methods. Keep improving it based on feedback.",
+        [8] = "Make sure you have the capacity, resources and technical flexibility to iterate and improve the service.",
+        [9] = "Evaluate what data the service will use, store and create. Understand the security threats to your service.",
+        [10] = "Work out how your service is performing and publish metrics, including the four mandatory KPIs.",
+        [11] = "Choose tools and technology that are appropriate to the service and aligned to DfE's technology standards.",
+        [12] = "Make all new source code open and reusable, and publish it under appropriate licences.",
+        [13] = "Build on open standards, use common components and contribute back to GOV.UK patterns.",
+        [14] = "Minimise service downtime and have a clear plan to deal with it when it does occur."
+    };
+
+    var serviceStandardRoles = new Dictionary<int, string>
+    {
+        [1] = "All roles",
+        [2] = "All roles",
+        [3] = "Design · Research",
+        [4] = "Design · Research",
+        [5] = "Design · Research · Accessibility",
+        [6] = "All roles",
+        [7] = "Delivery",
+        [8] = "All roles",
+        [9] = "Tech · Arch",
+        [10] = "Product · Delivery",
+        [11] = "Tech · Arch",
+        [12] = "Tech · Arch",
+        [13] = "Design · Tech",
+        [14] = "Tech · Delivery"
+    };
+
+    var serviceStandardPoints = vm.ContentsItems
+        .Where(item => !string.IsNullOrWhiteSpace(item.Url))
+        .Select((item, index) => new
+        {
+            Number = index + 1,
+            Url = item.Url!,
+            Title = Regex.Replace(item.Title ?? string.Empty, @"^\d+\.\s*", "").Trim(),
+        })
+        .ToList();
 }
 
 <div class="guide-modern">
     @* Guide hero - using standardized hero partial *@
     @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
-    @* Contents: on overview, respect ShowContents (HideContentsOnPrimaryPage); on child pages always show when we have items *@
-    @if (vm.ShowContents && vm.ContentsItems.Count > 0)
+    @if (isServiceStandardOverview)
     {
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                <nav class="guide-contents@(vm.ContentsUseNumbers ? "" : " guide-contents--dashed")" aria-label="Guide contents">
-                    <h2 class="guide-contents__title">Contents</h2>
-                    <ul class="guide-contents__list">
-                        @foreach (var item in vm.ContentsItems)
+        <div class="ss-body" id="main">
+            <div class="govuk-width-container">
+                <div class="ss-layout">
+                    <main>
+                        <ul class="ss-cards" role="list" aria-label="Service Standard points">
+                            @foreach (var point in serviceStandardPoints)
+                            {
+                                var cardDescription = serviceStandardDescriptions.TryGetValue(point.Number, out var description)
+                                    ? description
+                                    : "Guidance and assessment evidence for this Service Standard point.";
+                                var roleLabel = serviceStandardRoles.TryGetValue(point.Number, out var roles)
+                                    ? roles
+                                    : "All roles";
+                                var isActive = point.Number == 5;
+                                <li>
+                                    <a class="ss-card@(isActive ? " ss-card--active" : "")" href="@point.Url" role="listitem">
+                                        <div class="ss-card__num-col"><span class="ss-card__num">@point.Number</span></div>
+                                        <div class="ss-card__body">
+                                            <span class="ss-card__title">@point.Title</span>
+                                            <span class="ss-card__desc">@cardDescription</span>
+                                            <div class="ss-card__meta">
+                                                @if (point.Number == 1 || point.Number == 6 || point.Number == 7)
+                                                {
+                                                    <span class="ph ph--disc">Discovery</span>
+                                                }
+                                                <span class="ph ph--alpha">Alpha</span>
+                                                <span class="ph ph--beta">Beta</span>
+                                                @if (point.Number != 7 && point.Number != 11)
+                                                {
+                                                    <span class="ph ph--live">Live</span>
+                                                }
+                                                <span class="ss-card__roles">@roleLabel</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </main>
+
+                    <aside class="ss-aside" aria-label="Assessment information">
+                        @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
                         {
-                            <li class="guide-contents__item @(item.IsCurrent ? "guide-contents__item--current" : "")">
-                                <span class="guide-contents__num" aria-hidden="true">@(vm.ContentsUseNumbers ? item.Number.ToString() : "—")</span>
-                                @if (item.IsCurrent || item.Url == null)
-                                {
-                                    <span aria-current="page">@item.Title</span>
-                                }
-                                else
-                                {
-                                    <a href="@item.Url">@item.Title</a>
-                                }
-                            </li>
-                        }
-                    </ul>
-                </nav>
+                            ["ShareTitle"]     = vm.HeroTitle,
+                            ["ShareUrl"]       = canonicalCurrentUrl,
+                            ["LibId"]          = currentPath,
+                            ["LibTitle"]       = vm.HeroTitle,
+                            ["LibUrl"]         = currentPath,
+                            ["LibType"]        = "Guidance",
+                            ["LibDescription"] = vm.HeroIntro ?? string.Empty
+                        })
+
+                        <div class="assess-box">
+                            <h3>About service assessments</h3>
+                            <p>DfE services are assessed against the Service Standard at the end of each phase. Assessors are experienced practitioners who look for evidence, not documentation.</p>
+                            <a href="/guidance/guides/service-assessments">Assessment guidance</a>
+                        </div>
+                        <div class="rag-box">
+                            <h3>Assessment outcomes</h3>
+                            <div class="rag-item"><span class="rag-dot" style="background:var(--c-green)"></span><span class="rag-text"><strong>Green — Met</strong>The service meets the standard and can proceed to the next phase.</span></div>
+                            <div class="rag-item"><span class="rag-dot" style="background:var(--c-orange)"></span><span class="rag-text"><strong>Amber — Met with conditions</strong>Can proceed but must address specific issues by an agreed date.</span></div>
+                            <div class="rag-item"><span class="rag-dot" style="background:var(--c-error)"></span><span class="rag-text"><strong>Red — Not met</strong>Must pause, address issues and be reassessed before progressing.</span></div>
+                        </div>
+
+                        <div class="sb-block" style="margin-top:24px">
+                            <span class="sb-lbl">Related</span>
+                            <ul class="sb-links">
+                                <li><a class="sb-link" href="/guidance/guides/service-assessments">Service assessments</a></li>
+                                <li><a class="sb-link" href="/guidance/guides/applying-the-service-standard/make-sure-everyone-can-use-the-service">Standard 5 — Everyone can use it</a></li>
+                                <li><a class="sb-link" href="https://www.gov.uk/service-manual/service-standard" target="_blank" rel="noopener noreferrer">GOV.UK Service Standard</a></li>
+                                <li><a class="sb-link" href="/guidance/guides/service-assessments/book-an-assessment">Book an assessment</a></li>
+                            </ul>
+                        </div>
+                    </aside>
+                </div>
             </div>
         </div>
     }
+    else
+    {
 
-    @* Content + sidebar *@
-    <div class="govuk-grid-row guide-content-row@(vm.ApplyNoContentsSectionStyle ? " guide-content-row--no-contents" : "")">
-        <div class="govuk-grid-column-two-thirds">
-            <section class="dfe-f-content-section guide-content-section@(vm.ApplyNoContentsSectionStyle ? " guide-content-section--no-contents" : "")" aria-label="Content">
-                @if (ViewBag.PageNotification != null)
-                {
-                    @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
-                }
-
-                @if (vm.ShowPageHeader && (!string.IsNullOrEmpty(vm.PageTitle) || !string.IsNullOrEmpty(vm.PageBeforeContentsHtml)))
-                {
-                    <header class="dfe-f-content-header">
-                        @if (!string.IsNullOrEmpty(vm.PageTitle))
-                        {
-                            <h2 class="govuk-heading-l">@vm.PageTitle</h2>
-                        }
-                        @if (!string.IsNullOrEmpty(vm.PageBeforeContentsHtml))
-                        {
-                            <div class="dfe-f-content-header__intro govuk-body">
-                                @Html.Raw(vm.PageBeforeContentsHtml)
-                            </div>
-                        }
-                    </header>
-                }
-
-                @if (!string.IsNullOrEmpty(vm.BodyHtml))
-                {
-                    <div class="dfe-f-body">
-                        @Html.Raw(vm.BodyHtml)
-                    </div>
-                }
-
-                @if (vm.PaginationPrevUrl != null || vm.PaginationNextUrl != null)
-                {
-                    <nav class="govuk-pagination govuk-pagination--block guide-pagination" aria-label="Pages in this guide">
-                        @if (vm.PaginationPrevUrl != null)
-                        {
-                            <div class="govuk-pagination__prev">
-                                <a class="govuk-link govuk-pagination__link" href="@vm.PaginationPrevUrl" rel="prev">
-                                    <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" focusable="false" aria-hidden="true" viewBox="0 0 15 13"><path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"/></svg>
-                                    <span class="govuk-pagination__link-title">Previous<span class="govuk-visually-hidden"> page</span></span>
-                                    <span class="govuk-visually-hidden">:</span>
-                                    <span class="govuk-pagination__link-label">@(vm.PaginationPrevLabel ?? "Previous")</span>
-                                </a>
-                            </div>
-                        }
-                        @if (vm.PaginationNextUrl != null)
-                        {
-                            <div class="govuk-pagination__next">
-                                <a class="govuk-link govuk-pagination__link" href="@vm.PaginationNextUrl" rel="next">
-                                    <span class="govuk-pagination__link-title">Next<span class="govuk-visually-hidden"> page</span></span>
-                                    <span class="govuk-visually-hidden">:</span>
-                                    <span class="govuk-pagination__link-label">@(vm.PaginationNextLabel ?? "Next")</span>
-                                    <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" focusable="false" aria-hidden="true" viewBox="0 0 15 13"><path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7246z"/></svg>
-                                </a>
-                            </div>
-                        }
-                    </nav>
-                }
-            </section>
-        </div>
-
-        <div class="govuk-grid-column-one-third">
-            @if (vm.RelatedContent.Count > 0)
-            {
-                <aside class="guide-sidebar__card" aria-label="Related content">
-                    @foreach (var item in vm.RelatedContent)
-                    {
-                        <div class="govuk-!-margin-bottom-4">
-                            <h3 class="govuk-heading-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
-                            @if (!string.IsNullOrEmpty(item.Content))
+        @* Contents: on overview, respect ShowContents (HideContentsOnPrimaryPage); on child pages always show when we have items *@
+        @if (vm.ShowContents && vm.ContentsItems.Count > 0)
+        {
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <nav class="guide-contents@(vm.ContentsUseNumbers ? "" : " guide-contents--dashed")" aria-label="Guide contents">
+                        <h2 class="guide-contents__title">Contents</h2>
+                        <ul class="guide-contents__list">
+                            @foreach (var item in vm.ContentsItems)
                             {
-                                <div class="govuk-body-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForRelatedContent(item.Content))</div>
+                                <li class="guide-contents__item @(item.IsCurrent ? "guide-contents__item--current" : "")">
+                                    <span class="guide-contents__num" aria-hidden="true">@(vm.ContentsUseNumbers ? item.Number.ToString() : "—")</span>
+                                    @if (item.IsCurrent || item.Url == null)
+                                    {
+                                        <span aria-current="page">@item.Title</span>
+                                    }
+                                    else
+                                    {
+                                        <a href="@item.Url">@item.Title</a>
+                                    }
+                                </li>
                             }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        }
+
+        @* Content + sidebar *@
+        <div class="govuk-grid-row guide-content-row@(vm.ApplyNoContentsSectionStyle ? " guide-content-row--no-contents" : "")">
+            <div class="govuk-grid-column-two-thirds">
+                <section class="dfe-f-content-section guide-content-section@(vm.ApplyNoContentsSectionStyle ? " guide-content-section--no-contents" : "")" aria-label="Content">
+                    @if (ViewBag.PageNotification != null)
+                    {
+                        @await Html.PartialAsync("~/Views/Shared/_PageNotificationBanner.cshtml", (ServiceManual.Models.PageNotification)ViewBag.PageNotification)
+                    }
+
+                    @if (vm.ShowPageHeader && (!string.IsNullOrEmpty(vm.PageTitle) || !string.IsNullOrEmpty(vm.PageBeforeContentsHtml)))
+                    {
+                        <header class="dfe-f-content-header">
+                            @if (!string.IsNullOrEmpty(vm.PageTitle))
+                            {
+                                <h2 class="govuk-heading-l">@vm.PageTitle</h2>
+                            }
+                            @if (!string.IsNullOrEmpty(vm.PageBeforeContentsHtml))
+                            {
+                                <div class="dfe-f-content-header__intro govuk-body">
+                                    @Html.Raw(vm.PageBeforeContentsHtml)
+                                </div>
+                            }
+                        </header>
+                    }
+
+                    @if (!string.IsNullOrEmpty(vm.BodyHtml))
+                    {
+                        <div class="dfe-f-body">
+                            @Html.Raw(vm.BodyHtml)
                         </div>
                     }
-                </aside>
-            }
-            @if (vm.RelatedFiles.Count > 0)
-            {
-                <aside class="guide-sidebar__card guide-sidebar__card--downloads" aria-label="Downloads">
-                    <h3 class="govuk-heading-s">Downloads</h3>
-                    <ul class="guide-sidebar__downloads-list">
-                        @foreach (var file in vm.RelatedFiles)
+
+                    @if (vm.PaginationPrevUrl != null || vm.PaginationNextUrl != null)
+                    {
+                        <nav class="govuk-pagination govuk-pagination--block guide-pagination" aria-label="Pages in this guide">
+                            @if (vm.PaginationPrevUrl != null)
+                            {
+                                <div class="govuk-pagination__prev">
+                                    <a class="govuk-link govuk-pagination__link" href="@vm.PaginationPrevUrl" rel="prev">
+                                        <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" focusable="false" aria-hidden="true" viewBox="0 0 15 13"><path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"/></svg>
+                                        <span class="govuk-pagination__link-title">Previous<span class="govuk-visually-hidden"> page</span></span>
+                                        <span class="govuk-visually-hidden">:</span>
+                                        <span class="govuk-pagination__link-label">@(vm.PaginationPrevLabel ?? "Previous")</span>
+                                    </a>
+                                </div>
+                            }
+                            @if (vm.PaginationNextUrl != null)
+                            {
+                                <div class="govuk-pagination__next">
+                                    <a class="govuk-link govuk-pagination__link" href="@vm.PaginationNextUrl" rel="next">
+                                        <span class="govuk-pagination__link-title">Next<span class="govuk-visually-hidden"> page</span></span>
+                                        <span class="govuk-visually-hidden">:</span>
+                                        <span class="govuk-pagination__link-label">@(vm.PaginationNextLabel ?? "Next")</span>
+                                        <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" focusable="false" aria-hidden="true" viewBox="0 0 15 13"><path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7246z"/></svg>
+                                    </a>
+                                </div>
+                            }
+                        </nav>
+                    }
+                </section>
+            </div>
+
+            <div class="govuk-grid-column-one-third">
+                @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
+                {
+                    ["ShareTitle"]     = vm.IsOverviewPage ? vm.HeroTitle : (vm.PageTitle ?? vm.HeroTitle),
+                    ["ShareUrl"]       = canonicalCurrentUrl,
+                    ["LibId"]          = currentPath,
+                    ["LibTitle"]       = vm.IsOverviewPage ? vm.HeroTitle : (vm.PageTitle ?? vm.HeroTitle),
+                    ["LibUrl"]         = currentPath,
+                    ["LibType"]        = "Guidance",
+                    ["LibDescription"] = vm.HeroIntro ?? string.Empty
+                })
+
+                @if (vm.RelatedContent.Count > 0)
+                {
+                    <aside class="guide-sidebar__card" aria-label="Related content">
+                        @foreach (var item in vm.RelatedContent)
                         {
-                            <li class="guide-sidebar__downloads-item">
-                                <a class="guide-sidebar__downloads-link" href="@file.Url" target="_blank" rel="noopener noreferrer">
-                                    <span class="guide-sidebar__downloads-link-inner">
-                                        <span class="guide-sidebar__downloads-filename">@System.Net.WebUtility.HtmlEncode(file.Name)</span>
-                                        <span class="guide-sidebar__downloads-meta"><span class="guide-sidebar__downloads-type">@System.Net.WebUtility.HtmlEncode(file.FileType)</span> · @System.Net.WebUtility.HtmlEncode(file.SizeDisplay)</span>
-                                        @if (!string.IsNullOrWhiteSpace(file.Caption))
-                                        {
-                                            <span class="guide-sidebar__downloads-caption">@System.Net.WebUtility.HtmlEncode(file.Caption)</span>
-                                        }
-                                    </span>
-                                    <span class="guide-sidebar__downloads-icon" aria-hidden="true"></span>
-                                    <span class="govuk-visually-hidden"> (opens in new tab)</span>
-                                </a>
-                            </li>
+                            <div class="govuk-!-margin-bottom-4">
+                                <h3 class="govuk-heading-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkInlineHtml(item.Header))</h3>
+                                @if (!string.IsNullOrEmpty(item.Content))
+                                {
+                                    <div class="govuk-body-s">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForRelatedContent(item.Content))</div>
+                                }
+                            </div>
                         }
-                    </ul>
-                </aside>
-            }
+                    </aside>
+                }
+                @if (vm.RelatedFiles.Count > 0)
+                {
+                    <aside class="guide-sidebar__card guide-sidebar__card--downloads" aria-label="Downloads">
+                        <h3 class="govuk-heading-s">Downloads</h3>
+                        <ul class="guide-sidebar__downloads-list">
+                            @foreach (var file in vm.RelatedFiles)
+                            {
+                                <li class="guide-sidebar__downloads-item">
+                                    <a class="guide-sidebar__downloads-link" href="@file.Url" target="_blank" rel="noopener noreferrer">
+                                        <span class="guide-sidebar__downloads-link-inner">
+                                            <span class="guide-sidebar__downloads-filename">@System.Net.WebUtility.HtmlEncode(file.Name)</span>
+                                            <span class="guide-sidebar__downloads-meta"><span class="guide-sidebar__downloads-type">@System.Net.WebUtility.HtmlEncode(file.FileType)</span> · @System.Net.WebUtility.HtmlEncode(file.SizeDisplay)</span>
+                                            @if (!string.IsNullOrWhiteSpace(file.Caption))
+                                            {
+                                                <span class="guide-sidebar__downloads-caption">@System.Net.WebUtility.HtmlEncode(file.Caption)</span>
+                                            }
+                                        </span>
+                                        <span class="guide-sidebar__downloads-icon" aria-hidden="true"></span>
+                                        <span class="govuk-visually-hidden"> (opens in new tab)</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </aside>
+                }
+            </div>
         </div>
-    </div>
+    }
 </div>

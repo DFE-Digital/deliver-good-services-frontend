@@ -1,4 +1,5 @@
 @using ServiceManual.Services
+@using Microsoft.AspNetCore.WebUtilities
 @model DdtStandardsResponse
 @{
     ViewData["Title"] = "DDT Standards";
@@ -11,12 +12,36 @@
     var totalPages = ViewBag.TotalPages as int? ?? 1;
     var totalRecords = ViewBag.TotalRecords as int? ?? 0;
     var errorMessage = ViewBag.ErrorMessage as string;
+    var categoryCounts = ViewBag.CategoryCounts as Dictionary<string, int> ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+    var totalStandardsForFilter = ViewBag.TotalStandardsForFilter as int? ?? totalRecords;
+
+    string BuildCategoryFilterUrl(string? categoryValue)
+    {
+        var query = new List<KeyValuePair<string, string?>>();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query.Add(new KeyValuePair<string, string?>("search", search));
+        }
+        if (!string.IsNullOrWhiteSpace(categoryValue))
+        {
+            query.Add(new KeyValuePair<string, string?>("category", categoryValue));
+        }
+
+        return query.Count == 0
+            ? Url.Action("Index", "DdtStandards") ?? "/standards/ddt-standards"
+            : QueryHelpers.AddQueryString(Url.Action("Index", "DdtStandards") ?? "/standards/ddt-standards", query);
+    }
+
+    // Setup hero section parameters (aligned with Collection)
+    ViewBag.HeroType = "collection";
+    ViewBag.HeroTitle = "DDT Standards";
+    ViewBag.HeroMetaDescription = "Digital, data and technology standards to support good service delivery in DfE.";
+    ViewBag.HeroBadgeText = "Collection";
+    ViewBag.UseInverseNav = true;
 }
 
-@section Breadcrumbs {
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance/collections/standards">Standards</a></li>
-}
+<div class="guide-modern guidance-index standards-index">
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -35,55 +60,53 @@
         </div>
     </div>
 }
-        <div class="govuk-width-container" id="standard-content">
-        @* Row 1: header + contents (aligned with DetailedGuidePage) *@
-        <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                <div class="dfe-f-header">
-                    <span class="govuk-caption-xl govuk-!-margin-top-5">Standards</span>
-                    <h1 class="govuk-heading-xl dfe-f-header__title">DDT Standards</h1>
-                    <p class="govuk-body-l dfe-f-header__intro">Digital, data and technology standards to support good service delivery in DfE.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-<div class="govuk-grid-row govuk-!-margin-bottom-6" id="standards-content">
+<div class="govuk-grid-row govuk-!-margin-bottom-6 govuk-!-margin-top-7" id="standards-content">
     <div class="govuk-grid-column-one-third">
-        <aside class="dfe-standards-filter" aria-label="Filter standards">
-            <div class="dfe-standards-filter__panel">
-                <h2 class="dfe-standards-filter__title">Filter standards</h2>
-                <form method="get" action="@Url.Action("Index", "DdtStandards")" class="dfe-standards-filter__form">
-                    <div class="dfe-standards-filter__field">
-                        <label class="dfe-standards-filter__label" for="search">Keyword search</label>
-                        <input class="govuk-input govuk-input--width-full" id="search" name="search" type="text" value="@search" placeholder="e.g. accessibility" autocomplete="off">
-                    </div>
-                    <div class="dfe-standards-filter__field">
-                        <fieldset class="govuk-fieldset" aria-describedby="category-hint">
-                            <legend class="dfe-standards-filter__label govuk-!-margin-bottom-2">Category</legend>
-                            <div id="category-hint" class="govuk-hint govuk-!-margin-bottom-2">Select one or more</div>
-                            <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
-                                @{ var catIndex = 0; }
-                                @foreach (var cat in categories)
-                                {
-                                    var isChecked = selectedCategories.Contains(cat);
-                                    var id = "category-" + catIndex;
-                                    <div class="govuk-checkboxes__item">
-                                        <input class="govuk-checkboxes__input" id="@id" name="category" type="checkbox" value="@cat" checked="@(isChecked ? "checked" : null)">
-                                        <label class="govuk-label govuk-checkboxes__label" for="@id">@cat</label>
-                                    </div>
-                                    catIndex++;
-                                }
-                            </div>
-                        </fieldset>
-                    </div>
-                    <div class="dfe-standards-filter__actions">
-                        <button type="submit" class="govuk-button govuk-button--primary govuk-!-margin-bottom-0" data-module="govuk-button">Apply filters</button>
-                        <a href="@Url.Action("Index", "DdtStandards")" class="dfe-standards-filter__secondary-link govuk-link govuk-link--no-visited-state">Clear all filters</a>
+        <aside class="guidance-filters" aria-label="Filter standards">
+            <div class="gf-block">
+                <span class="gf-title">Search this page</span>
+                <form method="get" action="@Url.Action("Index", "DdtStandards")" class="gf-search" role="search">
+                    @foreach (var selectedCategory in selectedCategories)
+                    {
+                        <input type="hidden" name="category" value="@selectedCategory" />
+                    }
+                    <label class="govuk-label govuk-visually-hidden" for="standards-search">Search standards</label>
+                    <input class="govuk-input" id="standards-search" name="search" type="text" value="@search" placeholder="Search standards" autocomplete="off" />
+                    <div class="guidance-filters__actions gf-search__actions">
+                        <button type="submit" class="govuk-button govuk-button--secondary guidance-filters__button">Search</button>
                     </div>
                 </form>
+            </div>
+
+            <div class="gf-block guidance-filters__divider">
+                <span class="gf-title">Filter by category</span>
+                <ul class="gf-list">
+                    <li class="gf-item">
+                        <a class="gf-link @(selectedCategories.Count == 0 ? "active" : null)" href="@BuildCategoryFilterUrl(null)">
+                            <span class="gf-dot" style="background:var(--govuk-colour-secondary-text)"></span>
+                            All categories
+                            <span class="gf-count">@totalStandardsForFilter</span>
+                        </a>
+                    </li>
+                    @foreach (var cat in categories)
+                    {
+                        var isActive = selectedCategories.Contains(cat, StringComparer.OrdinalIgnoreCase);
+                        var count = categoryCounts.TryGetValue(cat, out var categoryCount) ? categoryCount : 0;
+                        <li class="gf-item">
+                            <a class="gf-link @(isActive ? "active" : null)" href="@BuildCategoryFilterUrl(cat)">
+                                <span class="gf-dot" style="background:var(--govuk-colour-blue)"></span>
+                                @cat
+                                <span class="gf-count">@count</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+                @if (hasActiveFilters)
+                {
+                    <div class="guidance-filters__actions">
+                        <a href="@Url.Action("Index", "DdtStandards")" class="govuk-link guidance-filters__clear">Clear all filters</a>
+                    </div>
+                }
             </div>
         </aside>
     </div>
@@ -195,4 +218,5 @@
             </div>
         }
     </div>
+</div>
 </div>

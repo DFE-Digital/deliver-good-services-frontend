@@ -40,9 +40,12 @@ namespace ServiceManual.Models
         public List<GuidanceFilterOption> ProfessionFilters { get; set; } = [];
         public string? SelectedGuidanceAreaSlug { get; set; }
         public List<string> SelectedProfessionSlugs { get; set; } = [];
+        public string? SelectedSearchTerm { get; set; }
         public int TotalCollectionCount { get; set; }
         public bool HasActiveFilters =>
-            !string.IsNullOrWhiteSpace(SelectedGuidanceAreaSlug) || SelectedProfessionSlugs.Count > 0;
+            !string.IsNullOrWhiteSpace(SelectedGuidanceAreaSlug)
+            || SelectedProfessionSlugs.Count > 0
+            || !string.IsNullOrWhiteSpace(SelectedSearchTerm);
     }
 
     public class GuidanceFilterOption

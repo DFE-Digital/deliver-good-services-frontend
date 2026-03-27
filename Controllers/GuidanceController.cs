@@ -14,7 +14,7 @@ public class GuidanceController : Controller
     }
 
     [Route("guidance")]
-    public async Task<IActionResult> Index([FromQuery] string? guidanceArea, [FromQuery] List<string>? professions)
+    public async Task<IActionResult> Index([FromQuery] string? guidanceArea, [FromQuery] List<string>? professions, [FromQuery] string? search)
     {
         var page = await _cmsApiService.GetGuidanceIndexAsync();
 
@@ -29,12 +29,42 @@ public class GuidanceController : Controller
 
         var selectedProfessionSet = selectedProfessionSlugs.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var selectedAreaSlug = string.IsNullOrWhiteSpace(guidanceArea) ? null : guidanceArea.Trim();
+        var selectedSearchTerm = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
 
         static IReadOnlyList<TagRef> ProfessionTagsForCollection(GuidanceAreaGroup area, GuidanceCollectionCard collection)
         {
-            return collection.ApplicableProfessions.Count > 0
-                ? collection.ApplicableProfessions
-                : area.FeaturedProfessions;
+            return collection.ApplicableProfessions
+                .Concat(area.FeaturedProfessions)
+                .Where(profession => !string.IsNullOrWhiteSpace(profession.Slug) || !string.IsNullOrWhiteSpace(profession.Title))
+                .GroupBy(
+                    profession => !string.IsNullOrWhiteSpace(profession.Slug)
+                        ? profession.Slug
+                        : profession.Title,
+                    StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .ToList();
+        }
+
+        static bool MatchesSearch(GuidanceAreaGroup area, GuidanceCollectionCard collection, string? searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return true;
+
+            var term = searchTerm.Trim();
+            var texts = new[]
+            {
+                area.Name,
+                area.Summary,
+                area.Description,
+                collection.Title,
+                collection.Description,
+                string.Join(" ", collection.Tags),
+                string.Join(" ", collection.ApplicableProfessions.Select(profession => profession.Title)),
+                string.Join(" ", collection.AlsoInAreas.Select(areaRef => areaRef.Title))
+            };
+
+            return texts.Any(text => !string.IsNullOrWhiteSpace(text)
+                && text.Contains(term, StringComparison.OrdinalIgnoreCase));
         }
 
         var visibleAreas = page.Areas
@@ -49,9 +79,10 @@ public class GuidanceController : Controller
                 FeaturedProfessions = area.FeaturedProfessions,
                 Collections = area.Collections
                     .Where(collection =>
-                        selectedProfessionSet.Count == 0 ||
+                        (selectedProfessionSet.Count == 0 ||
                         ProfessionTagsForCollection(area, collection)
                             .Any(profession => selectedProfessionSet.Contains(profession.Slug)))
+                        && MatchesSearch(area, collection, selectedSearchTerm))
                     .ToList()
             })
             .Where(area => area.Collections.Count > 0)
@@ -63,22 +94,32 @@ public class GuidanceController : Controller
             .Select(group => group.First())
             .ToList();
 
-        var professionFilters = uniqueCollections
-            .SelectMany(collection =>
-                page.Areas
-                    .Where(area => area.Collections.Any(areaCollection => areaCollection.Slug.Equals(collection.Slug, StringComparison.OrdinalIgnoreCase)))
-                    .SelectMany(area => ProfessionTagsForCollection(area, collection)))
-            .Where(profession => !string.IsNullOrWhiteSpace(profession.Slug) && !string.IsNullOrWhiteSpace(profession.Title))
-            .GroupBy(profession => profession.Slug, StringComparer.OrdinalIgnoreCase)
+        var collectionProfessionMappings = page.Areas
+            .SelectMany(area => area.Collections.Select(collection => new
+            {
+                CollectionSlug = collection.Slug,
+                Professions = ProfessionTagsForCollection(area, collection)
+            }))
+            .Where(mapping => !string.IsNullOrWhiteSpace(mapping.CollectionSlug))
+            .SelectMany(mapping => mapping.Professions
+                .Where(profession => !string.IsNullOrWhiteSpace(profession.Slug) && !string.IsNullOrWhiteSpace(profession.Title))
+                .Select(profession => new
+                {
+                    mapping.CollectionSlug,
+                    Profession = profession
+                }))
+            .ToList();
+
+        var professionFilters = collectionProfessionMappings
+            .GroupBy(mapping => mapping.Profession.Slug, StringComparer.OrdinalIgnoreCase)
             .Select(group => new GuidanceFilterOption
             {
-                Slug = group.First().Slug,
-                Label = group.First().Title,
-                Count = uniqueCollections.Count(collection =>
-                    page.Areas
-                        .Where(area => area.Collections.Any(areaCollection => areaCollection.Slug.Equals(collection.Slug, StringComparison.OrdinalIgnoreCase)))
-                        .SelectMany(area => ProfessionTagsForCollection(area, collection))
-                        .Any(profession => profession.Slug.Equals(group.Key, StringComparison.OrdinalIgnoreCase)))
+                Slug = group.First().Profession.Slug,
+                Label = group.First().Profession.Title,
+                Count = group
+                    .Select(mapping => mapping.CollectionSlug)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Count()
             })
             .OrderBy(option => option.Label)
             .ToList();
@@ -98,6 +139,7 @@ public class GuidanceController : Controller
             ProfessionFilters = professionFilters,
             SelectedGuidanceAreaSlug = selectedAreaSlug,
             SelectedProfessionSlugs = selectedProfessionSlugs,
+            SelectedSearchTerm = selectedSearchTerm,
             TotalCollectionCount = uniqueCollections.Count
         };
 

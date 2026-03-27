@@ -1,3 +1,10 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
+@{
+  var gtmContainerId = HostEnvironment.IsEnvironment("Test")
+    ? (Configuration["Analytics:GtmContainerId"] ?? "GTM-WFXD8W9G")
+    : (HostEnvironment.IsEnvironment("Production") ? Configuration["Analytics:GtmContainerId"] : null);
+}
 <!DOCTYPE html>
 <html lang="en" class="govuk-template--rebranded">
 <head>
@@ -10,16 +17,36 @@
     <link rel="stylesheet" href="~/css/inter.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/service-manual.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/dfe-f-panel-container.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/font-awesome/css/all.min.css" asp-append-version="true" />
     <link rel="shortcut icon" href="~/favicon.ico" type="image/x-icon" />
     <link rel="mask-icon" href="~/favicon.ico" color="#0b0c0c" />
     <link rel="apple-touch-icon" sizes="180x180" href="~/favicon.ico" />
     <meta name="theme-color" content="#0b0c0c" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="format-detection" content="telephone=no" />
+    @if (!string.IsNullOrWhiteSpace(gtmContainerId))
+    {
+        <!-- Google Tag Manager -->
+        <script>
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','@gtmContainerId');
+        </script>
+        <!-- End Google Tag Manager -->
+    }
     @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body class="govuk-template__body @(IsSectionDefined("Breadcrumbs") ? "has-breadcrumbs" : "")">
+  @if (!string.IsNullOrWhiteSpace(gtmContainerId))
+  {
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=@gtmContainerId"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+  }
   <script>
     document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');
   </script>
@@ -87,6 +114,7 @@
     initAll();
   </script>
   <script src="/js/site.js"></script>
+  <script src="/js/library.js"></script>
   <script src="/js/dfe-f-panel-container.js"></script>
   <script src="/js/dfe-sortable-table.js"></script>
   <script type="module">

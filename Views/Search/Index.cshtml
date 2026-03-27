@@ -1,10 +1,42 @@
 @using Microsoft.AspNetCore.Html
+@using Microsoft.AspNetCore.WebUtilities
 @using ServiceManual.Controllers
 @using ServiceManual.Models
 @model SearchViewModel
 @{
     ViewData["Title"] = string.IsNullOrEmpty(Model.Keywords) ? "Search" : $"Search results for \"{Model.Keywords}\"";
     var hasQuery = !string.IsNullOrEmpty(Model.Keywords);
+  var hasResults = hasQuery && Model.Results.Count > 0;
+  var noResults = hasQuery && Model.Results.Count == 0;
+
+  ViewBag.HeroType = "search";
+  ViewBag.HeroTitle = "Search this site";
+  ViewBag.HeroIntro = "Searches guidance, collections, guides, pages and standards.";
+  ViewBag.HeroBadgeText = "Search";
+  ViewBag.HeroBreadcrumbItems = new List<(string Title, string Url)>
+  {
+    ("Home", "/"),
+    ("Search", null!)
+  };
+
+  string BuildSearchUrl(string? keywords, IEnumerable<string>? types, bool highlight)
+  {
+    var query = new List<KeyValuePair<string, string?>>();
+
+    if (!string.IsNullOrWhiteSpace(keywords))
+      query.Add(new KeyValuePair<string, string?>("keywords", keywords));
+
+    foreach (var type in types ?? Enumerable.Empty<string>())
+    {
+      if (!string.IsNullOrWhiteSpace(type))
+        query.Add(new KeyValuePair<string, string?>("type", type));
+    }
+
+    if (highlight)
+      query.Add(new KeyValuePair<string, string?>("highlight", "1"));
+
+    return query.Count == 0 ? "/search" : QueryHelpers.AddQueryString("/search", query);
+  }
 }
 
 @functions {
@@ -54,151 +86,149 @@
     }
 }
 
-@section Breadcrumbs {
-  <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-  <li class="govuk-breadcrumbs__list-item" aria-current="page">Search</li>
-}
+<div class="guide-modern guidance-index search-index">
+  @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
-@{
-  var hasResults = hasQuery && Model.Results.Count > 0;
-  var noResults = hasQuery && Model.Results.Count == 0;
-}
+  <div class="guidance-body">
+    @if (!hasQuery || noResults)
+    {
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <div class="guidance-empty-state">
+            <form method="get" action="/search" class="search-facets" role="search">
+              @if (Model.HighlightKeywords)
+              {
+                <input type="hidden" name="highlight" value="1">
+              }
+              <div class="gem-c-search gem-c-search--large gem-c-search--on-white gem-c-search--separate-label govuk-!-margin-bottom-0" data-module="gem-search-page">
+                <label class="govuk-label govuk-label--m gem-c-search-page__label" for="search-page-keywords">Search</label>
+                <div id="search-page-hint" class="govuk-hint govuk-!-margin-top-1">Searches guidance, collections, guides, pages and standards.</div>
+                <div class="gem-c-search__item-wrapper">
+                  <div class="gem-c-search-page__input-wrapper">
+                    <input class="gem-c-search__input gem-c-search__item" id="search-page-keywords" name="keywords" type="search" value="@Model.Keywords" placeholder="e.g. accessibility" autocomplete="off">
+                  </div>
+                  <div class="gem-c-search__item gem-c-search__submit-wrapper">
+                    <button class="gem-c-search__submit" type="submit" enterkeyhint="search">
+                      <span class="gem-c-search__submit-text">Search</span>
+                      <svg class="gem-c-search__icon" width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                        <circle cx="12.0161" cy="11.0161" r="8.51613" stroke="currentColor" stroke-width="3"></circle>
+                        <line x1="17.8668" y1="17.3587" x2="26.4475" y2="25.9393" stroke="currentColor" stroke-width="3"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
 
-<div class="govuk-grid-row">
-  <div class="govuk-grid-column-full">
-    <h1 class="govuk-heading-xl govuk-!-margin-top-5">Search this site</h1>
-  </div>
-</div>
-
-@if (!hasQuery || noResults)
-{
-  @* Default (no query) or no results: single two-thirds column, no one-third *@
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      <form method="get" action="/search" class="search-facets" role="search">
-        <div class="gem-c-search gem-c-search--large gem-c-search--on-white gem-c-search--separate-label govuk-!-margin-bottom-4" data-module="gem-search-page">
-          <label class="govuk-label govuk-label--m gem-c-search-page__label" for="search-page-keywords">Search</label>
-          <div id="search-page-hint" class="govuk-hint govuk-!-margin-top-1">Searches guidance, collections, guides, pages and standards.</div>
-          <div class="gem-c-search__item-wrapper">
-            <div class="gem-c-search-page__input-wrapper">
-              <input class="gem-c-search__input gem-c-search__item" id="search-page-keywords" name="keywords" type="search" value="@Model.Keywords" placeholder="e.g. accessibility" autocomplete="off">
-            </div>
-            <div class="gem-c-search__item gem-c-search__submit-wrapper">
-              <button class="gem-c-search__submit" type="submit" enterkeyhint="search">
-                <span class="gem-c-search__submit-text">Search</span>
-                <svg class="gem-c-search__icon" width="27" height="27" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                  <circle cx="12.0161" cy="11.0161" r="8.51613" stroke="currentColor" stroke-width="3"></circle>
-                  <line x1="17.8668" y1="17.3587" x2="26.4475" y2="25.9393" stroke="currentColor" stroke-width="3"></line>
-                </svg>
-              </button>
-            </div>
+            @if (noResults)
+            {
+              <p class="govuk-body govuk-!-margin-top-4">No results for <strong>@Model.Keywords</strong>. Try different keywords.</p>
+            }
           </div>
         </div>
-      </form>
-      @if (noResults)
-      {
-        <p class="govuk-body govuk-!-margin-top-2">No results for <strong>@Model.Keywords</strong>. Try different keywords.</p>
-      }
-    </div>
-  </div>
-}
-else
-{
-  @* Has results: one-third (search + filters) + two-thirds (results) *@
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-one-third">
-      <aside class="dfe-standards-filter" aria-label="Filter results">
-        <div class="dfe-standards-filter__panel">
-          <h2 class="dfe-standards-filter__title">Filter results</h2>
-          <form method="get" action="/search" class="dfe-standards-filter__form" role="search">
-            @if (Model.HighlightKeywords)
-            {
-              <input type="hidden" name="highlight" value="1">
-            }
-            <div class="dfe-standards-filter__field">
-              <label class="dfe-standards-filter__label" for="search-page-keywords">Keyword search</label>
-              <input class="govuk-input govuk-input--width-full" id="search-page-keywords" name="keywords" type="search" value="@Model.Keywords" placeholder="e.g. accessibility" autocomplete="off">
-            </div>
-            @if (Model.Facets.Count > 0)
-            {
-              <div class="dfe-standards-filter__field">
-                <fieldset class="govuk-fieldset" aria-describedby="type-hint">
-                  <legend class="dfe-standards-filter__label govuk-!-margin-bottom-2">Content type</legend>
-                  <div id="type-hint" class="govuk-hint govuk-!-margin-bottom-2">Select one or more. Content types in the current results.</div>
-                  <div class="govuk-checkboxes govuk-checkboxes--small" data-module="govuk-checkboxes">
-                    @{ var facetIndex = 0; }
-                    @foreach (var facet in Model.Facets)
-                    {
-                      var isChecked = Model.Types.Contains(facet.ContentType, StringComparer.OrdinalIgnoreCase);
-                      var id = "facet-type-" + facetIndex;
-                      facetIndex++;
-                      <div class="govuk-checkboxes__item">
-                        <input class="govuk-checkboxes__input" id="@id" name="type" type="checkbox" value="@facet.ContentType" checked="@(isChecked ? "checked" : null)">
-                        <label class="govuk-label govuk-checkboxes__label" for="@id">@facet.ContentType <span class="govuk-body-s govuk-!-font-weight-regular">(@facet.Count)</span></label>
-                      </div>
-                    }
-                  </div>
-                </fieldset>
+      </div>
+    }
+    else
+    {
+      <div class="guidance-layout">
+        <aside class="guidance-filters" aria-label="Filter results">
+          <div class="gf-block">
+            <span class="gf-title">Search this page</span>
+            <form method="get" action="/search" class="gf-search" role="search">
+              @if (Model.HighlightKeywords)
+              {
+                <input type="hidden" name="highlight" value="1">
+              }
+              @foreach (var type in Model.Types)
+              {
+                <input type="hidden" name="type" value="@type" />
+              }
+              <label class="govuk-label govuk-visually-hidden" for="search-filter-keywords">Search results</label>
+              <input class="govuk-input" id="search-filter-keywords" name="keywords" type="search" value="@Model.Keywords" placeholder="Search results" autocomplete="off">
+              <div class="guidance-filters__actions gf-search__actions">
+                <button type="submit" class="govuk-button guidance-filters__button" data-module="govuk-button">Search</button>
               </div>
-            }
-            <div class="dfe-standards-filter__actions">
-              <button type="submit" class="govuk-button govuk-button--primary govuk-!-margin-bottom-0" data-module="govuk-button">Apply filters</button>
-              <a href="/search?keywords=@Uri.EscapeDataString(Model.Keywords)@(Model.HighlightKeywords ? "&highlight=1" : "")" class="dfe-standards-filter__secondary-link govuk-link govuk-link--no-visited-state">Clear all filters</a>
-            </div>
-          </form>
-        </div>
-      </aside>
-    </div>
+            </form>
+          </div>
 
-    <div class="govuk-grid-column-two-thirds">
-      @if (Model.Types.Count > 0)
-      {
-        <div class="dfe-standards-filter__applied dfe-standards-filter__applied--above-results govuk-!-margin-bottom-4">
-          <p class="dfe-standards-filter__applied-heading">Applied filters</p>
-          <ul class="dfe-standards-filter__chips">
-            @foreach (var type in Model.Types)
+          @if (Model.Facets.Count > 0)
+          {
+            <div class="gf-block guidance-filters__divider">
+              <span class="gf-title">Filter by content type</span>
+              <form method="get" action="/search">
+                @if (Model.HighlightKeywords)
+                {
+                  <input type="hidden" name="highlight" value="1">
+                }
+                <input type="hidden" name="keywords" value="@Model.Keywords" />
+
+                <ul class="gf-list">
+                  @foreach (var facet in Model.Facets)
+                  {
+                    var isChecked = Model.Types.Contains(facet.ContentType, StringComparer.OrdinalIgnoreCase);
+                    <li class="gf-item">
+                      <label class="gf-check">
+                        <input name="type" type="checkbox" value="@facet.ContentType" checked="@(isChecked ? "checked" : null)">
+                        <span class="gf-check__lbl">@facet.ContentType</span>
+                        <span class="gf-count">@facet.Count</span>
+                      </label>
+                    </li>
+                  }
+                </ul>
+
+                <div class="guidance-filters__actions">
+                  <button type="submit" class="govuk-button guidance-filters__button" data-module="govuk-button">Apply filters</button>
+                  <a href="@BuildSearchUrl(Model.Keywords, null, Model.HighlightKeywords)" class="govuk-link guidance-filters__clear">Clear all filters</a>
+                </div>
+              </form>
+            </div>
+          }
+        </aside>
+
+        <div class="guidance-main">
+          @if (Model.Types.Count > 0)
+          {
+            <div class="dfe-standards-filter__applied dfe-standards-filter__applied--above-results govuk-!-margin-bottom-4">
+              <p class="dfe-standards-filter__applied-heading">Applied filters</p>
+              <ul class="dfe-standards-filter__chips">
+                @foreach (var type in Model.Types)
+                {
+                  var remainingTypes = Model.Types.Where(t => !string.Equals(t, type, StringComparison.OrdinalIgnoreCase)).ToList();
+                  <li>
+                    <span class="dfe-standards-filter__chip">
+                      <span class="dfe-standards-filter__chip-text">@type</span>
+                      <a href="@BuildSearchUrl(Model.Keywords, remainingTypes, Model.HighlightKeywords)" class="dfe-standards-filter__chip-remove" aria-label="Remove @type filter"><span aria-hidden="true">×</span></a>
+                    </span>
+                  </li>
+                }
+              </ul>
+              <a href="@BuildSearchUrl(Model.Keywords, null, Model.HighlightKeywords)" class="dfe-standards-filter__clear-all govuk-link govuk-link--no-visited-state">Clear all filters</a>
+            </div>
+          }
+
+          <p class="govuk-body govuk-!-margin-bottom-4"><strong>@Model.Results.Count</strong> result@(Model.Results.Count == 1 ? "" : "s") for @Model.Keywords</p>
+
+          <ul class="govuk-list search-results-list">
+            @foreach (var item in Model.Results)
             {
-              var otherTypes = Model.Types.Where(t => !string.Equals(t, type, StringComparison.OrdinalIgnoreCase)).ToList();
-              var query = string.Join("&", otherTypes.Select(t => "type=" + Uri.EscapeDataString(t)));
-              var clearTypeUrl = "/search?keywords=" + Uri.EscapeDataString(Model.Keywords) + (query.Length > 0 ? "&" + query : "") + (Model.HighlightKeywords ? "&highlight=1" : "");
-              <li>
-                <span class="dfe-standards-filter__chip">
-                  <span class="dfe-standards-filter__chip-text">@type</span>
-                  <a href="@clearTypeUrl" class="dfe-standards-filter__chip-remove" aria-label="Remove @type filter"><span aria-hidden="true">×</span></a>
-                </span>
+              <li class="search-results-item">
+                <h2 class="govuk-heading-m govuk-!-margin-bottom-1">
+                  <a href="@item.Url" class="govuk-link">@(Model.HighlightKeywords ? HighlightKeywords(item.Title, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.Title)))</a>
+                </h2>
+                <p class="govuk-body-s govuk-!-margin-bottom-1 search-results-meta">@item.ContentType</p>
+                @if (!string.IsNullOrWhiteSpace(item.PartOfCollectionTitle) && !string.IsNullOrWhiteSpace(item.PartOfCollectionUrl))
+                {
+                  <p class="govuk-body-s govuk-!-margin-bottom-1 search-results-meta">Part of collection: <a href="@item.PartOfCollectionUrl" class="govuk-link">@(Model.HighlightKeywords ? HighlightKeywords(item.PartOfCollectionTitle, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.PartOfCollectionTitle!)))</a></p>
+                }
+                @if (!string.IsNullOrWhiteSpace(item.Summary))
+                {
+                  <p class="govuk-body govuk-body-s govuk-!-margin-top-1">@(Model.HighlightKeywords ? HighlightKeywords(item.Summary, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.Summary)))</p>
+                }
               </li>
             }
           </ul>
-          <a href="/search?keywords=@Uri.EscapeDataString(Model.Keywords)@(Model.HighlightKeywords ? "&highlight=1" : "")" class="dfe-standards-filter__clear-all govuk-link govuk-link--no-visited-state">Clear all filters</a>
         </div>
-      }
-      @{
-        var searchBase = "/search?keywords=" + Uri.EscapeDataString(Model.Keywords);
-        var typeParams = Model.Types.Count > 0 ? "&" + string.Join("&", Model.Types.Select(t => "type=" + Uri.EscapeDataString(t))) : "";
-        var urlWithHighlight = searchBase + typeParams + "&highlight=1";
-        var urlWithoutHighlight = searchBase + typeParams;
-      }
-      <p class="govuk-body govuk-!-margin-bottom-2"><strong>@Model.Results.Count</strong> result@(Model.Results.Count == 1 ? "" : "s") for @Model.Keywords</p>
-
-      <ul class="govuk-list">
-        @foreach (var item in Model.Results)
-        {
-          <li class="govuk-!-margin-bottom-4">
-            <h2 class="govuk-heading-m govuk-!-margin-bottom-1">
-              <a href="@item.Url" class="govuk-link">@(Model.HighlightKeywords ? HighlightKeywords(item.Title, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.Title)))</a>
-            </h2>
-            <span class="govuk-body-s govuk-!-margin-right-2" style="color: var(--govuk-colour-secondary-text);">@item.ContentType</span>
-            @if (!string.IsNullOrWhiteSpace(item.PartOfCollectionTitle) && !string.IsNullOrWhiteSpace(item.PartOfCollectionUrl))
-            {
-              <span class="govuk-body-s govuk-!-margin-right-2" style="color: var(--govuk-colour-secondary-text);">Part of collection: <a href="@item.PartOfCollectionUrl" class="govuk-link">@(Model.HighlightKeywords ? HighlightKeywords(item.PartOfCollectionTitle, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.PartOfCollectionTitle!)))</a></span>
-            }
-            @if (!string.IsNullOrWhiteSpace(item.Summary))
-            {
-              <p class="govuk-body govuk-body-s govuk-!-margin-top-1">@(Model.HighlightKeywords ? HighlightKeywords(item.Summary, Model.Keywords) : (IHtmlContent)new HtmlString(System.Net.WebUtility.HtmlEncode(item.Summary)))</p>
-            }
-          </li>
-        }
-      </ul>
-    </div>
+      </div>
+    }
   </div>
-}
+</div>

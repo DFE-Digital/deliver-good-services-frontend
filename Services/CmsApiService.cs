@@ -1135,13 +1135,13 @@ namespace ServiceManual.Services
             var items = new List<ContentIndexItem>();
             const int pageSize = 250;
 
-            // Articles: /guidance/articles/{routeKey}
+            // Articles: /article/{slug}
             await AddListAsync(items, "api/articles",
-                "&fields[0]=title&fields[1]=metaDescription",
+                "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug",
                 pageSize,
                 "Article",
-                d => $"/guidance/articles/{Uri.EscapeDataString(ResolveArticleRouteKey(d.Slug, d.DocumentId, d.Id) ?? string.Empty)}",
-                d => ResolveArticleRouteKey(d.Slug, d.DocumentId, d.Id));
+                d => $"/article/{Uri.EscapeDataString(d.Slug?.Trim() ?? string.Empty)}",
+                d => string.IsNullOrWhiteSpace(d.Slug) ? null : d.Slug.Trim());
 
             // Collections: /guidance/collections/{slug}
             await AddListAsync(items, "api/collections",

@@ -19,70 +19,38 @@
     if (hasRoleDescription) { contentsItems.Add(("Role responsibilities", "you-will-heading")); }
     if (hasSkills) { contentsItems.Add(("Skills you need", "skills-heading")); }
     var hasContents = contentsItems.Count > 0;
+
+    // Setup hero section parameters (aligned with DetailedGuide)
+    ViewBag.HeroType = "guidance";
+    ViewBag.HeroTitle = jobSpec.Title;
+    ViewBag.HeroIntro = !string.IsNullOrEmpty(jobSpec.Grade) ? $"Grade {jobSpec.Grade}" : "";
+    ViewBag.HeroBadgeText = "Job description";
+    ViewBag.HeroCollectionSlug = collectionSlug;
+    ViewBag.HeroCollectionTitle = collectionTitle;
 }
 
 <div class="guide-modern">
-    @* Hero: breadcrumb + header (same structure as DetailedGuide) *@
-    <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <header class="guide-hero">
-                <div class="govuk-width-container">
-                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
-                        <ol class="govuk-breadcrumbs__list">
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
-                            @if (!string.IsNullOrEmpty(professionTitle))
-                            {
-                                <li class="govuk-breadcrumbs__list-item">@professionTitle</li>
-                            }
-                            <li class="govuk-breadcrumbs__list-item" aria-current="page">@jobSpec.Title</li>
-                        </ol>
-                    </nav>
-                    <div class="govuk-grid-row">
-                        <div class="govuk-grid-column-two-thirds">
-                            <span class="guide-hero__label">Job description</span>
-                            <h1 class="govuk-heading-xl dfe-f-header__title">@jobSpec.Title</h1>
-                            @if (!string.IsNullOrEmpty(jobSpec.Grade))
-                            {
-                                <p class="govuk-body-l govuk-!-margin-top-2 govuk-!-margin-bottom-0">Grade @jobSpec.Grade</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </header>
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
-            @* Meta strip — Part of (same as DetailedGuide) *@
-            @if (hasCollection)
-            {
-                <div class="guide-meta">
-                    <div class="govuk-width-container">
-                        <span class="guide-meta__item"><strong>Part of:</strong> <a href="/guidance/collections/@collectionSlug">@System.Net.WebUtility.HtmlEncode(collectionTitle!)</a></span>
-                    </div>
-                </div>
-            }
-
-            @* Contents: page sections (same pattern as DetailedGuide) *@
-            @if (hasContents)
-            {
-                <div class="govuk-grid-row">
-                    <div class="@(hasRightPanel ? "govuk-grid-column-two-thirds" : "govuk-grid-column-full")">
-                        <nav class="guide-contents guide-contents--dashed" aria-label="Contents">
-                            <h2 class="guide-contents__title">Contents</h2>
-                            <ul class="guide-contents__list">
-                                @foreach (var (title, id) in contentsItems)
-                                {
-                                    <li class="guide-contents__item">
-                                        <span class="guide-contents__num" aria-hidden="true">—</span>
-                                        <a href="#@id">@title</a>
-                                    </li>
-                                }
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-            }
+    @if (hasContents)
+    {
+        <div class="govuk-grid-row">
+            <div class="@(hasRightPanel ? "govuk-grid-column-two-thirds" : "govuk-grid-column-full")">
+                <nav class="guide-contents guide-contents--dashed" aria-label="Contents">
+                    <h2 class="guide-contents__title">Contents</h2>
+                    <ul class="guide-contents__list">
+                        @foreach (var (title, id) in contentsItems)
+                        {
+                            <li class="guide-contents__item">
+                                <span class="guide-contents__num" aria-hidden="true">—</span>
+                                <a href="#@id">@title</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
         </div>
-    </div>
+    }
 
     @* Content + sidebar (same structure as DetailedGuide) *@
     <div class="govuk-grid-row guide-content-row">

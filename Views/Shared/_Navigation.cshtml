@@ -20,14 +20,24 @@
                 <li class="govuk-service-navigation__item @(isParentActive ? "govuk-service-navigation__item--active" : "")">
                     @if (item.Url is not null)
                     {
-                        <a class="govuk-service-navigation__link" href="@item.Url" @(isParentActive ? Html.Raw("aria-current=\"true\"") : null)>
+                        <a class="govuk-service-navigation__link@(item.Url == "/my-library" ? " lib-nav-link" : "")" href="@item.Url" @(isParentActive ? Html.Raw("aria-current=\"true\"") : null)>
                             @if (isParentActive)
                             {
-                                <strong class="govuk-service-navigation__active-fallback">@item.Title</strong>
+                                <strong class="govuk-service-navigation__active-fallback">
+                                    @item.Title
+                                    @if (item.Url == "/my-library")
+                                    {
+                                        <span class="lib-count" hidden aria-hidden="true"></span>
+                                    }
+                                </strong>
                             }
                             else
                             {
                                 @item.Title
+                                @if (item.Url == "/my-library")
+                                {
+                                    <span class="lib-count" hidden aria-hidden="true"></span>
+                                }
                             }
                         </a>
                     }

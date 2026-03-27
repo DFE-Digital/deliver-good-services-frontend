@@ -13,14 +13,20 @@ namespace ServiceManual.Controllers
             _cmsApiService = cmsApiService;
         }
 
-        [Route("guidance/articles")]
+        [Route("articles")]
         public async Task<IActionResult> Index()
         {
             var articles = await _cmsApiService.GetArticlesAsync();
             return View("~/Views/Templates/Articles.cshtml", articles);
         }
 
-        [Route("guidance/articles/{routeKey}")]
+        [Route("guidance/articles")]
+        public IActionResult LegacyIndex()
+        {
+            return RedirectPermanent("/articles");
+        }
+
+        [Route("article/{routeKey}")]
         public async Task<IActionResult> Show(string routeKey)
         {
             var article = await _cmsApiService.GetArticleByRouteKeyAsync(routeKey);
@@ -29,6 +35,12 @@ namespace ServiceManual.Controllers
 
             ViewBag.BodyHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(article.Body ?? string.Empty);
             return View("~/Views/Templates/Article.cshtml", article);
+        }
+
+        [Route("guidance/articles/{routeKey}")]
+        public IActionResult LegacyShow(string routeKey)
+        {
+            return RedirectPermanent($"/article/{Uri.EscapeDataString(routeKey)}");
         }
     }
 }

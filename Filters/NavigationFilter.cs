@@ -49,13 +49,14 @@ namespace ServiceManual.Filters
                                     ..orderedStages.Select((s, i) => new NavigationItem { Title = s.Title, Url = $"/lifecycle#{s.Slug}", Order = i + 1 })
                                 ]
                             };
-                            nav = [lifecycleNav, ..nav];
+                            nav = [lifecycleNav, .. nav];
                         }
                     }
                     if (nav is null || nav.Count == 0)
                     {
                         nav = GetDefaultSiteNavigation();
                     }
+
                     controller.ViewData["Navigation"] = nav;
                 }
             }

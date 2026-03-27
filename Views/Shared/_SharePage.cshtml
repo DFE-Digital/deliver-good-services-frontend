@@ -1,0 +1,63 @@
+@{
+    var shareTitle = ViewData["ShareTitle"] as string ?? string.Empty;
+    var shareUrl = ViewData["ShareUrl"] as string ?? string.Empty;
+    var libId = ViewData["LibId"] as string ?? string.Empty;
+    var libTitle = ViewData["LibTitle"] as string ?? shareTitle;
+    var libUrl = ViewData["LibUrl"] as string ?? shareUrl;
+    var libType = ViewData["LibType"] as string ?? "Guidance";
+    var libDescription = ViewData["LibDescription"] as string ?? string.Empty;
+
+    var encodedUrl = Uri.EscapeDataString(shareUrl);
+    var encodedText = Uri.EscapeDataString(shareTitle + " " + shareUrl);
+    var encodedSubject = Uri.EscapeDataString(shareTitle);
+    var encodedBody = Uri.EscapeDataString(shareTitle + "\n\n" + shareUrl);
+}
+
+<aside class="guide-sidebar__card share-panel" aria-label="Share this page" data-share-title="@shareTitle" data-share-url="@shareUrl">
+    <h3 class="govuk-heading-s">Save and share</h3>
+
+    <div class="share-panel__row">
+        <a class="govuk-link share-panel__icon-btn share-panel__icon-btn--save share-panel__link"
+            href="#"
+            role="button"
+            data-library-toggle
+            data-lib-id="@libId"
+            data-lib-title="@libTitle"
+            data-lib-url="@libUrl"
+            data-lib-type="@libType"
+            data-lib-description="@libDescription"
+            aria-pressed="false">
+            <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
+            <span class="library-btn__label">Save</span>
+        </a>
+
+        <span class="share-panel__divider" aria-hidden="true"></span>
+
+        <ul class="share-panel__icon-list" role="list">
+            <li>
+                <a class="govuk-link share-panel__icon-btn share-panel__link" data-share-provider="linkedin" href="https://www.linkedin.com/sharing/share-offsite/?url=@encodedUrl" target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn" title="LinkedIn">
+                    <i class="fa-brands fa-linkedin-in" aria-hidden="true"></i>
+                    <span class="govuk-visually-hidden">LinkedIn</span>
+                </a>
+            </li>
+            <li>
+                <a class="govuk-link share-panel__icon-btn share-panel__link" data-share-provider="teams" href="https://teams.microsoft.com/share?href=@encodedUrl&text=@Uri.EscapeDataString(shareTitle)" target="_blank" rel="noopener noreferrer" aria-label="Share on Teams" title="Teams">
+                    <i class="fa-brands fa-microsoft" aria-hidden="true"></i>
+                    <span class="govuk-visually-hidden">Teams</span>
+                </a>
+            </li>
+            <li>
+                <a class="govuk-link share-panel__icon-btn share-panel__link" data-share-provider="bluesky" href="https://bsky.app/intent/compose?text=@encodedText" target="_blank" rel="noopener noreferrer" aria-label="Share on BlueSky" title="BlueSky">
+                    <i class="fa-brands fa-bluesky" aria-hidden="true"></i>
+                    <span class="govuk-visually-hidden">BlueSky</span>
+                </a>
+            </li>
+            <li>
+                <a class="govuk-link share-panel__icon-btn share-panel__link" data-share-provider="email" href="mailto:?subject=@encodedSubject&body=@encodedBody" aria-label="Share by email" title="Email">
+                    <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                    <span class="govuk-visually-hidden">Email</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>

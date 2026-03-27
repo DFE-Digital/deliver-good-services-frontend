@@ -6177,7 +6177,7 @@ ul > li:last-child {
 }
 
 .hero__meta-item {
-  font-size: 13px;
+  font-size: 1rem;
   color: #505a5f;
 }
 
@@ -6454,7 +6454,7 @@ ul > li:last-child {
 }
 
 .guide-modern .page-hero__meta-item {
-  font-size: 12.5px;
+  font-size: 1rem;
   color: var(--ink-soft);
 }
 
@@ -6579,6 +6579,28 @@ ul > li:last-child {
 
 .guidance-index .guidance-filters__button {
   margin-bottom: 0;
+  background-color: var(--govuk-colour-blue);
+  border-color: var(--govuk-colour-blue);
+  color: var(--govuk-colour-white);
+  box-shadow: 0 2px 0 var(--govuk-colour-blue-shade-50);
+}
+
+.guidance-index .guidance-filters__button:hover {
+  background-color: var(--govuk-colour-blue-shade-50);
+  border-color: var(--govuk-colour-blue-shade-50);
+  color: var(--govuk-colour-white);
+}
+
+.guidance-index .guidance-filters__button:focus {
+  color: var(--govuk-colour-text);
+  background-color: var(--govuk-colour-focus);
+  border-color: var(--govuk-colour-focus);
+  box-shadow: 0 2px 0 var(--govuk-colour-text);
+}
+
+.guidance-index .guidance-filters__button:active {
+  top: 2px;
+  box-shadow: none;
 }
 
 .guidance-index .guidance-filters__clear {
@@ -6846,6 +6868,271 @@ ul > li:last-child {
   background: #ffffff;
 }
 
+.search-index .search-results-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.search-index .search-results-item {
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.search-index .search-results-item:last-child {
+  margin-bottom: 0;
+}
+
+.search-index .search-results-meta {
+  color: var(--govuk-colour-secondary-text);
+}
+
+.search-index .search-facets .gem-c-search {
+  max-width: none;
+}
+
+.search-index .gf-search .govuk-input {
+  margin-top: 12px;
+}
+
+.guide-modern .ss-body {
+  --c-green: #00703c;
+  --c-orange: #f47738;
+  --c-error: #d4351c;
+  padding: 32px 0 64px;
+}
+
+.guide-modern .ss-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.guide-modern .ss-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.guide-modern .ss-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  text-decoration: none;
+  border: 1px solid #d8dde0;
+  background: #ffffff;
+  color: inherit;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.guide-modern .ss-card:hover {
+  border-color: var(--govuk-colour-blue);
+  box-shadow: 0 4px 14px rgba(11, 12, 12, 0.08);
+  transform: translateY(-1px);
+}
+
+.guide-modern .ss-card:focus {
+  outline: 3px solid var(--govuk-colour-focus);
+  outline-offset: 2px;
+}
+
+.guide-modern .ss-card--active {
+  border-color: var(--govuk-colour-blue);
+  box-shadow: inset 4px 0 0 var(--govuk-colour-blue);
+  background: var(--govuk-colour-blue-tint-95);
+}
+
+.guide-modern .ss-card__num-col {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14px;
+  border-right: 1px solid #e8e8e8;
+}
+
+.guide-modern .ss-card__num {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--govuk-colour-blue);
+  color: #ffffff;
+}
+
+.guide-modern .ss-card__body {
+  padding: 14px 16px;
+}
+
+.guide-modern .ss-card__title {
+  display: block;
+  color: var(--govuk-colour-link);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.guide-modern .ss-card__desc {
+  display: block;
+  margin-top: 6px;
+  color: var(--govuk-colour-secondary-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.guide-modern .ss-card__meta {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.guide-modern .ph {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #d8dde0;
+  background: #ffffff;
+  color: #3d4346;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.guide-modern .ph--disc {
+  border-color: #8fc4ff;
+  background: #eef6ff;
+  color: #0b4f8a;
+}
+
+.guide-modern .ph--alpha {
+  border-color: #c0e2b7;
+  background: #f3fbf0;
+  color: #2a6f1e;
+}
+
+.guide-modern .ph--beta {
+  border-color: #ffe3bf;
+  background: #fff7eb;
+  color: #8a4a07;
+}
+
+.guide-modern .ph--live {
+  border-color: #bcd7ff;
+  background: #eff6ff;
+  color: #1b4f9c;
+}
+
+.guide-modern .ss-card__roles {
+  font-size: 12px;
+  color: #505a5f;
+  font-weight: 600;
+}
+
+.guide-modern .ss-aside {
+  position: sticky;
+  top: 88px;
+}
+
+.guide-modern .assess-box,
+.guide-modern .rag-box,
+.guide-modern .sb-block {
+  border: 1px solid #d8dde0;
+  background: #ffffff;
+  padding: 16px;
+}
+
+.guide-modern .assess-box h3,
+.guide-modern .rag-box h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.guide-modern .assess-box p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #505a5f;
+}
+
+.guide-modern .rag-box {
+  margin-top: 16px;
+}
+
+.guide-modern .rag-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.guide-modern .rag-item:last-child {
+  margin-bottom: 0;
+}
+
+.guide-modern .rag-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.guide-modern .rag-text {
+  font-size: 13px;
+  color: #505a5f;
+  line-height: 1.45;
+}
+
+.guide-modern .rag-text strong {
+  display: block;
+  color: #0b0c0c;
+}
+
+.guide-modern .sb-lbl {
+  display: block;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #0b0c0c;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #505a5f;
+}
+
+.guide-modern .sb-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guide-modern .sb-links li {
+  margin: 0;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.guide-modern .sb-link {
+  display: block;
+  padding: 8px 0;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.guide-modern .sb-link:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 62rem) {
   .guidance-index .guidance-layout {
     grid-template-columns: 1fr;
@@ -6857,6 +7144,14 @@ ul > li:last-child {
 
   .guidance-index .ga-collections {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .guide-modern .ss-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-modern .ss-aside {
+    position: static;
   }
 }
 
@@ -6882,4 +7177,442 @@ h5,
 h6 {
   letter-spacing: -1px !important;
   font-weight: 800 !important;
+}
+.gf-search {
+  margin-top: 15px;
+}
+
+/* ==========================================================================
+   My Library feature
+   ========================================================================== */
+
+/* --- Save to library toggle button --- */
+.library-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  margin-top: 12px;
+  background: #fff;
+  border: 2px solid #b1b4b6;
+  border-radius: 4px;
+  color: #0b0c0c;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+  text-decoration: none;
+}
+
+.library-btn:hover {
+  border-color: #0b0c0c;
+  background: #f3f2f1;
+}
+
+.library-btn:focus {
+  outline: 3px solid #fd0;
+  outline-offset: 0;
+  background: #fd0;
+  color: #0b0c0c;
+}
+
+.library-btn--saved {
+  border-color: #1d70b8;
+  color: #1d70b8;
+  background: #e8f0fc;
+}
+
+.library-btn--saved:hover {
+  border-color: #003078;
+  color: #003078;
+  background: #dce8fa;
+}
+
+.library-btn__icon {
+  flex-shrink: 0;
+  transition:
+    fill 0.15s ease,
+    stroke 0.15s ease;
+}
+
+.library-btn--saved .library-btn__icon {
+  fill: #1d70b8;
+  stroke: #1d70b8;
+}
+
+/* --- Nav badge (count bubble beside the My Library nav link) --- */
+.lib-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 5px;
+  background: #1d70b8;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 9px;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* --- Library page shell --- */
+.lib-empty {
+  padding: 24px 0 48px;
+}
+
+.lib-meta {
+  color: #505a5f;
+}
+
+.lib-text-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: #1d70b8;
+  text-decoration: underline;
+}
+
+.lib-text-btn:hover {
+  color: #003078;
+  text-decoration-thickness: 3px;
+}
+
+.lib-text-btn:focus {
+  outline: 3px solid #fd0;
+  outline-offset: 0;
+  background: #fd0;
+  color: #0b0c0c;
+}
+
+/* --- Library item list --- */
+.lib-items {
+  list-style: none;
+  margin: 0 0 36px;
+  padding: 0;
+}
+
+.lib-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #b1b4b6;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background: #fff;
+  transition: border-color 0.1s ease;
+}
+
+.lib-card:hover {
+  border-color: #0b0c0c;
+}
+
+.lib-card__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lib-card__title {
+  display: block;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.lib-card__desc {
+  margin: 0;
+  color: #505a5f;
+}
+
+.lib-card__remove {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 4px;
+  border: 1px solid #f1b6b6;
+  background: #fff5f5;
+  color: #d4351c;
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.lib-card__remove i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.lib-card__remove:hover {
+  border-color: #d4351c;
+  background: #fdeaea;
+  color: #942514;
+}
+
+.lib-card__remove:focus {
+  outline: 3px solid #fd0;
+  outline-offset: 1px;
+  background: #fd0;
+  color: #0b0c0c;
+  border-color: #0b0c0c;
+}
+
+.lib-modal-open {
+  overflow: hidden;
+}
+
+.lib-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lib-modal[hidden] {
+  display: none;
+}
+
+.lib-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 12, 12, 0.7);
+}
+
+.lib-modal__dialog {
+  position: relative;
+  width: min(92vw, 540px);
+  background: #fff;
+  border: 3px solid #0b0c0c;
+  border-radius: 6px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(11, 12, 12, 0.22);
+}
+
+.lib-modal__title {
+  margin-bottom: 12px;
+}
+
+.lib-modal__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.lib-modal__actions .govuk-button {
+  margin-bottom: 0;
+}
+
+@media (max-width: 40rem) {
+  .lib-modal__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lib-modal__actions .govuk-button {
+    width: 100%;
+  }
+}
+
+.govuk-grid-column-one-third > .library-btn {
+  margin-top: 0;
+  margin-bottom: 12px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Font Awesome icon fix — restore FA font that's overridden by global * selector */
+i[class^="fa-"],
+i[class*=" fa-"] {
+  font-family:
+    "Font Awesome 7 Brands", "Font Awesome 7 Free" !important;
+  font-style: normal;
+}
+
+.share-panel {
+  margin-bottom: 16px;
+}
+
+.share-panel__row {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+.share-panel__divider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 32px;
+  background: #b1b4b6;
+  margin: 0 2px;
+}
+
+.share-panel__icon-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.share-panel__icon-list li {
+  display: flex;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.share-panel__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  color: #1d70b8;
+  border: 1px solid #b1b4b6;
+  background: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+.library-btn__label {
+  font-size: 1rem;
+}
+
+.library-btn__label:hover,
+.share-panel__link:hover {
+  text-decoration: none;
+}
+
+.share-panel__icon-btn i {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.share-panel__icon-btn:hover {
+  border-color: #1d70b8;
+  background: #f3f2f1;
+}
+
+.share-panel__icon-btn:focus {
+  outline: 3px solid #fd0;
+  outline-offset: 1px;
+}
+
+.share-panel__icon-btn--save {
+  width: auto;
+  height: 32px;
+  padding: 0 12px;
+  gap: 6px;
+  border-radius: 4px;
+}
+
+.share-panel__icon-btn--save.library-btn--saved {
+  border-color: #1d70b8;
+  color: #1d70b8;
+  background: #e8f0fc;
+}
+
+.share-panel__icon-btn--save.library-btn--saved .fa-bookmark {
+  font-weight: 900;
+}
+
+.share-panel__link {
+  display: inline-flex;
+}
+
+/* Header library icon and badge */
+.gem-c-layout-super-navigation-header__library-item {
+  position: relative;
+}
+
+.gem-c-layout-super-navigation-header__library-item-link {
+  position: relative;
+  color: #fff;
+  text-decoration: none;
+}
+
+.gem-c-layout-super-navigation-header__library-item-link-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+}
+
+.gem-c-layout-super-navigation-header__library-icon {
+  width: 21px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gem-c-layout-super-navigation-header__library-item-link:hover {
+  opacity: 0.8;
+}
+
+.gem-c-layout-super-navigation-header__library-badge {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  background: #d4351c;
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.library-index .guidance-body {
+  padding-top: 0;
+}
+
+.library-index .guidance-results .guide-sidebar__card {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.library-index .lib-items {
+  margin-bottom: 24px;
+}
+
+.library-index .lib-card {
+  border-color: #d8dde0;
+}
+
+@media (max-width: 48.0525em) {
+  .govuk-grid-column-one-third > .library-btn {
+    width: auto;
+    justify-content: flex-start;
+  }
 }

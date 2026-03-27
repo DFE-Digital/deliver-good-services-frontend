@@ -1,0 +1,39 @@
+@*
+    _LibraryToggle.cshtml — "Save to library" button
+    Renders a client-side toggle button that adds/removes the current page from the
+    user's browser localStorage library.
+
+    ViewData expected:
+        LibId          (string) — unique identifier, typically the canonical URL
+        LibTitle       (string) — human-readable page title
+        LibUrl         (string) — canonical URL for the saved link
+        LibType        (string) — content type label, e.g. "Article", "Guidance", "Collection"
+        LibDescription (string, optional) — short description/summary
+*@
+@{
+    var libId    = ViewData["LibId"]          as string ?? string.Empty;
+    var libTitle = ViewData["LibTitle"]       as string ?? string.Empty;
+    var libUrl   = ViewData["LibUrl"]         as string ?? string.Empty;
+    var libType  = ViewData["LibType"]        as string ?? "Guidance";
+    var libDesc  = ViewData["LibDescription"] as string ?? string.Empty;
+}
+@if (!string.IsNullOrWhiteSpace(libId))
+{
+    <button class="library-btn"
+            data-library-toggle
+            data-lib-id="@libId"
+            data-lib-title="@libTitle"
+            data-lib-url="@libUrl"
+            data-lib-type="@libType"
+            data-lib-description="@libDesc"
+            aria-pressed="false"
+            type="button">
+        <svg class="library-btn__icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true" focusable="false">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span class="library-btn__label">Save to library</span>
+    </button>
+}

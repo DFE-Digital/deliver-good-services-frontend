@@ -48,14 +48,12 @@ public class DdtStandardsController : Controller
             ViewBag.TotalPages = response.Pagination?.TotalPages ?? 1;
             ViewBag.TotalRecords = response.Pagination?.TotalRecords ?? 0;
 
-            // Always show all categories in the filter: when filters are applied, get categories from an unfiltered request
-            var dataForCategories = response.Data;
-            if (!string.IsNullOrWhiteSpace(search) || categoriesList.Count > 0)
-            {
-                var unfiltered = await _apiService.GetPublishedStandardsAsync(page: 1, pageSize: 500);
-                if (unfiltered?.Data != null && unfiltered.Data.Count > 0)
-                    dataForCategories = unfiltered.Data;
-            }
+            // Always show categories and counts from the broadest available dataset.
+            var unfiltered = await _apiService.GetPublishedStandardsAsync(page: 1, pageSize: 500);
+            var dataForCategories = unfiltered?.Data != null && unfiltered.Data.Count > 0
+                ? unfiltered.Data
+                : response.Data;
+
             var allCategories = dataForCategories
                 .SelectMany(s => s.Categories ?? [])
                 .Where(c => !string.IsNullOrWhiteSpace(c))
@@ -63,7 +61,17 @@ public class DdtStandardsController : Controller
                 .OrderBy(c => c!)
                 .ToList();
 
+            var categoryCounts = dataForCategories
+                .SelectMany(s => (s.Categories ?? [])
+                    .Where(c => !string.IsNullOrWhiteSpace(c))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .Select(c => c!))
+                .GroupBy(c => c, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.Count(), StringComparer.OrdinalIgnoreCase);
+
             ViewBag.Categories = allCategories;
+            ViewBag.CategoryCounts = categoryCounts;
+            ViewBag.TotalStandardsForFilter = dataForCategories.Count;
 
             response.Data = response.Data.OrderBy(s => s.Title).ToList();
 

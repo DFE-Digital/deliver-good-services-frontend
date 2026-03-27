@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "My library";
+
+    ViewBag.HeroType = "collection";
+    ViewBag.HeroTitle = "My library";
+    ViewBag.HeroIntro = "A personalised list of pages you've saved. This list is kept in your browser on this device.";
+    ViewBag.HeroMetaDescription = string.Empty;
+    ViewBag.HeroAudienceTags = new List<dynamic>();
+    ViewBag.HeroBadgeText = "Personalised";
+    ViewBag.UseInverseNav = true; // Library page uses inverse nav for better contrast with hero
+    ViewBag.HideBadge = true; // Hide badge on library page as it's not a specific content type
+}
+
+<div class="guide-modern guidance-index library-index">
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
+<div class="govuk-grid-row govuk-!-margin-bottom-6 govuk-!-margin-top-7" id="library-page">
+    <div class="govuk-grid-column-full">
+    <div class="guidance-body">
+        <div class="guidance-layout">
+            <aside class="guidance-filters" aria-label="Filter saved items">
+                <div class="gf-block">
+                    <span class="gf-title">Filter by type</span>
+                    <div id="lib-type-filters" class="lib-filter-list" aria-live="polite">
+                        <p class="govuk-body-s govuk-!-margin-bottom-0">Loading filters&hellip;</p>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="guidance-results" aria-label="Saved library items">
+                <section class="guide-sidebar__card govuk-!-margin-bottom-6" aria-label="About my library">
+                    <h2 class="govuk-heading-m govuk-!-margin-bottom-3">About this list</h2>
+                    <p class="govuk-body govuk-!-margin-bottom-3">Items are saved in browser local storage. They are private to you on this browser.</p>
+                    <p class="govuk-body govuk-!-margin-bottom-3"><a href="/guidance" class="govuk-link">Browse guidance</a> to add more pages.</p>
+                    <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-0">
+                        <li>Clearing browser storage removes saved items</li>
+                        <li>Saved items are available between sessions on this device</li>
+                        <li>You can remove individual items or clear all</li>
+                    </ul>
+                </section>
+
+                <div id="library-content" aria-live="polite" aria-busy="true">
+                    <p class="govuk-body">Loading your saved items&hellip;</p>
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+    </div>
+</div>

@@ -15,8 +15,7 @@
                     <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
                         <ol class="govuk-breadcrumbs__list">
                             <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance/articles">Articles</a></li>
+                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/articles">Articles</a></li>
                             <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
                         </ol>
                     </nav>
@@ -28,6 +27,16 @@
                             {
                                 <p class="govuk-body-l">@Model.MetaDescription</p>
                             }
+                            @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
+                            {
+                                ["ShareTitle"]     = Model.Title,
+                                ["ShareUrl"]       = $"{Context.Request.Scheme}://{Context.Request.Host}/article/{Model.RouteKey}",
+                                ["LibId"]          = "/article/" + Model.RouteKey,
+                                ["LibTitle"]       = Model.Title,
+                                ["LibUrl"]         = "/article/" + Model.RouteKey,
+                                ["LibType"]        = "Article",
+                                ["LibDescription"] = Model.MetaDescription ?? string.Empty
+                            })
                         </div>
                     </div>
                 </div>
@@ -60,7 +69,7 @@
     <div class="govuk-grid-row guide-content-row guide-content-row--no-contents">
         <div class="govuk-grid-column-two-thirds">
             <section class="dfe-f-content-section guide-content-section guide-content-section--no-contents" aria-label="Article content">
-                <p class="govuk-body govuk-!-margin-bottom-6"><a class="govuk-link" href="/guidance/articles">Back to all articles</a></p>
+                <p class="govuk-body govuk-!-margin-bottom-6"><a class="govuk-link" href="/articles">Back to all articles</a></p>
 
                 @if (!string.IsNullOrWhiteSpace(Model.LeadImageUrl))
                 {

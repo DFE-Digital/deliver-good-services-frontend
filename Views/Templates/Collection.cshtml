@@ -15,6 +15,7 @@
     ViewBag.HeroMetaDescription = collection.MetaDescription;
     ViewBag.HeroAudienceTags = collection.AudienceTags;
     ViewBag.HeroBadgeText = "Collection";
+    ViewBag.UseInverseNav = true; // Collection page uses inverse nav for better contrast with hero
 
     string SectionId(string title)
     {
@@ -112,20 +113,19 @@
 
                                     @if (externalItems.Any())
                                     {
-                                        <h3 class="govuk-heading-s govuk-!-margin-top-6 govuk-!-margin-bottom-3">External guidance and resources</h3>
-                                        <ul class="dfe-f-guide-list">
+                                         <ul class="dfe-f-guide-list">
                                             @foreach (var link in externalItems)
                                             {
                                                 var subText = link.MetaDescription;
-                                                <li class="dfe-f-guide-list__item dfe-f-guide-list__item--external">
+                                                <li class="dfe-f-guide-list__item">
                                                     <a class="govuk-link dfe-f-guide-list__item-title" href="@link.Url" @if (link.OpenInNewTab) { <text>target="_blank" rel="noopener noreferrer"</text> }>
                                                         @link.Title
-                                                        <span class="govuk-visually-hidden">(opens in new tab)</span>
+                                                        @if (link.OpenInNewTab)
+                                                        {
+                                                            <span class="govuk-visually-hidden">(opens in new tab)</span>
+                                                        }
                                                     </a>
-                                                    @if (!string.IsNullOrEmpty(subText))
-                                                    {
-                                                        @Html.Raw(GovUkMarkdownHelper.ToGovUkHtml(subText))
-                                                    }
+                                                    <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">External guidance</p>
                                                 </li>
                                             }
                                         </ul>
@@ -139,6 +139,17 @@
         </div>
 
         <div class="govuk-grid-column-one-third">
+            @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
+            {
+                ["ShareTitle"]     = collection.Title,
+                ["ShareUrl"]       = $"{Context.Request.Scheme}://{Context.Request.Host}/guidance/collections/{collection.Slug}",
+                ["LibId"]          = "/guidance/collections/" + collection.Slug,
+                ["LibTitle"]       = collection.Title,
+                ["LibUrl"]         = "/guidance/collections/" + collection.Slug,
+                ["LibType"]        = "Collection",
+                ["LibDescription"] = collection.MetaDescription ?? string.Empty
+            })
+
             @if (hasRightPanel)
             {
                 <aside class="guide-sidebar__card" aria-label="Related content">

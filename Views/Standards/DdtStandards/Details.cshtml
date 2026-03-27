@@ -17,7 +17,18 @@
     var hasCategories = Model.Categories != null && Model.Categories.Any(c => !string.IsNullOrEmpty(c.Name));
     var hasContents = hasPurpose || hasHowToMeet || hasGovernance || hasRelatedGuidance || hasCategories;
     var relatedStandards = ViewBag.RelatedStandards as List<DdtStandardDto> ?? new List<DdtStandardDto>();
-    var hasMeta = true; /* Part of: Standards always; optional: Last updated, Version */
+    var requestScheme = Context?.Request?.Scheme ?? "https";
+    var requestHost = Context?.Request?.Host.Value ?? string.Empty;
+    var currentPath = Context?.Request?.Path.Value ?? string.Empty;
+    var canonicalCurrentUrl = $"{requestScheme}://{requestHost}{currentPath}";
+
+    // Setup hero section parameters (aligned with DetailedGuide)
+    ViewBag.HeroType = "guidance";
+    ViewBag.HeroTitle = Model.Title;
+    ViewBag.HeroIntro = Model.Summary;
+    ViewBag.HeroBadgeText = "Standard";
+    ViewBag.HeroCollectionSlug = "standards";
+    ViewBag.HeroCollectionTitle = "Standards";
 
 <div class="guide-modern">
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -36,100 +47,54 @@
         </div>
     }
 
-    @* Hero: breadcrumb + header (same structure as DetailedGuide) *@
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
+
     <div class="govuk-grid-row">
-        <div class="govuk-grid-column-full">
-            <header class="guide-hero">
-                <div class="govuk-width-container">
-                    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
-                        <ol class="govuk-breadcrumbs__list">
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                            <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@Url.Action("Index", "DdtStandards")">Standards</a></li>
-                            <li class="govuk-breadcrumbs__list-item" aria-current="page">@Model.Title</li>
-                        </ol>
-                    </nav>
-                    <div class="govuk-grid-row">
-                        <div class="govuk-grid-column-two-thirds">
-                            <span class="guide-hero__label">Standards</span>
-                            <h1 class="govuk-heading-xl">@Model.Title</h1>
-                            @if (!string.IsNullOrEmpty(Model.Summary))
-                            {
-                                <p class="govuk-body-l">@Model.Summary</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            @* Meta strip *@
-            @if (hasMeta)
-            {
-                <div class="guide-meta">
-                    <div class="govuk-width-container">
-                        <span class="guide-meta__item"><strong>Part of:</strong> <a href="@Url.Action("Index", "DdtStandards")">Standards</a></span>
-                        @if (Model.LastUpdated.HasValue)
-                        {
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                            <span class="guide-meta__item"><strong>Last updated:</strong> @Model.LastUpdated.Value.ToString("dd MMMM yyyy")</span>
-                        }
-                        @if (!string.IsNullOrEmpty(Model.Version))
-                        {
-                            <span class="guide-meta__dot" aria-hidden="true">·</span>
-                            <span class="guide-meta__item"><strong>Version:</strong> @Model.Version</span>
-                        }
-                    </div>
-                </div>
-            }
-
-            @* Contents *@
-            <div class="govuk-grid-row">
-                <div class="govuk-grid-column-two-thirds">
-                    <nav class="guide-contents guide-contents--dashed" aria-label="Contents">
-                        <h2 class="guide-contents__title">Contents</h2>
-                        <ul class="guide-contents__list">
-                            @if (hasPurpose)
-                            {
-                                <li class="guide-contents__item">
-                                    <span class="guide-contents__num" aria-hidden="true">—</span>
-                                    <a href="#purpose">Purpose</a>
-                                </li>
-                            }
-                            @if (hasCategories)
-                            {
-                                <li class="guide-contents__item">
-                                    <span class="guide-contents__num" aria-hidden="true">—</span>
-                                    <a href="#categories">Categories</a>
-                                </li>
-                            }
-                            @if (hasHowToMeet)
-                            {
-                                <li class="guide-contents__item">
-                                    <span class="guide-contents__num" aria-hidden="true">—</span>
-                                    <a href="#how-to-meet">How to meet this standard</a>
-                                </li>
-                            }
-                            @if (hasGovernance)
-                            {
-                                <li class="guide-contents__item">
-                                    <span class="guide-contents__num" aria-hidden="true">—</span>
-                                    <a href="#governance">Governance</a>
-                                </li>
-                            }
-                            @if (hasRelatedGuidance)
-                            {
-                                <li class="guide-contents__item">
-                                    <span class="guide-contents__num" aria-hidden="true">—</span>
-                                    <a href="#related-guidance">Related guidance</a>
-                                </li>
-                            }
-                            <li class="guide-contents__item">
-                                <span class="guide-contents__num" aria-hidden="true">—</span>
-                                <a href="#version-history">Version history</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
+        <div class="govuk-grid-column-two-thirds">
+            <nav class="guide-contents guide-contents--dashed" aria-label="Contents">
+                <h2 class="guide-contents__title">Contents</h2>
+                <ul class="guide-contents__list">
+                    @if (hasPurpose)
+                    {
+                        <li class="guide-contents__item">
+                            <span class="guide-contents__num" aria-hidden="true">—</span>
+                            <a href="#purpose">Purpose</a>
+                        </li>
+                    }
+                    @if (hasCategories)
+                    {
+                        <li class="guide-contents__item">
+                            <span class="guide-contents__num" aria-hidden="true">—</span>
+                            <a href="#categories">Categories</a>
+                        </li>
+                    }
+                    @if (hasHowToMeet)
+                    {
+                        <li class="guide-contents__item">
+                            <span class="guide-contents__num" aria-hidden="true">—</span>
+                            <a href="#how-to-meet">How to meet this standard</a>
+                        </li>
+                    }
+                    @if (hasGovernance)
+                    {
+                        <li class="guide-contents__item">
+                            <span class="guide-contents__num" aria-hidden="true">—</span>
+                            <a href="#governance">Governance</a>
+                        </li>
+                    }
+                    @if (hasRelatedGuidance)
+                    {
+                        <li class="guide-contents__item">
+                            <span class="guide-contents__num" aria-hidden="true">—</span>
+                            <a href="#related-guidance">Related guidance</a>
+                        </li>
+                    }
+                    <li class="guide-contents__item">
+                        <span class="guide-contents__num" aria-hidden="true">—</span>
+                        <a href="#version-history">Version history</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 
@@ -211,6 +176,17 @@
             </section>
         </div>
         <div class="govuk-grid-column-one-third">
+            @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
+            {
+                ["ShareTitle"]     = Model.Title,
+                ["ShareUrl"]       = canonicalCurrentUrl,
+                ["LibId"]          = currentPath,
+                ["LibTitle"]       = Model.Title,
+                ["LibType"]        = "Standard",
+                ["LibUrl"]         = currentPath,
+                ["LibDescription"] = Model.Summary ?? string.Empty
+            })
+
             @if (relatedStandards.Any())
             {
                 <aside class="guide-sidebar__card" aria-label="Related standards">
