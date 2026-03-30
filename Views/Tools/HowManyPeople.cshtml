@@ -1,0 +1,70 @@
+@using ServiceManual.Helpers
+@using ServiceManual.Models
+@using System.Text.Json
+@{
+    var pageModel = ViewBag.HowManyPeoplePage as HowManyPeoplePage ?? new HowManyPeoplePage();
+    var initialPopulation = ViewBag.InitialPopulation as int?;
+    ViewData["Title"] = string.IsNullOrWhiteSpace(pageModel.Title) ? "How many people" : pageModel.Title;
+
+    ViewBag.HeroType = "collection";
+    ViewBag.HeroTitle = ViewData["Title"];
+    ViewBag.HeroIntro = pageModel.Description ?? string.Empty;
+    ViewBag.HeroBadgeText = "Accessibility";
+    ViewBag.HeroMetaDescription = string.Empty;
+    ViewBag.HeroSectionTitle = "Tools";
+    ViewBag.HeroSectionUrl = "/tools";
+    ViewBag.UseInverseNav = true;
+
+    var dataJson = pageModel.Data?.GetRawText() ?? "{}";
+    var disclaimerMarkdown = pageModel.DataDisclaimer ?? string.Empty;
+    var disclaimerHtml = GovUkMarkdownHelper.ToGovUkHtml(disclaimerMarkdown);
+}
+
+<div class="guide-modern how-many-people-tool">
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
+        <section class="calc-input-section" aria-label="Calculator input">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    <div class="calc-input-box">
+                        <label class="calc-label" for="calc-n">
+                            Number of people to calculate for
+                            <span class="calc-label__hint">Enter the number of people who will use your service, or a population you are designing for.</span>
+                        </label>
+                        <div class="calc-input-row">
+                            <input class="calc-input" type="number" id="calc-n" value="@(initialPopulation?.ToString() ?? string.Empty)" min="1" max="999999999" inputmode="numeric" />
+                            <button class="calc-go" id="calc-go" type="button">Calculate</button>
+                        </div>
+                        <div class="calc-presets" id="calc-presets"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <div class="govuk-width-container calc-page">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full">
+                <div class="calc-results-section" id="calc-output" aria-live="polite"></div>
+
+              
+            </div>
+            <div class="govuk-grid-column-two-thirds">
+                  @if (!string.IsNullOrWhiteSpace(disclaimerMarkdown))
+                {
+                    <div class="calc-disclaimer govuk-body">
+                        @Html.Raw(disclaimerHtml)
+                    </div>
+                }
+                </div>
+        </div>
+    </div>
+</div>
+
+<script id="how-many-people-data" type="application/json">@Html.Raw(dataJson)</script>
+<script id="how-many-people-quick-picks" type="application/json">@Html.Raw(JsonSerializer.Serialize(pageModel.QuickPickNumbers ?? string.Empty))</script>
+
+@section Scripts {
+<script src="~/js/how-many-people.js" asp-append-version="true"></script>
+}

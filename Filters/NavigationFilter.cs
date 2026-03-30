@@ -24,6 +24,10 @@ namespace ServiceManual.Filters
             {
                 var path = context.HttpContext.Request.Path.Value ?? string.Empty;
 
+                // Fetch Tools data for header
+                var toolsPage = await _cmsApiService.GetToolsPageAsync();
+                controller.ViewData["ToolsPage"] = toolsPage;
+
                 if (path.StartsWith("/documentation", StringComparison.OrdinalIgnoreCase))
                 {
                     var sections = await _cmsApiService.GetDocumentationSectionsAsync();

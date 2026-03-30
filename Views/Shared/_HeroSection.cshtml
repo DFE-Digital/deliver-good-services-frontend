@@ -33,6 +33,8 @@
     var collectionTitle = ViewBag.HeroCollectionTitle as string ?? "";
     var breadcrumbItems = ViewBag.HeroBreadcrumbItems as List<(string Title, string Url)> ?? new List<(string, string)>();
     var hideBadge = (bool?)ViewBag.HideBadge ?? false;
+    var heroSectionTitle = ViewBag.HeroSectionTitle as string ?? "Guidance";
+    var heroSectionUrl = ViewBag.HeroSectionUrl as string ?? "/guidance";
     var heroClass = heroType == "collection" ? "page-hero--collection" : "page-hero--guidance";
     var chipColors = new[] { "#5439F9", "#15B187", "#CA357C" };
 }
@@ -48,12 +50,12 @@
                             @if (heroType == "collection")
                             {
                                 <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@heroSectionUrl">@heroSectionTitle</a></li>
                             }
                             else if (heroType == "guidance")
                             {
                                 <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance">Guidance</a></li>
+                                <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@heroSectionUrl">@heroSectionTitle</a></li>
                                 @if (!string.IsNullOrEmpty(collectionSlug) && !string.IsNullOrEmpty(collectionTitle))
                                 {
                                     <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance/collections/@collectionSlug">@collectionTitle</a></li>

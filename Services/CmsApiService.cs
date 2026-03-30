@@ -572,6 +572,91 @@ namespace ServiceManual.Services
             }
         }
 
+        public async Task<ToolsPage?> GetToolsPageAsync()
+        {
+            try
+            {
+                const string url = "api/tool?fields[0]=title&fields[1]=slug&fields[2]=description&fields[3]=body&populate[Tool][fields][0]=title&populate[Tool][fields][1]=url&populate[Tool][fields][2]=description&populate[Tool][fields][3]=internalOnly&populate[Tool][fields][4]=openInNewTab";
+
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for tool single type", response.StatusCode);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiSingleTypeResponse<StrapiToolsPage>>(json, JsonOptions);
+                var item = result?.Data;
+
+                if (item is null)
+                    return null;
+
+                return new ToolsPage
+                {
+                    Title = item.Title ?? string.Empty,
+                    Slug = item.Slug,
+                    Description = item.Description,
+                    Body = item.Body,
+                    Tools = (item.Tool ?? [])
+                        .Where(tool => !string.IsNullOrWhiteSpace(tool.Title) && !string.IsNullOrWhiteSpace(tool.Url))
+                        .Select(tool => new ToolsPageItem
+                        {
+                            Title = tool.Title ?? string.Empty,
+                            Url = tool.Url,
+                            Description = tool.Description,
+                            InternalOnly = tool.InternalOnly ?? false,
+                            OpenInNewTab = tool.OpenInNewTab ?? false
+                        })
+                        .ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching tool single type");
+                return null;
+            }
+        }
+
+        public async Task<HowManyPeoplePage?> GetHowManyPeoplePageAsync()
+        {
+            try
+            {
+                const string url = "api/how-many-people?fields[0]=title&fields[1]=slug&fields[2]=quickPickNumbers&fields[3]=description&fields[4]=dataDisclaimer&fields[5]=data";
+
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for how-many-people single type", response.StatusCode);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiSingleTypeResponse<StrapiHowManyPeople>>(json, JsonOptions);
+                var item = result?.Data;
+
+                if (item is null)
+                    return null;
+
+                return new HowManyPeoplePage
+                {
+                    Title = item.Title ?? string.Empty,
+                    Slug = item.Slug,
+                    Description = item.Description,
+                    QuickPickNumbers = item.QuickPickNumbers,
+                    DataDisclaimer = item.DataDisclaimer,
+                    Data = item.Data
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching how-many-people single type");
+                return null;
+            }
+        }
+
         public async Task<Homepage?> GetHomepageAsync()
         {
             try
@@ -1569,6 +1654,34 @@ namespace ServiceManual.Services
             public string? MetaDescription { get; set; }
             public string? Body { get; set; }
             public string? UpdateHistory { get; set; }
+        }
+
+        private class StrapiHowManyPeople
+        {
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+            public string? QuickPickNumbers { get; set; }
+            public JsonElement? Data { get; set; }
+            public string? Description { get; set; }
+            public string? DataDisclaimer { get; set; }
+        }
+
+        private class StrapiToolsPage
+        {
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+            public string? Description { get; set; }
+            public string? Body { get; set; }
+            public List<StrapiToolItem>? Tool { get; set; }
+        }
+
+        private class StrapiToolItem
+        {
+            public string? Title { get; set; }
+            public string? Url { get; set; }
+            public bool? InternalOnly { get; set; }
+            public string? Description { get; set; }
+            public bool? OpenInNewTab { get; set; }
         }
 
         private class StrapiGuidanceArea

@@ -1,0 +1,57 @@
+@using ServiceManual.Helpers
+@using ServiceManual.Models
+@{
+    var page = ViewBag.ToolsPage as ToolsPage ?? new ToolsPage();
+    var title = string.IsNullOrWhiteSpace(page.Title) ? "Tools" : page.Title;
+    ViewData["Title"] = title;
+
+    ViewBag.HeroType = "collection";
+    ViewBag.HeroTitle = title;
+    ViewBag.HeroIntro = page.Description ?? string.Empty;
+    ViewBag.HeroBadgeText = "Tools";
+    ViewBag.HeroMetaDescription = string.Empty;
+    ViewBag.HeroSectionTitle = "Tools";
+    ViewBag.HeroSectionUrl = "/tools";
+    ViewBag.UseInverseNav = true;
+
+    var bodyHtml = string.IsNullOrWhiteSpace(page.Body)
+        ? string.Empty
+        : GovUkMarkdownHelper.ToGovUkHtmlForBody(page.Body);
+
+    var cardItems = page.Tools
+        .Where(tool => !string.IsNullOrWhiteSpace(tool.Title) && !string.IsNullOrWhiteSpace(tool.Url))
+        .Select(tool => new
+        {
+            Title = tool.Title,
+            Description = tool.Description ?? string.Empty,
+            Href = tool.Url,
+            tool.OpenInNewTab
+        })
+        .ToList();
+}
+
+<div class="guide-modern tools-index">
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
+
+    <div class="govuk-width-container govuk-!-margin-top-8 govuk-!-margin-bottom-8">
+        @if (!string.IsNullOrWhiteSpace(bodyHtml))
+        {
+            <div class="dfe-f-body govuk-!-margin-bottom-7">
+                @Html.Raw(bodyHtml)
+            </div>
+        }
+
+        @if (cardItems.Count > 0)
+        {
+            @await Html.PartialAsync("~/Views/Shared/_CardList.cshtml", null, new ViewDataDictionary(ViewData)
+            {
+                ["Items"] = cardItems,
+                ["Columns"] = 1
+            })
+        }
+        else
+        {
+            <p class="govuk-body">No tools are available right now.</p>
+        }
+    </div>
+</div>

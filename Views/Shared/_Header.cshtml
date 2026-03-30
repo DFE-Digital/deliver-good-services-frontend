@@ -37,6 +37,17 @@
             </button>
           </div> *@
 
+          <div class="gem-c-layout-super-navigation-header__navigation-item gem-c-layout-super-navigation-header__tools-item">
+            <button aria-controls="super-tools-menu" aria-expanded="false" aria-label="Show tools menu"
+              class="gem-c-layout-super-navigation-header__navigation-top-toggle-button gem-c-layout-super-navigation-header__tools-toggle-button"
+              id="super-tools-menu-toggle" type="button">
+              <span class="gem-c-layout-super-navigation-header__navigation-top-toggle-button-inner gem-c-layout-super-navigation-header__tools-toggle-button-inner">
+                <span class="govuk-visually-hidden">Tools</span>
+                <i class="fa-solid fa-screwdriver-wrench gem-c-layout-super-navigation-header__tools-icon" aria-hidden="true"></i>
+              </span>
+            </button>
+          </div>
+
           <div class="gem-c-layout-super-navigation-header__navigation-item gem-c-layout-super-navigation-header__library-item">
             <a class="gem-c-layout-super-navigation-header__navigation-item-link gem-c-layout-super-navigation-header__library-item-link" href="/my-library" aria-label="My library (0 items)">
               <span class="gem-c-layout-super-navigation-header__navigation-item-link-inner gem-c-layout-super-navigation-header__library-item-link-inner">
@@ -210,6 +221,48 @@
           </div>
         </div>
       </div>
+
+      <div id="super-tools-menu" class="gem-c-layout-super-navigation-header__navigation-dropdown-menu"
+        hidden="hidden">
+        <div class="govuk-width-container gem-c-layout-super-navigation-header__tools-container">
+          <div class="govuk-grid-row">
+            <div class="govuk-grid-column-full-from-desktop gem-c-layout-super-navigation-header__column--services-and-information">
+              <h3 class="govuk-heading-m gem-c-layout-super-navigation-header__column-header">
+                Tools
+              </h3>
+              <p class="gem-c-layout-super-navigation-header__tools-intro">
+                A collection of tools to support teams in their work.
+              </p>
+              </div>
+            <div class="govuk-grid-column-one-third-from-desktop gem-c-layout-super-navigation-header__column--tools">
+             
+              <ul class="gem-c-layout-super-navigation-header__navigation-second-items gem-c-layout-super-navigation-header__tools-list">
+                @{
+                  var toolsPage = ViewData["ToolsPage"] as ServiceManual.Models.ToolsPage;
+                  var tools = toolsPage?.Tools ?? new List<ServiceManual.Models.ToolsPageItem>();
+                  
+                  foreach (var tool in tools)
+                  {
+                    <li class="gem-c-layout-super-navigation-header__dropdown-list-item">
+                      <a class="govuk-link gem-c-layout-super-navigation-header__navigation-second-item-link"
+                        href="@tool.Url" @(tool.OpenInNewTab ? "target=\"_blank\" rel=\"noopener\"" : "")>
+                        @tool.Title
+                      </a>
+                      @if (!string.IsNullOrWhiteSpace(tool.Description))
+                      {
+                        <p class="gem-c-layout-super-navigation-header__navigation-second-item-description">
+                          @tool.Description
+                        </p>
+                      }
+                    </li>
+                  }
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="super-search-menu" class="gem-c-layout-super-navigation-header__navigation-dropdown-menu"
         hidden="hidden">
         <div

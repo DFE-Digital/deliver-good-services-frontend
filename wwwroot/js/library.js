@@ -10,14 +10,13 @@
     var activeTypeFilters = [];
 
     function trackGaEvent(eventName, properties) {
-        var payload = Object.assign({ event: eventName }, properties || {});
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push(payload);
-
-        // Also mirror into existing telemetry pipeline where available.
         if (typeof window.trackEvent === 'function') {
             window.trackEvent(eventName, properties || {});
+            return;
         }
+
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(Object.assign({ event: eventName }, properties || {}));
     }
 
     // -------------------------------------------------------------------------
@@ -118,7 +117,7 @@
         wrapper.hidden = true;
         wrapper.innerHTML =
             '<div class="lib-modal__backdrop" data-lib-modal-cancel></div>' +
-            '<div class="lib-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="lib-remove-modal-title" aria-describedby="lib-remove-modal-body">' +
+            '<div class="lib-modal__dialog" role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="lib-remove-modal-title" aria-describedby="lib-remove-modal-body">' +
             '<h2 class="govuk-heading-m lib-modal__title" id="lib-remove-modal-title">Remove saved item</h2>' +
             '<p class="govuk-body" id="lib-remove-modal-body"></p>' +
             '<div class="lib-modal__actions">' +
@@ -133,6 +132,7 @@
 
     function showLibraryConfirmDialog(options, onConfirm) {
         var modal = getRemoveModal();
+        var dialog = modal.querySelector('.lib-modal__dialog');
         var title = modal.querySelector('#lib-remove-modal-title');
         var body = modal.querySelector('#lib-remove-modal-body');
         var confirmBtn = modal.querySelector('[data-lib-modal-confirm]');
@@ -182,8 +182,8 @@
 
         modal.hidden = false;
         document.body.classList.add('lib-modal-open');
-        if (confirmBtn && typeof confirmBtn.focus === 'function') {
-            confirmBtn.focus();
+        if (dialog && typeof dialog.focus === 'function') {
+            dialog.focus();
         }
     }
 
@@ -266,13 +266,14 @@
     }
 
     function initShareTracking() {
-        document.querySelectorAll('.share-panel__link').forEach(function (link) {
+        document.querySelectorAll('.share-panel__link[data-share-provider]').forEach(function (link) {
             if (link._shareWired) { return; }
             link._shareWired = true;
 
             link.addEventListener('click', function () {
                 var sharePanel = link.closest('.share-panel');
-                var provider = link.getAttribute('data-share-provider') || 'unknown';
+                var provider = link.getAttribute('data-share-provider');
+                if (!provider) { return; }
                 var shareTitle = (sharePanel && sharePanel.getAttribute('data-share-title')) || document.title;
                 var shareUrl = (sharePanel && sharePanel.getAttribute('data-share-url')) || window.location.href;
 
@@ -400,8 +401,20 @@
             btn.addEventListener('click', function () {
                 var itemId = btn.getAttribute('data-lib-remove');
                 var itemTitle = btn.getAttribute('data-lib-remove-title') || 'this item';
+                var item = DfeLibrary.getAll().find(function (savedItem) {
+                    return savedItem.id === itemId;
+                }) || null;
                 showRemoveConfirmDialog(itemTitle, function () {
                     DfeLibrary.remove(itemId);
+
+                    trackGaEvent('library_item_removed', {
+                        item_id: itemId,
+                        item_name: itemTitle,
+                        item_url: item && item.url ? item.url : '',
+                        content_type: item && item.type ? item.type : '',
+                        page_path: window.location.pathname
+                    });
+
                     announceLibraryChange(itemTitle + ' removed from your library.');
                     renderLibraryPage();
                     updateNavBadge();
@@ -413,13 +426,23 @@
         var clearAllBtn = document.getElementById('lib-clear-all');
         if (clearAllBtn) {
             clearAllBtn.addEventListener('click', function () {
-                var count = DfeLibrary.getAll().length;
+                var savedItems = DfeLibrary.getAll();
+                var count = savedItems.length;
                 showLibraryConfirmDialog({
                     title: 'Clear your library',
                     body: 'Are you sure you want to remove all ' + count + ' saved item' + (count !== 1 ? 's' : '') + ' from your library?',
                     confirmText: 'Clear all'
                 }, function () {
                     DfeLibrary.clear();
+
+                    trackGaEvent('library_cleared', {
+                        item_count: count,
+                        content_types: Array.from(new Set(savedItems.map(function (item) {
+                            return item.type || 'Other';
+                        }))).join(','),
+                        page_path: window.location.pathname
+                    });
+
                     announceLibraryChange('All saved items removed from your library.');
                     renderLibraryPage();
                 });

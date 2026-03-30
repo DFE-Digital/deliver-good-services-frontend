@@ -1,6 +1,8 @@
 @using ServiceManual.Models
 @{
-    var navItems = ViewData["Navigation"] as List<NavigationItem> ?? [];
+    var navItems = (ViewData["Navigation"] as List<NavigationItem> ?? [])
+        .Where(item => !string.Equals(item.Url, "/content", StringComparison.OrdinalIgnoreCase))
+        .ToList();
     var currentPath = Context.Request.Path.Value ?? string.Empty;
 }
 
