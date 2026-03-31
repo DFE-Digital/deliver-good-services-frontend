@@ -82,54 +82,34 @@
                                 @* Section summary (description) is not shown on the collection page; profession description is only shown on the job specification page. *@
                                 @if (grp.Items.Any())
                                 {
-                                    var guidanceItems = grp.Items.Where(l => l.ContentType != "External link").ToList();
-                                    var externalItems = grp.Items.Where(l => l.ContentType == "External link").ToList();
-
-                                    @if (guidanceItems.Any())
-                                    {
-                                        <ul class="dfe-f-guide-list">
-                                            @foreach (var link in guidanceItems)
+                                    <ul class="dfe-f-guide-list">
+                                        @foreach (var link in grp.Items)
+                                        {
+                                            var isJobDescription = link.ContentType == "Job description";
+                                            var linkHref = link.Url + (isJobDescription && !string.IsNullOrEmpty(collection.Slug) ? "?collection=" + Uri.EscapeDataString(collection.Slug) : "");
+                                            var subText = link.ContentType;
+                                            if (link.ExternalLink)
                                             {
-                                                var subText = link.ContentType;
-                                                var isJobDescription = subText == "Job description";
-                                                
-                                                var linkHref = link.Url + (subText == "Job description" && !string.IsNullOrEmpty(collection.Slug) ? "?collection=" + Uri.EscapeDataString(collection.Slug) : "");
-                                                <li class="dfe-f-guide-list__item">
-                                                    <a class="govuk-link dfe-f-guide-list__item-title" href="@linkHref" target="@(link.OpenInNewTab ? "_blank" : null)" rel="@(link.OpenInNewTab ? "noopener noreferrer" : null)">
-                                                        @link.Title
-                                                        @if (link.OpenInNewTab)
-                                                        {
-                                                            <span class="govuk-visually-hidden">(opens in new tab)</span>
-                                                        }
-                                                    </a>
-                                                    @if (!string.IsNullOrEmpty(subText))
+                                                subText = !string.IsNullOrWhiteSpace(link.LinkType)
+                                                    ? $"External {link.LinkType}"
+                                                    : "External link";
+                                            }
+
+                                            <li class="dfe-f-guide-list__item">
+                                                <a class="govuk-link dfe-f-guide-list__item-title" href="@linkHref" target="@(link.OpenInNewTab ? "_blank" : null)" rel="@(link.OpenInNewTab ? "noopener noreferrer" : null)">
+                                                    @link.Title
+                                                    @if (link.OpenInNewTab)
                                                     {
-                                                        <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">@subText@(isJobDescription && !string.IsNullOrEmpty(link.Grade) ? $" — {link.Grade}" : "")</p>
+                                                        <span class="govuk-visually-hidden">(opens in new tab)</span>
                                                     }
-                                                </li>
-                                            }
-                                        </ul>
-                                    }
-
-                                    @if (externalItems.Any())
-                                    {
-                                         <ul class="dfe-f-guide-list">
-                                            @foreach (var link in externalItems)
-                                            {
-                                                var subText = link.MetaDescription;
-                                                <li class="dfe-f-guide-list__item">
-                                                    <a class="govuk-link dfe-f-guide-list__item-title" href="@link.Url" @if (link.OpenInNewTab) { <text>target="_blank" rel="noopener noreferrer"</text> }>
-                                                        @link.Title
-                                                        @if (link.OpenInNewTab)
-                                                        {
-                                                            <span class="govuk-visually-hidden">(opens in new tab)</span>
-                                                        }
-                                                    </a>
-                                                    <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">External guidance</p>
-                                                </li>
-                                            }
-                                        </ul>
-                                    }
+                                                </a>
+                                                @if (!string.IsNullOrEmpty(subText))
+                                                {
+                                                    <p class="govuk-body-s govuk-!-margin-top-1 govuk-!-margin-bottom-0">@subText@(isJobDescription && !string.IsNullOrEmpty(link.Grade) ? $" — {link.Grade}" : "")</p>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
                                 }
                             </section>
                         }

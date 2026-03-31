@@ -15,6 +15,12 @@ namespace ServiceManual.Models
         public string Url { get; set; } = string.Empty;
         /// <summary>When true, link should open in a new tab (e.g. external links).</summary>
         public bool OpenInNewTab { get; set; }
+        /// <summary>Marks an item as an external link, as configured in CMS.</summary>
+        public bool ExternalLink { get; set; }
+        /// <summary>Category label from CMS Link type enum (Service, Guidance, Standard, Policy, Process).</summary>
+        public string? LinkType { get; set; }
+        /// <summary>When true, this item should be listed before non-priority links in its section.</summary>
+        public bool PriorityInGroup { get; set; }
         /// <summary>Display label for content type (e.g. "Guidance", "External link") for collection listing.</summary>
         public string? ContentType { get; set; }
         /// <summary>Grade for job specification items (e.g. "G7", "SEO").</summary>

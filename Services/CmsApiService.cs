@@ -266,9 +266,13 @@ namespace ServiceManual.Services
                                     MetaDescription = i.MetaDescription,
                                     Url = i.Url ?? string.Empty,
                                     OpenInNewTab = i.NewTab,
+                                    ExternalLink = i.ExternalLink,
+                                    LinkType = i.LinkType,
+                                    PriorityInGroup = i.PriorityInGroup,
                                     ContentType = ContentTypeLabel(i.Type),
                                     Grade = i.Grade
                                 })
+                                .OrderByDescending(i => i.PriorityInGroup)
                                 .ToList()
                         })
                         .ToList() ?? [],
@@ -2472,6 +2476,8 @@ namespace ServiceManual.Services
         {
             [JsonPropertyName("type")]
             public string? Type { get; set; }
+            [JsonPropertyName("linkType")]
+            public string? LinkType { get; set; }
             [JsonPropertyName("title")]
             public string? Title { get; set; }
             [JsonPropertyName("slug")]
@@ -2482,6 +2488,10 @@ namespace ServiceManual.Services
             public string? Url { get; set; }
             [JsonPropertyName("newTab")]
             public bool NewTab { get; set; }
+            [JsonPropertyName("externalLink")]
+            public bool ExternalLink { get; set; }
+            [JsonPropertyName("priorityInGroup")]
+            public bool PriorityInGroup { get; set; }
             [JsonPropertyName("grade")]
             public string? Grade { get; set; }
         }
