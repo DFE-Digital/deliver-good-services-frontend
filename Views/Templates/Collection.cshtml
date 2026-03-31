@@ -88,11 +88,19 @@
                                             var isJobDescription = link.ContentType == "Job description";
                                             var linkHref = link.Url + (isJobDescription && !string.IsNullOrEmpty(collection.Slug) ? "?collection=" + Uri.EscapeDataString(collection.Slug) : "");
                                             var subText = link.ContentType;
-                                            if (link.ExternalLink)
+                                            var isExternalLinkItem = string.Equals(link.ContentType, "External link", StringComparison.OrdinalIgnoreCase);
+                                            if (isExternalLinkItem)
                                             {
-                                                subText = !string.IsNullOrWhiteSpace(link.LinkType)
-                                                    ? $"External {link.LinkType}"
-                                                    : "External link";
+                                                if (!string.IsNullOrWhiteSpace(link.LinkType))
+                                                {
+                                                    subText = string.Equals(link.LinkType, "Standard", StringComparison.OrdinalIgnoreCase)
+                                                        ? "Standards"
+                                                        : link.LinkType;
+                                                }
+                                                else
+                                                {
+                                                    subText = "External link";
+                                                }
                                             }
 
                                             <li class="dfe-f-guide-list__item">
