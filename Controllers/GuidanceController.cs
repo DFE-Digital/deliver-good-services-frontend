@@ -7,10 +7,12 @@ namespace ServiceManual.Controllers;
 public class GuidanceController : Controller
 {
     private readonly ICmsApiService _cmsApiService;
+    private readonly ISearchService _searchService;
 
-    public GuidanceController(ICmsApiService cmsApiService)
+    public GuidanceController(ICmsApiService cmsApiService, ISearchService searchService)
     {
         _cmsApiService = cmsApiService;
+        _searchService = searchService;
     }
 
     [Route("guidance")]
@@ -30,6 +32,7 @@ public class GuidanceController : Controller
         var selectedProfessionSet = selectedProfessionSlugs.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var selectedAreaSlug = string.IsNullOrWhiteSpace(guidanceArea) ? null : guidanceArea.Trim();
         var selectedSearchTerm = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+        var matchedGuidanceCardUrls = await GetMatchedGuidanceCardUrlsAsync(selectedSearchTerm);
 
         static IReadOnlyList<TagRef> ProfessionTagsForCollection(GuidanceAreaGroup area, GuidanceCollectionCard collection)
         {
@@ -45,28 +48,6 @@ public class GuidanceController : Controller
                 .ToList();
         }
 
-        static bool MatchesSearch(GuidanceAreaGroup area, GuidanceCollectionCard collection, string? searchTerm)
-        {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return true;
-
-            var term = searchTerm.Trim();
-            var texts = new[]
-            {
-                area.Name,
-                area.Summary,
-                area.Description,
-                collection.Title,
-                collection.Description,
-                string.Join(" ", collection.Tags),
-                string.Join(" ", collection.ApplicableProfessions.Select(profession => profession.Title)),
-                string.Join(" ", collection.AlsoInAreas.Select(areaRef => areaRef.Title))
-            };
-
-            return texts.Any(text => !string.IsNullOrWhiteSpace(text)
-                && text.Contains(term, StringComparison.OrdinalIgnoreCase));
-        }
-
         var visibleAreas = page.Areas
             .Where(area => string.IsNullOrWhiteSpace(selectedAreaSlug) || area.Slug.Equals(selectedAreaSlug, StringComparison.OrdinalIgnoreCase))
             .Select(area => new GuidanceAreaGroup
@@ -79,11 +60,16 @@ public class GuidanceController : Controller
                 FeaturedProfessions = area.FeaturedProfessions,
                 Collections = area.Collections
                     .Where(collection =>
+                    {
+                        var normalizedCollectionUrl = NormalizePath(collection.Url);
+                        return
                         (selectedProfessionSet.Count == 0 ||
                         collection.ApplicableProfessions.Any(p => p.Title.Equals("All DDaT Professions", StringComparison.OrdinalIgnoreCase)) ||
                         ProfessionTagsForCollection(area, collection)
                             .Any(profession => selectedProfessionSet.Contains(profession.Slug)))
-                        && MatchesSearch(area, collection, selectedSearchTerm))
+                        && (matchedGuidanceCardUrls == null
+                            || (normalizedCollectionUrl != null && matchedGuidanceCardUrls.Contains(normalizedCollectionUrl)));
+                    })
                     .ToList()
             })
             .Where(area => area.Collections.Count > 0)
@@ -151,5 +137,68 @@ public class GuidanceController : Controller
         ViewBag.HeroBadgeText = "Guidance";
 
         return View("~/Views/Templates/Guidance.cshtml", model);
+    }
+
+    private async Task<HashSet<string>?> GetMatchedGuidanceCardUrlsAsync(string? searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return null;
+
+        var types = new[] { "Collection", "Detailed Guide", "Detailed Guide Page", "Job description" };
+        var results = await _searchService.SearchAsync(searchTerm, types);
+
+        var matched = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var result in results)
+        {
+            AddGuidanceUrlMatch(matched, result.Url);
+            AddGuidanceUrlMatch(matched, result.PartOfCollectionUrl);
+        }
+
+        return matched;
+    }
+
+    private static void AddGuidanceUrlMatch(ISet<string> matched, string? url)
+    {
+        var normalized = NormalizePath(url);
+        if (normalized == null || !normalized.StartsWith("/guidance/", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        matched.Add(normalized);
+
+        // Guide page matches should reveal the parent guide card on the guidance index.
+        var segments = normalized.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+        if (segments.Length >= 4
+            && segments[0].Equals("guidance", StringComparison.OrdinalIgnoreCase)
+            && segments[1].Equals("guides", StringComparison.OrdinalIgnoreCase))
+        {
+            matched.Add($"/guidance/guides/{segments[2]}");
+        }
+    }
+
+    private static string? NormalizePath(string? pathOrUrl)
+    {
+        if (string.IsNullOrWhiteSpace(pathOrUrl))
+            return null;
+
+        if (Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var absolute))
+            return absolute.AbsolutePath.TrimEnd('/');
+
+        var path = pathOrUrl.Trim();
+        if (path.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || path.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        if (!path.StartsWith('/'))
+            path = "/" + path;
+
+        var queryIndex = path.IndexOf('?');
+        if (queryIndex >= 0)
+            path = path[..queryIndex];
+
+        var hashIndex = path.IndexOf('#');
+        if (hashIndex >= 0)
+            path = path[..hashIndex];
+
+        var normalized = path.TrimEnd('/');
+        return string.IsNullOrEmpty(normalized) ? "/" : normalized;
     }
 }
