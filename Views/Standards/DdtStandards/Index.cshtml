@@ -15,6 +15,7 @@
     var categoryCounts = ViewBag.CategoryCounts as Dictionary<string, int> ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
     var totalStandardsForFilter = ViewBag.TotalStandardsForFilter as int? ?? totalRecords;
 
+
     string BuildCategoryFilterUrl(string? categoryValue)
     {
         var query = new List<KeyValuePair<string, string?>>();
@@ -36,7 +37,11 @@
     ViewBag.HeroType = "collection";
     ViewBag.HeroTitle = "DDT Standards";
     ViewBag.HeroMetaDescription = "Digital, data and technology standards to support good service delivery in DfE.";
-    ViewBag.HeroBadgeText = "Collection";
+    ViewBag.HeroBadgeText = "Standards";
+    ViewBag.HeroSectionTitle = "Standards";
+    ViewBag.HeroSectionUrl = "/guidance/collections/standards";
+    ViewBag.HeroCollectionSlug = "standards";
+    ViewBag.HeroCollectionTitle = "Standards";
     ViewBag.UseInverseNav = true;
 }
 
@@ -83,7 +88,7 @@
                 <ul class="gf-list">
                     <li class="gf-item">
                         <a class="gf-link @(selectedCategories.Count == 0 ? "active" : null)" href="@BuildCategoryFilterUrl(null)">
-                            <span class="gf-dot" style="background:var(--govuk-colour-secondary-text)"></span>
+                            <span class="gf-dot"></span>
                             All categories
                             <span class="gf-count">@totalStandardsForFilter</span>
                         </a>
@@ -94,7 +99,7 @@
                         var count = categoryCounts.TryGetValue(cat, out var categoryCount) ? categoryCount : 0;
                         <li class="gf-item">
                             <a class="gf-link @(isActive ? "active" : null)" href="@BuildCategoryFilterUrl(cat)">
-                                <span class="gf-dot" style="background:var(--govuk-colour-blue)"></span>
+                                <span class="gf-dot"></span>
                                 @cat
                                 <span class="gf-count">@count</span>
                             </a>

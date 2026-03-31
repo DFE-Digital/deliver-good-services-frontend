@@ -77,6 +77,12 @@ namespace ServiceManual.Services
                                 {
                                     Title = collection.Title ?? string.Empty,
                                     Slug = collection.Slug ?? string.Empty,
+                                    Url = string.IsNullOrWhiteSpace(collection.Url)
+                                        ? $"/guidance/collections/{collection.Slug}"
+                                        : collection.Url.Trim(),
+                                    ContentType = string.IsNullOrWhiteSpace(collection.ContentType)
+                                        ? "Collection"
+                                        : collection.ContentType.Trim(),
                                     Description = string.IsNullOrWhiteSpace(collection.Description)
                                         ? collection.Title ?? string.Empty
                                         : collection.Description.Trim(),
@@ -339,6 +345,8 @@ namespace ServiceManual.Services
                 var url = $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
                           "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage" +
                           "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug" +
+                          "&populate[detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
+                          "&populate[detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide_pages][populate][applicableProfessions][fields][1]=slug" +
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
                           "&populate[contentOwner][fields][0]=title&populate[contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
@@ -376,7 +384,19 @@ namespace ServiceManual.Services
                     Collections = collections,
                     HideContentsOnPrimaryPage = item.HideContentsOnPrimaryPage ?? false,
                     Pages = item.Detailed_Guide_Pages?
-                        .Select(p => new DetailedGuidePageSummary { Title = p.Title ?? string.Empty, Slug = p.Slug ?? string.Empty })
+                        .Select(p => new DetailedGuidePageSummary
+                        {
+                            Title = p.Title ?? string.Empty,
+                            Slug = p.Slug ?? string.Empty,
+                            Phases = p.ApplicablePhases?
+                                .Where(ph => !string.IsNullOrWhiteSpace(ph.Slug) || !string.IsNullOrWhiteSpace(ph.Title))
+                                .Select(ph => new TagRef { Slug = ph.Slug ?? "", Title = ph.Title ?? "" })
+                                .ToList() ?? [],
+                            Professions = p.ApplicableProfessions?
+                                .Where(pr => !string.IsNullOrWhiteSpace(pr.Slug) || !string.IsNullOrWhiteSpace(pr.Title))
+                                .Select(pr => new TagRef { Slug = pr.Slug ?? "", Title = pr.Title ?? "" })
+                                .ToList() ?? [],
+                        })
                         .ToList() ?? [],
                     RelatedContent = item.RelatedContent?
                         .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
@@ -1189,11 +1209,9 @@ namespace ServiceManual.Services
                           "&fields[0]=title&fields[1]=order&fields[2]=externalUrl" +
                           "&populate[collection][fields][0]=slug" +
                           "&populate[detailed_guide][fields][0]=slug" +
-                          "&populate[html_page][fields][0]=slug" +
                           "&populate[children][fields][0]=title&populate[children][fields][1]=order&populate[children][fields][2]=externalUrl" +
                           "&populate[children][populate][collection][fields][0]=slug" +
                           "&populate[children][populate][detailed_guide][fields][0]=slug" +
-                          "&populate[children][populate][html_page][fields][0]=slug" +
                           "&sort=order:asc" +
                           "&pagination[pageSize]=100";
 
@@ -1264,27 +1282,6 @@ namespace ServiceManual.Services
             // Detailed guide pages: /guidance/guides/{guideSlug}/{pageSlug} (with guide's collection)
             await AddDetailedGuidePagesAsync(items, pageSize);
 
-            // HTML pages: /pages/{slug}
-            await AddListAsync(items, "api/html-pages",
-                "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug",
-                pageSize,
-                "HTML Page",
-                d => $"/pages/{d.Slug}",
-                d => d.Slug);
-
-            // Lifecycle (single type): /lifecycle
-            var lifecycle = await GetLifecycleAsync();
-            if (lifecycle != null)
-            {
-                items.Add(new ContentIndexItem
-                {
-                    Title = lifecycle.Title,
-                    MetaDescription = lifecycle.Summary,
-                    ContentType = "Lifecycle",
-                    Url = "/lifecycle"
-                });
-            }
-
             // Roadmap (single type): /roadmap
             var roadmap = await GetRoadmapAsync();
             if (roadmap != null)
@@ -1298,15 +1295,192 @@ namespace ServiceManual.Services
                 });
             }
 
-            // Phases: /lifecycle/{slug}
-            await AddPhaseListAsync(items, pageSize);
-
             if (items.Count == 0)
             {
-                _logger.LogWarning("Content index fetch returned 0 items. Check CMS credentials and find permissions for collections, detailed-guides, detailed-guide-pages, html-pages, roadmap, lifecycle and lifecycle-stages.");
+                _logger.LogWarning("Content index fetch returned 0 items. Check CMS credentials and find permissions for collections, detailed-guides, detailed-guide-pages, roadmap and job-specifications.");
             }
 
             return items.OrderBy(i => i.ContentType).ThenBy(i => i.Title).ToList();
+        }
+
+        public async Task<List<ContentEntry>> GetContentEntriesAsync(string? strength = null, string? phaseSlug = null, string? roleSlug = null)
+        {
+            try
+            {
+                var url = "api/content-entries?" +
+                          "fields[0]=title&fields[1]=slug&fields[2]=summary&fields[3]=body&fields[4]=entryType&fields[5]=strength&fields[6]=priority&fields[7]=legalRequirement&fields[8]=notes" +
+                          "&populate[phases][fields][0]=title&populate[phases][fields][1]=slug" +
+                          "&populate[roles][fields][0]=title&populate[roles][fields][1]=slug";
+
+                if (!string.IsNullOrWhiteSpace(strength))
+                    url += "&filters[strength][$eq]=" + Uri.EscapeDataString(strength.Trim());
+
+                if (!string.IsNullOrWhiteSpace(phaseSlug))
+                    url += "&filters[phases][slug][$eq]=" + Uri.EscapeDataString(phaseSlug.Trim());
+
+                if (!string.IsNullOrWhiteSpace(roleSlug))
+                    url += "&filters[roles][slug][$eq]=" + Uri.EscapeDataString(roleSlug.Trim());
+
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for content entries", response.StatusCode);
+                    return [];
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiContentEntryListItem>>(json, JsonOptions);
+
+                return result?.Data?
+                    .Select(item => new ContentEntry
+                    {
+                        Title = item.Title ?? string.Empty,
+                        Slug = item.Slug ?? string.Empty,
+                        Summary = item.Summary,
+                        Body = item.Body,
+                        EntryType = item.EntryType,
+                        Strength = item.Strength,
+                        Priority = item.Priority,
+                        LegalRequirement = item.LegalRequirement ?? false,
+                        Notes = item.Notes,
+                        Phases = item.Phases?
+                            .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
+                            .Select(p => new TagRef { Slug = p.Slug ?? string.Empty, Title = p.Title ?? string.Empty })
+                            .ToList() ?? [],
+                        Roles = item.Roles?
+                            .Where(r => !string.IsNullOrWhiteSpace(r.Slug) || !string.IsNullOrWhiteSpace(r.Title))
+                            .Select(r => new TagRef { Slug = r.Slug ?? string.Empty, Title = r.Title ?? string.Empty })
+                            .ToList() ?? []
+                    })
+                    .ToList() ?? [];
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching content entries");
+                return [];
+            }
+        }
+
+        public async Task<List<ServiceStandardSummary>> GetServiceStandardsAsync()
+        {
+            try
+            {
+                const string url = "api/service-standards?fields[0]=title&fields[1]=point&fields[2]=slug&fields[3]=description&sort[0]=point:asc&sort[1]=title:asc";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for service standards", response.StatusCode);
+                    return [];
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiServiceStandard>>(json, JsonOptions);
+
+                return result?.Data?
+                    .Select(item => new ServiceStandardSummary
+                    {
+                        Title = item.Title ?? string.Empty,
+                        Point = item.Point ?? 0,
+                        Slug = item.Slug ?? string.Empty,
+                        Description = item.Description,
+                    })
+                    .OrderBy(s => s.Point == 0 ? int.MaxValue : s.Point)
+                    .ThenBy(s => s.Title)
+                    .ToList() ?? [];
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching service standards");
+                return [];
+            }
+        }
+
+        public async Task<ServiceStandardPage?> GetServiceStandardBySlugAsync(string slug)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(slug))
+                    return null;
+
+                var url = "api/service-standards?filters[slug][$eq]=" + Uri.EscapeDataString(slug.Trim()) +
+                          "&fields[0]=title&fields[1]=point&fields[2]=slug&fields[3]=description&fields[4]=body" +
+                          "&populate[Section][fields][0]=title&populate[Section][fields][1]=description" +
+                          "&populate[Section][populate][content_entries][fields][0]=title" +
+                          "&populate[Section][populate][content_entries][fields][1]=slug" +
+                          "&populate[Section][populate][content_entries][fields][2]=summary" +
+                          "&populate[Section][populate][content_entries][fields][3]=body" +
+                          "&populate[Section][populate][content_entries][fields][4]=entryType" +
+                          "&populate[Section][populate][content_entries][fields][5]=strength" +
+                          "&populate[Section][populate][content_entries][fields][6]=priority" +
+                          "&populate[Section][populate][content_entries][fields][7]=legalRequirement" +
+                          "&populate[Section][populate][content_entries][fields][8]=notes" +
+                          "&populate[Section][populate][content_entries][populate][phases][fields][0]=title" +
+                          "&populate[Section][populate][content_entries][populate][phases][fields][1]=slug" +
+                          "&populate[Section][populate][content_entries][populate][roles][fields][0]=title" +
+                          "&populate[Section][populate][content_entries][populate][roles][fields][1]=slug";
+
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("CMS API returned {StatusCode} for service standard slug '{Slug}'", response.StatusCode, slug);
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiServiceStandard>>(json, JsonOptions);
+                var item = result?.Data?.FirstOrDefault();
+                if (item is null)
+                    return null;
+
+                return new ServiceStandardPage
+                {
+                    Title = item.Title ?? string.Empty,
+                    Point = item.Point ?? 0,
+                    Slug = item.Slug ?? string.Empty,
+                    Description = item.Description,
+                    Body = item.Body,
+                    Sections = (item.Section ?? [])
+                        .Select(s => new ServiceStandardSection
+                        {
+                            Title = s.Title ?? string.Empty,
+                            Description = s.Description,
+                            ContentEntries = (s.ContentEntries ?? [])
+                                .Select(MapContentEntry)
+                                .ToList(),
+                        })
+                        .ToList(),
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching service standard for slug '{Slug}'", slug);
+                return null;
+            }
+        }
+
+        private static ContentEntry MapContentEntry(StrapiContentEntryListItem item)
+        {
+            return new ContentEntry
+            {
+                Title = item.Title ?? string.Empty,
+                Slug = item.Slug ?? string.Empty,
+                Summary = item.Summary,
+                Body = item.Body,
+                EntryType = item.EntryType,
+                Strength = item.Strength,
+                Priority = item.Priority,
+                LegalRequirement = item.LegalRequirement ?? false,
+                Notes = item.Notes,
+                Phases = item.Phases?
+                    .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
+                    .Select(p => new TagRef { Slug = p.Slug ?? string.Empty, Title = p.Title ?? string.Empty })
+                    .ToList() ?? [],
+                Roles = item.Roles?
+                    .Where(r => !string.IsNullOrWhiteSpace(r.Slug) || !string.IsNullOrWhiteSpace(r.Title))
+                    .Select(r => new TagRef { Slug = r.Slug ?? string.Empty, Title = r.Title ?? string.Empty })
+                    .ToList() ?? []
+            };
         }
 
         public async Task<string?> GetRedirectUrlByShortUrlAsync(string shortUrl)
@@ -1339,59 +1513,62 @@ namespace ServiceManual.Services
         {
             if (string.IsNullOrWhiteSpace(path))
                 return null;
+
             var normalizedPath = path.Trim();
             if (!normalizedPath.StartsWith("/", StringComparison.Ordinal))
                 normalizedPath = "/" + normalizedPath;
-            var withSlash = normalizedPath;
-            var withoutSlash = normalizedPath.TrimStart('/');
 
-            var withSlashNoTrailing = withSlash.TrimEnd('/');
-            var withSlashWithTrailing = withSlashNoTrailing + "/";
-            var withoutSlashNoTrailing = withoutSlash.TrimEnd('/');
-            var withoutSlashWithTrailing = withoutSlashNoTrailing + "/";
-
-            // Try common storage variants (leading slash/no leading slash and trailing slash/no trailing slash).
-            var pathsToTry = new[]
+            var withSlashNoTrailing = normalizedPath.TrimEnd('/');
+            var pathVariants = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                withSlash,
-                withoutSlash,
+                normalizedPath,
                 withSlashNoTrailing,
-                withSlashWithTrailing,
-                withoutSlashNoTrailing,
-                withoutSlashWithTrailing
+                withSlashNoTrailing + "/",
+                normalizedPath.TrimStart('/'),
+                withSlashNoTrailing.TrimStart('/'),
+                withSlashNoTrailing.TrimStart('/') + "/"
             };
-            foreach (var pathToTry in pathsToTry.Distinct())
+
+            try
             {
-                try
+                // Redirect-301 entries store rules as a JSON 'mapping' array — fetch all and match in-memory.
+                const string url = "api/redirect-301s?fields[0]=mapping&publicationState=live&pagination[pageSize]=100";
+                var response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
                 {
-                    var url = "api/redirect-301s?filters[oldPath][$eq]=" + Uri.EscapeDataString(pathToTry) +
-                              "&publicationState=live";
-                    var response = await _httpClient.GetAsync(url);
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        var body = await response.Content.ReadAsStringAsync();
-                        _logger.LogWarning(
-                            "CMS API returned {StatusCode} for path redirect '{Path}'. If 403, enable Public find permission for '301 Redirects' in Strapi. Response: {Response}",
-                            response.StatusCode, pathToTry, body.Length > 200 ? body[..200] + "..." : body);
-                        continue;
-                    }
-                    var json = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiRedirect301>>(json, JsonOptions);
-                    var item = result?.Data?.FirstOrDefault();
-                    if (item == null || string.IsNullOrWhiteSpace(item.NewPath))
-                        continue;
-                    return new PathRedirect
-                    {
-                        OldPath = item.OldPath ?? normalizedPath,
-                        NewPath = item.NewPath!.Trim(),
-                        UseInterimPage = item.UseInterimPage
-                    };
+                    var body = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning(
+                        "CMS API returned {StatusCode} for path redirects. If 403, enable Public find permission for '301 Redirects' in Strapi. Response: {Response}",
+                        response.StatusCode, body.Length > 200 ? body[..200] + "..." : body);
+                    return null;
                 }
-                catch (Exception ex)
+
+                var json = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiRedirect301>>(json, JsonOptions);
+                if (result?.Data == null) return null;
+
+                foreach (var entry in result.Data)
                 {
-                    _logger.LogError(ex, "Error fetching path redirect for '{Path}'", pathToTry);
+                    if (entry.Mapping == null) continue;
+                    foreach (var rule in entry.Mapping)
+                    {
+                        if (string.IsNullOrWhiteSpace(rule.OldPath) || string.IsNullOrWhiteSpace(rule.NewPath))
+                            continue;
+                        if (pathVariants.Contains(rule.OldPath))
+                            return new PathRedirect
+                            {
+                                OldPath = rule.OldPath,
+                                NewPath = rule.NewPath.Trim(),
+                                UseInterimPage = rule.UseInterimPage
+                            };
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching path redirects for '{Path}'", normalizedPath);
+            }
+
             return null;
         }
 
@@ -1529,9 +1706,6 @@ namespace ServiceManual.Services
             if (!string.IsNullOrEmpty(item.ExternalUrl))
                 return item.ExternalUrl;
 
-            if (item.Html_Page?.Slug is not null)
-                return $"/pages/{item.Html_Page.Slug}";
-
             if (item.Collection?.Slug is not null)
                 return $"/guidance/collections/{item.Collection.Slug}";
 
@@ -1635,6 +1809,12 @@ namespace ServiceManual.Services
 
         private class StrapiRedirect301
         {
+            [JsonPropertyName("mapping")]
+            public List<StrapiRedirectMapping>? Mapping { get; set; }
+        }
+
+        private class StrapiRedirectMapping
+        {
             [JsonPropertyName("oldPath")]
             public string? OldPath { get; set; }
             [JsonPropertyName("newPath")]
@@ -1699,6 +1879,8 @@ namespace ServiceManual.Services
         {
             public string? Title { get; set; }
             public string? Slug { get; set; }
+            public string? Url { get; set; }
+            public string? ContentType { get; set; }
             public string? Description { get; set; }
             public int ItemCount { get; set; }
             public bool Featured { get; set; }
@@ -2450,6 +2632,12 @@ namespace ServiceManual.Services
         {
             public string? Title { get; set; }
             public string? Slug { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicablePhases")]
+            public List<StrapiTagRef>? ApplicablePhases { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicableProfessions")]
+            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
         }
 
         private class StrapiCollectionRef
@@ -2502,7 +2690,6 @@ namespace ServiceManual.Services
             public string? ExternalUrl { get; set; }
             public StrapiNavSlugRef? Collection { get; set; }
             public StrapiNavSlugRef? Detailed_Guide { get; set; }
-            public StrapiNavSlugRef? Html_Page { get; set; }
             public List<StrapiNavigationItem>? Children { get; set; }
         }
 
@@ -2674,6 +2861,44 @@ namespace ServiceManual.Services
         {
             public string? Slug { get; set; }
             public StrapiSlugRef? Collection { get; set; }
+        }
+
+        private class StrapiContentEntryListItem
+        {
+            public string? Title { get; set; }
+            public string? Slug { get; set; }
+            public string? Summary { get; set; }
+            public string? Body { get; set; }
+            public string? EntryType { get; set; }
+            public string? Strength { get; set; }
+            public string? Priority { get; set; }
+            public bool? LegalRequirement { get; set; }
+            public string? Notes { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("phases")]
+            public List<StrapiTagRef>? Phases { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("roles")]
+            public List<StrapiTagRef>? Roles { get; set; }
+        }
+
+        private class StrapiServiceStandard
+        {
+            public string? Title { get; set; }
+            public int? Point { get; set; }
+            public string? Slug { get; set; }
+            public string? Description { get; set; }
+            public string? Body { get; set; }
+            [JsonPropertyName("Section")]
+            public List<StrapiServiceStandardSection>? Section { get; set; }
+        }
+
+        private class StrapiServiceStandardSection
+        {
+            public string? Title { get; set; }
+            public string? Description { get; set; }
+            [JsonPropertyName("content_entries")]
+            public List<StrapiContentEntryListItem>? ContentEntries { get; set; }
         }
 
         private class StrapiPhaseListItem

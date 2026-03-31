@@ -43,5 +43,7 @@ namespace ServiceManual.Models
     {
         public string Title { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
+        public List<TagRef> Phases { get; set; } = [];
+        public List<TagRef> Professions { get; set; } = [];
     }
 }

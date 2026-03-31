@@ -1,5 +1,4 @@
 @using System.Linq
-@using System.Text.RegularExpressions
 @using ServiceManual.Models
 @using ServiceManual.Helpers
 @{
@@ -30,142 +29,12 @@
     var canonicalCurrentUrl = string.IsNullOrEmpty(requestHost)
         ? currentPath
         : $"{requestScheme}://{requestHost}{currentPath}";
-    var isServiceStandardOverview = vm.IsOverviewPage
-        && currentPath.Equals("/guidance/guides/applying-the-service-standard", StringComparison.OrdinalIgnoreCase);
-
-    var serviceStandardDescriptions = new Dictionary<int, string>
-    {
-        [1] = "Develop a deep understanding of users and the problem you're trying to solve for them.",
-        [2] = "Work across organisational boundaries to create a service that solves a complete problem.",
-        [3] = "Create a service that is accessible and consistent across different channels for all users.",
-        [4] = "Build a service that is simple and intuitive. Users should be able to do what they need to do without difficulty.",
-        [5] = "Ensure your service can be used by people with different physical, mental, social, cultural or learning needs.",
-        [6] = "Build the service using a multidisciplinary team with the right mix of skills.",
-        [7] = "Create the service using agile, iterative, user-centred methods. Keep improving it based on feedback.",
-        [8] = "Make sure you have the capacity, resources and technical flexibility to iterate and improve the service.",
-        [9] = "Evaluate what data the service will use, store and create. Understand the security threats to your service.",
-        [10] = "Work out how your service is performing and publish metrics, including the four mandatory KPIs.",
-        [11] = "Choose tools and technology that are appropriate to the service and aligned to DfE's technology standards.",
-        [12] = "Make all new source code open and reusable, and publish it under appropriate licences.",
-        [13] = "Build on open standards, use common components and contribute back to GOV.UK patterns.",
-        [14] = "Minimise service downtime and have a clear plan to deal with it when it does occur."
-    };
-
-    var serviceStandardRoles = new Dictionary<int, string>
-    {
-        [1] = "All roles",
-        [2] = "All roles",
-        [3] = "Design · Research",
-        [4] = "Design · Research",
-        [5] = "Design · Research · Accessibility",
-        [6] = "All roles",
-        [7] = "Delivery",
-        [8] = "All roles",
-        [9] = "Tech · Arch",
-        [10] = "Product · Delivery",
-        [11] = "Tech · Arch",
-        [12] = "Tech · Arch",
-        [13] = "Design · Tech",
-        [14] = "Tech · Delivery"
-    };
-
-    var serviceStandardPoints = vm.ContentsItems
-        .Where(item => !string.IsNullOrWhiteSpace(item.Url))
-        .Select((item, index) => new
-        {
-            Number = index + 1,
-            Url = item.Url!,
-            Title = Regex.Replace(item.Title ?? string.Empty, @"^\d+\.\s*", "").Trim(),
-        })
-        .ToList();
 }
 
 <div class="guide-modern">
     @* Guide hero - using standardized hero partial *@
     @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
-    @if (isServiceStandardOverview)
-    {
-        <div class="ss-body" id="main">
-            <div class="govuk-width-container">
-                <div class="ss-layout">
-                    <main>
-                        <ul class="ss-cards" role="list" aria-label="Service Standard points">
-                            @foreach (var point in serviceStandardPoints)
-                            {
-                                var cardDescription = serviceStandardDescriptions.TryGetValue(point.Number, out var description)
-                                    ? description
-                                    : "Guidance and assessment evidence for this Service Standard point.";
-                                var roleLabel = serviceStandardRoles.TryGetValue(point.Number, out var roles)
-                                    ? roles
-                                    : "All roles";
-                                var isActive = point.Number == 5;
-                                <li>
-                                    <a class="ss-card@(isActive ? " ss-card--active" : "")" href="@point.Url" role="listitem">
-                                        <div class="ss-card__num-col"><span class="ss-card__num">@point.Number</span></div>
-                                        <div class="ss-card__body">
-                                            <span class="ss-card__title">@point.Title</span>
-                                            <span class="ss-card__desc">@cardDescription</span>
-                                            <div class="ss-card__meta">
-                                                @if (point.Number == 1 || point.Number == 6 || point.Number == 7)
-                                                {
-                                                    <span class="ph ph--disc">Discovery</span>
-                                                }
-                                                <span class="ph ph--alpha">Alpha</span>
-                                                <span class="ph ph--beta">Beta</span>
-                                                @if (point.Number != 7 && point.Number != 11)
-                                                {
-                                                    <span class="ph ph--live">Live</span>
-                                                }
-                                                <span class="ss-card__roles">@roleLabel</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </main>
-
-                    <aside class="ss-aside" aria-label="Assessment information">
-                        @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
-                        {
-                            ["ShareTitle"]     = vm.HeroTitle,
-                            ["ShareUrl"]       = canonicalCurrentUrl,
-                            ["LibId"]          = currentPath,
-                            ["LibTitle"]       = vm.HeroTitle,
-                            ["LibUrl"]         = currentPath,
-                            ["LibType"]        = "Guidance",
-                            ["LibDescription"] = vm.HeroIntro ?? string.Empty
-                        })
-
-                        <div class="assess-box">
-                            <h3>About service assessments</h3>
-                            <p>DfE services are assessed against the Service Standard at the end of each phase. Assessors are experienced practitioners who look for evidence, not documentation.</p>
-                            <a href="/guidance/guides/service-assessments">Assessment guidance</a>
-                        </div>
-                        <div class="rag-box">
-                            <h3>Assessment outcomes</h3>
-                            <div class="rag-item"><span class="rag-dot" style="background:var(--c-green)"></span><span class="rag-text"><strong>Green — Met</strong>The service meets the standard and can proceed to the next phase.</span></div>
-                            <div class="rag-item"><span class="rag-dot" style="background:var(--c-orange)"></span><span class="rag-text"><strong>Amber — Met with conditions</strong>Can proceed but must address specific issues by an agreed date.</span></div>
-                            <div class="rag-item"><span class="rag-dot" style="background:var(--c-error)"></span><span class="rag-text"><strong>Red — Not met</strong>Must pause, address issues and be reassessed before progressing.</span></div>
-                        </div>
-
-                        <div class="sb-block" style="margin-top:24px">
-                            <span class="sb-lbl">Related</span>
-                            <ul class="sb-links">
-                                <li><a class="sb-link" href="/guidance/guides/service-assessments">Service assessments</a></li>
-                                <li><a class="sb-link" href="/guidance/guides/applying-the-service-standard/make-sure-everyone-can-use-the-service">Standard 5 — Everyone can use it</a></li>
-                                <li><a class="sb-link" href="https://www.gov.uk/service-manual/service-standard" target="_blank" rel="noopener noreferrer">GOV.UK Service Standard</a></li>
-                                <li><a class="sb-link" href="/guidance/guides/service-assessments/book-an-assessment">Book an assessment</a></li>
-                            </ul>
-                        </div>
-                    </aside>
-                </div>
-            </div>
-        </div>
-    }
-    else
-    {
 
         @* Contents: on overview, respect ShowContents (HideContentsOnPrimaryPage); on child pages always show when we have items *@
         @if (vm.ShowContents && vm.ContentsItems.Count > 0)
@@ -311,5 +180,4 @@
                 }
             </div>
         </div>
-    }
 </div>

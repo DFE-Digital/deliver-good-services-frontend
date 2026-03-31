@@ -1,0 +1,41 @@
+@model List<ServiceManual.Models.ServiceStandardSummary>
+@{
+    ViewData["Title"] = "Service standards";
+
+    ViewBag.HeroType = "collection";
+    ViewBag.HeroTitle = "Service standards";
+    ViewBag.HeroMetaDescription = "Browse the service standards and open each standard page for guidance by phase, role and strength.";
+    ViewBag.HeroBadgeText = "Service standards";
+    ViewBag.HeroSectionTitle = "Standards";
+    ViewBag.HeroSectionUrl = "/guidance/collections/standards";
+    ViewBag.HeroCollectionSlug = "standards";
+    ViewBag.HeroCollectionTitle = "Standards";
+    ViewBag.UseInverseNav = true;
+}
+
+<div class="guide-modern">
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
+
+    <div class="ss-body" id="main">
+        <div class="govuk-width-container">
+            <ul class="ss-cards govuk-!-margin-top-2" role="list" aria-label="Service standard points">
+                @foreach (var standard in Model.OrderBy(s => s.Point == 0 ? int.MaxValue : s.Point).ThenBy(s => s.Title))
+                {
+                    var label = standard.Point > 0 ? $"{standard.Point}. {standard.Title}" : standard.Title;
+                    <li>
+                        <a class="ss-card" href="@Url.Action("Details", "ServiceStandards", new { slug = standard.Slug })" role="listitem">
+                            <div class="ss-card__num-col"><span class="ss-card__num">@(standard.Point > 0 ? standard.Point.ToString() : "-")</span></div>
+                            <div class="ss-card__body">
+                                <span class="ss-card__title">@label</span>
+                                @if (!string.IsNullOrWhiteSpace(standard.Description))
+                                {
+                                    <span class="ss-card__desc">@standard.Description</span>
+                                }
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

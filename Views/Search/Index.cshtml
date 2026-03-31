@@ -130,8 +130,8 @@
     }
     else
     {
-      <div class="guidance-layout">
-        <aside class="guidance-filters" aria-label="Filter results">
+      <div class="govuk-grid-row">
+        <aside class="govuk-grid-column-one-third guidance-filters" aria-label="Filter results">
           <div class="gf-block">
             <span class="gf-title">Search this page</span>
             <form method="get" action="/search" class="gf-search" role="search">
@@ -185,7 +185,7 @@
           }
         </aside>
 
-        <div class="guidance-main">
+        <div class="govuk-grid-column-two-thirds guidance-main">
           @if (Model.Types.Count > 0)
           {
             <div class="dfe-standards-filter__applied dfe-standards-filter__applied--above-results govuk-!-margin-bottom-4">

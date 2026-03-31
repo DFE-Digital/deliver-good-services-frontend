@@ -50,5 +50,7 @@ namespace ServiceManual.Models
         /// <summary>When null, render as span (current page).</summary>
         public string? Url { get; set; }
         public bool IsCurrent { get; set; }
+        public List<TagRef> Phases { get; set; } = [];
+        public List<TagRef> Professions { get; set; } = [];
     }
 }

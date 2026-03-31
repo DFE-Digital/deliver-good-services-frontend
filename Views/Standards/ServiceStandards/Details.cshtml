@@ -1,0 +1,76 @@
+@model ServiceManual.Models.ServiceStandardPageViewModel
+@{
+    var standard = Model.Standard;
+    var totalPoints = Model.AllStandards.Count;
+    ViewData["Title"] = !string.IsNullOrWhiteSpace(standard.Title) ? standard.Title : "Service standard";
+
+    ViewBag.HeroType = "guidance";
+    ViewBag.HeroTitle = standard.Point > 0 ? $"{standard.Point}. {standard.Title}" : standard.Title;
+    ViewBag.HeroIntro = standard.Description;
+    ViewBag.HeroBadgeText = "Service standard";
+    ViewBag.HeroCollectionSlug = "standards";
+    ViewBag.HeroCollectionTitle = "Standards";
+}
+
+<div class="guide-modern">
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
+
+    <div class="govuk-width-container">
+        @if (!string.IsNullOrWhiteSpace(ViewBag.ErrorMessage as string))
+        {
+            <div class="govuk-error-summary" role="alert" tabindex="-1" data-module="govuk-error-summary">
+                <h2 class="govuk-error-summary__title">There is a problem</h2>
+                <div class="govuk-error-summary__body">
+                    <ul class="govuk-list govuk-error-summary__list">
+                        <li>@(ViewBag.ErrorMessage as string)</li>
+                    </ul>
+                </div>
+            </div>
+        }
+
+        @if (string.IsNullOrWhiteSpace(standard.Title))
+        {
+            <h1 class="govuk-heading-xl">Service standard not found</h1>
+            <p class="govuk-body">The service standard you requested could not be found.</p>
+            <p class="govuk-body"><a class="govuk-link" href="@Url.Action("Index", "ServiceStandards")">Return to service standards</a></p>
+        }
+        else
+        {
+            <div class="sp-layout govuk-!-margin-top-6">
+                <nav class="sp-nav" aria-label="All service standard points">
+                    <a class="sp-nav__back" href="@Url.Action("Index", "ServiceStandards")">&larr; All @totalPoints points</a>
+                    <ul class="sp-nav-list">
+                        @foreach (var point in Model.AllStandards)
+                        {
+                            var isActive = point.Slug.Equals(Model.CurrentSlug, StringComparison.OrdinalIgnoreCase);
+                            var pointLabel = point.Point > 0 ? point.Point.ToString() : "-";
+                            <li class="sp-nav-item">
+                                <a class="sp-nav-link @(isActive ? "active" : "")" href="@Url.Action("Details", "ServiceStandards", new { slug = point.Slug })">
+                                    <span class="sp-nav-link__num">@pointLabel</span>@point.Title
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+
+                <main class="sp-main">
+                    @await Html.PartialAsync("~/Views/Shared/_ServicePointGuidance.cshtml", Model.Guidance)
+
+                    @if (Model.PreviousUrl != null || Model.NextUrl != null)
+                    {
+                        <div class="sp-page-nav">
+                            @if (Model.PreviousUrl != null)
+                            {
+                                <a class="sp-page-nav__link sp-page-nav__link--prev" href="@Model.PreviousUrl">&larr; @Model.PreviousLabel</a>
+                            }
+                            @if (Model.NextUrl != null)
+                            {
+                                <a class="sp-page-nav__link sp-page-nav__link--next" href="@Model.NextUrl">@Model.NextLabel &rarr;</a>
+                            }
+                        </div>
+                    }
+                </main>
+            </div>
+        }
+    </div>
+</div>

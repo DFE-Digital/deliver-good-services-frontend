@@ -38,8 +38,8 @@
     @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
     <div class="guidance-body">
-        <div class="guidance-layout">
-            <aside class="guidance-filters" aria-label="Filter guidance">
+        <div class="govuk-grid-row">
+            <aside class="govuk-grid-column-one-third guidance-filters" aria-label="Filter guidance">
                 <div class="gf-block">
                     <span class="gf-title">Search this page</span>
                     <form method="get" action="/guidance" class="gf-search" role="search">
@@ -64,7 +64,7 @@
                     <ul class="gf-list">
                         <li class="gf-item">
                             <a class="gf-link @(string.IsNullOrWhiteSpace(Model.SelectedGuidanceAreaSlug) ? "active" : null)" href="@BuildFilterUrl(null, Model.SelectedProfessionSlugs, Model.SelectedSearchTerm)">
-                                <span class="gf-dot" style="background:var(--govuk-colour-secondary-text)"></span>
+                                <span class="gf-dot"></span>
                                 All areas
                                 <span class="gf-count">@Model.TotalCollectionCount</span>
                             </a>
@@ -73,7 +73,7 @@
                         {
                             <li class="gf-item">
                                 <a class="gf-link @(Model.SelectedGuidanceAreaSlug == area.Slug ? "active" : null)" href="@BuildFilterUrl(area.Slug, Model.SelectedProfessionSlugs, Model.SelectedSearchTerm)">
-                                    <span class="gf-dot" style="background:@area.ColourHex"></span>
+                                    <span class="gf-dot"></span>
                                     @area.Label
                                     <span class="gf-count">@area.Count</span>
                                 </a>
@@ -118,7 +118,7 @@
                 </div>
             </aside>
 
-            <div class="guidance-main">
+            <div class="govuk-grid-column-two-thirds guidance-main">
                 @if (Model.Areas.Count == 0)
                 {
                     <div class="guidance-empty-state">
@@ -137,7 +137,7 @@
                                 <div class="ga-header__body">
                                     <div class="ga-header__top">
                                         <h2 class="ga-header__title" id="ga-@area.Slug-hd">@area.Name</h2>
-                                        <span class="ga-header__count">@area.TotalItemCount item@(area.TotalItemCount == 1 ? null : "s") across @area.CollectionCount collection@(area.CollectionCount == 1 ? null : "s")</span>
+                                        <span class="ga-header__count">@area.TotalItemCount item@(area.TotalItemCount == 1 ? null : "s") across @area.CollectionCount card@(area.CollectionCount == 1 ? null : "s")</span>
                                     </div>
                                     @if (!string.IsNullOrWhiteSpace(area.IntroText))
                                     {
@@ -158,26 +158,21 @@
                             <div class="ga-collections">
                                 @foreach (var collection in area.Collections)
                                 {
-                                    <a class="ga-coll" href="/guidance/collections/@collection.Slug">
+                                    <a class="ga-coll" href="@collection.Url">
                                         <div class="ga-coll__top">
-                                            <span class="ga-coll__icon" style="background:@area.ColourHex" aria-hidden="true">
-                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                                    <rect x="1" y="1" width="4" height="4" fill="white"></rect>
-                                                    <rect x="7" y="1" width="4" height="4" fill="white"></rect>
-                                                    <rect x="1" y="7" width="4" height="4" fill="white"></rect>
-                                                    <rect x="7" y="7" width="4" height="4" fill="white"></rect>
-                                                </svg>
-                                            </span>
                                             <span class="ga-coll__name">@collection.Title</span>
-                                            <span class="ga-coll__count">@collection.ItemCount item@(collection.ItemCount == 1 ? null : "s")</span>
                                         </div>
                                         <p class="ga-coll__desc">@collection.Description</p>
-                                        @if (collection.Tags.Count > 0 || collection.AlsoInAreas.Count > 0)
+                                        @if (collection.ContentType == "Collection" || collection.ContentType == "Detailed guide" || collection.AlsoInAreas.Count > 0)
                                         {
                                             <div class="ga-coll__tags">
-                                                @foreach (var tag in collection.Tags)
+                                                @if (collection.ContentType == "Collection")
                                                 {
-                                                    <span class="ga-coll__tag">@tag</span>
+                                                    <span class="ga-coll__tag">Collection</span>
+                                                }
+                                                else if (collection.ContentType == "Detailed guide")
+                                                {
+                                                    <span class="ga-coll__tag">Guide</span>
                                                 }
                                                 @if (collection.AlsoInAreas.Count > 0)
                                                 {

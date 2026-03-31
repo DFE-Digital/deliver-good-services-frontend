@@ -25,12 +25,15 @@ namespace ServiceManual.Models
     {
         public string Title { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+        public string ContentType { get; set; } = "Collection";
         public string Description { get; set; } = string.Empty;
         public int ItemCount { get; set; }
         public bool Featured { get; set; }
         public List<string> Tags { get; set; } = [];
         public List<TagRef> ApplicableProfessions { get; set; } = [];
         public List<CollectionRef> AlsoInAreas { get; set; } = [];
+        public string Key => $"{ContentType}:{Slug}";
     }
 
     public class GuidanceIndexViewModel

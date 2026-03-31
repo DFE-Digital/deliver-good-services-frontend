@@ -33,9 +33,11 @@
     var collectionTitle = ViewBag.HeroCollectionTitle as string ?? "";
     var breadcrumbItems = ViewBag.HeroBreadcrumbItems as List<(string Title, string Url)> ?? new List<(string, string)>();
     var hideBadge = (bool?)ViewBag.HideBadge ?? false;
+    var useInverseNav = (bool?)ViewBag.UseInverseNav ?? false;
     var heroSectionTitle = ViewBag.HeroSectionTitle as string ?? "Guidance";
     var heroSectionUrl = ViewBag.HeroSectionUrl as string ?? "/guidance";
     var heroClass = heroType == "collection" ? "page-hero--collection" : "page-hero--guidance";
+    var heroMetaClass = useInverseNav ? "page-hero__meta page-hero__meta--inverse" : "page-hero__meta";
     var chipColors = new[] { "#5439F9", "#15B187", "#CA357C" };
 }
 
@@ -108,7 +110,7 @@
                     @* Guidance-specific meta information *@
                     @if (heroType == "guidance")
                     {
-                        <div class="page-hero__meta">
+                        <div class="@heroMetaClass">
                             @if (collections.Count > 0)
                             {
                                 var c = collections[0];
@@ -145,9 +147,15 @@
                             }
                         </div>
                     }
+                    else if (heroType == "collection" && !string.IsNullOrEmpty(collectionSlug) && !string.IsNullOrEmpty(collectionTitle))
+                    {
+                        <div class="@heroMetaClass">
+                            <span class="page-hero__meta-item"><strong>Part of:</strong> <a class="govuk-link govuk-link--inverse" href="/guidance/collections/@collectionSlug">@System.Net.WebUtility.HtmlEncode(collectionTitle)</a></span>
+                        </div>
+                    }
                     else if (heroType == "article" && hasArticleMeta)
                     {
-                        <div class="page-hero__meta">
+                        <div class="@heroMetaClass">
                             @if (!string.IsNullOrWhiteSpace(articlePublishedFromDisplay))
                             {
                                 <span class="page-hero__meta-item"><strong>Published:</strong> @System.Net.WebUtility.HtmlEncode(articlePublishedFromDisplay)</span>

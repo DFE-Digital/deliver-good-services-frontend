@@ -1,0 +1,252 @@
+@using ServiceManual.Models
+@using ServiceManual.Helpers
+@model ServicePointGuidanceViewModel
+@{
+    var requestPath = Context?.Request?.Path.Value ?? string.Empty;
+
+    string BuildPhaseUrl(string? phaseSlug)
+    {
+        if (string.IsNullOrWhiteSpace(phaseSlug))
+            return requestPath;
+
+        var query = new List<string> { $"phase={Uri.EscapeDataString(phaseSlug)}" };
+        if (!string.IsNullOrWhiteSpace(Model.SelectedRoleSlug))
+            query.Add($"role={Uri.EscapeDataString(Model.SelectedRoleSlug)}");
+        if (!string.IsNullOrWhiteSpace(Model.SelectedStrength))
+            query.Add($"strength={Uri.EscapeDataString(Model.SelectedStrength)}");
+        return $"{requestPath}?{string.Join("&", query)}";
+    }
+
+    var groupedByType = Model.Entries
+        .GroupBy(e => e.EntryType ?? "Guidance", StringComparer.OrdinalIgnoreCase)
+        .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+    var orderedTypes = new[] { "Requirement", "Assessment point", "Consideration", "Guidance", "Principle", "Standard point" };
+
+    var activePhase = Model.PhaseTabs
+        .FirstOrDefault(p => p.Slug.Equals(Model.ActivePhaseSlug, StringComparison.OrdinalIgnoreCase));
+    var activePhaseSlug = activePhase?.Slug?.ToLowerInvariant() ?? string.Empty;
+    var activePhaseTitle = activePhase?.Title ?? "Current phase";
+
+    string SectionTitleForType(string type) => type.ToLowerInvariant() switch
+    {
+        "requirement" => "You must do this",
+        "assessment point" => activePhaseSlug == "discovery"
+            ? "You must evidence this at the Discovery peer review"
+            : $"You must evidence this at {activePhaseTitle} assessment",
+        "guidance" => "Guidance",
+        "consideration" => $"Common failure patterns at {activePhaseTitle}",
+        "principle" => "Principles to follow",
+        "standard point" => "Standard points",
+        _ => type
+    };
+
+    string PhaseLede() => activePhaseSlug switch
+    {
+        "discovery" => "Discovery is assessed as a peer review, not a formal gate. You still need to show that accessibility has been considered from the start.",
+        "alpha" => "Alpha is the first formal gate for this standard. Evidence of inclusive research and accessibility testing is expected now, not deferred to Beta.",
+        "beta" => "Before public Beta, legal and governance requirements must be complete. A planned activity is not accepted as completed evidence.",
+        "live" => "At Live, legal obligations are ongoing. Accessibility testing, inclusive research and statement maintenance continue after launch.",
+        _ => "Use this guidance to understand what good evidence looks like for this service standard in the selected phase."
+    };
+
+    string BlockClassForType(string type) => type.ToLowerInvariant() switch
+    {
+        "requirement" => "sp-must",
+        "assessment point" => "sp-evidence",
+        "consideration" => "sp-fail",
+        _ => "sp-must"
+    };
+
+    string HeaderClassForType(string type) => type.ToLowerInvariant() switch
+    {
+        "requirement" => "sp-must__hd",
+        "assessment point" => "sp-evidence__hd",
+        "consideration" => "sp-fail__hd",
+        _ => "sp-must__hd"
+    };
+
+    string HeaderTextClassForType(string type) => type.ToLowerInvariant() switch
+    {
+        "requirement" => "sp-must__hd-text",
+        "assessment point" => "sp-evidence__hd-text",
+        "consideration" => "sp-fail__hd-text",
+        _ => "sp-must__hd-text"
+    };
+
+    string HeaderIconClassForType(string type) => type.ToLowerInvariant() switch
+    {
+        "requirement" => "sp-must__hd-icon",
+        "assessment point" => "sp-evidence__hd-icon",
+        "consideration" => "sp-fail__hd-icon",
+        _ => "sp-must__hd-icon"
+    };
+
+    string HeaderIconForType(string type) => type.ToLowerInvariant() switch
+    {
+        "requirement" => "!",
+        "assessment point" => "✓",
+        "consideration" => "⚠",
+        _ => "•"
+    };
+
+    string ListClassForType(string type) => type.ToLowerInvariant() switch
+    {
+        "requirement" => "sp-must__items",
+        "assessment point" => "sp-evidence__items",
+        "consideration" => "sp-fail__items",
+        _ => "sp-must__items"
+    };
+
+    string ItemClassForType(string type) => type.ToLowerInvariant() switch
+    {
+        "requirement" => "sp-must__item",
+        "assessment point" => "sp-evidence__item",
+        "consideration" => "sp-fail__item",
+        _ => "sp-must__item"
+    };
+
+}
+
+<div class="sp-content">
+    @if (!string.IsNullOrWhiteSpace(Model.IntroHtml))
+    {
+        <div class="sp-prose sp-rich-text">
+            <h2 class="govuk-heading-m">What this means</h2>
+            @Html.Raw(Model.IntroHtml)
+        </div>
+    }
+
+    <div class="sp-tabs">
+        <div class="sp-tabs__bar">
+            @foreach (var phase in Model.PhaseTabs)
+            {
+                var isActive = string.Equals(phase.Slug, Model.ActivePhaseSlug, StringComparison.OrdinalIgnoreCase);
+                var phaseClass = phase.Slug?.ToLowerInvariant() switch
+                {
+                    "discovery" => "ph--disc",
+                    "alpha" => "ph--alpha",
+                    "beta" => "ph--beta",
+                    "live" => "ph--live",
+                    _ => ""
+                };
+                <a class="sp-tab-btn @(isActive ? "on" : "")" href="@BuildPhaseUrl(phase.Slug)">
+                    <span class="sp-tab-dot @phaseClass"></span>@phase.Title
+                </a>
+            }
+        </div>
+
+        <div class="sp-tab-panel on">
+            <div class="sp-tab-lede">@PhaseLede()</div>
+
+            @if (activePhaseSlug == "beta")
+            {
+                <div class="sp-prereq">
+                    <div class="sp-prereq__left">
+                        <span class="sp-prereq__eyebrow">Legal requirements</span>
+                        <h4 class="govuk-heading-s">Complete mandatory checks before public Beta</h4>
+                        <p class="govuk-body-s">These are mandatory checks for launch readiness. Services should have accessibility and security assurance completed before entering public Beta.</p>
+                    </div>
+                </div>
+            }
+
+            @foreach (var type in orderedTypes)
+            {
+                if (!groupedByType.TryGetValue(type, out var entriesForType) || entriesForType.Count == 0)
+                {
+                    continue;
+                }
+
+                <div class="sp-section">
+                    <div class="@BlockClassForType(type)">
+                        <div class="@HeaderClassForType(type)">
+                            <span class="@HeaderIconClassForType(type)">@HeaderIconForType(type)</span>
+                            <span class="@HeaderTextClassForType(type)">@SectionTitleForType(type)</span>
+                        </div>
+                        <ul class="@ListClassForType(type)">
+                            @for (var i = 0; i < entriesForType.Count; i++)
+                            {
+                                var entry = entriesForType[i];
+                                var hasCritical = string.Equals(entry.Priority, "Critical", StringComparison.OrdinalIgnoreCase);
+                                var hasLegal = entry.LegalRequirement;
+                                <li class="@ItemClassForType(type)">
+                                    @if (type.Equals("Requirement", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="sp-must__item-n">@(i + 1)</span>
+                                    }
+                                    @if (type.Equals("Assessment point", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <div class="sp-evidence__check"></div>
+                                    }
+                                    @if (type.Equals("Consideration", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="sp-fail__item-icon">⚠</span>
+                                    }
+                                    <div class="sp-must__item-body">
+                                        <p class="@(type.Equals("Assessment point", StringComparison.OrdinalIgnoreCase) ? "sp-evidence__item-text" : type.Equals("Consideration", StringComparison.OrdinalIgnoreCase) ? "sp-fail__item-text" : "sp-must__item-text")">@entry.Title</p>
+                                        @if (!string.IsNullOrWhiteSpace(entry.Summary))
+                                        {
+                                            <div class="sp-rich-text @(type.Equals("Assessment point", StringComparison.OrdinalIgnoreCase) ? "sp-evidence__item-sub" : type.Equals("Consideration", StringComparison.OrdinalIgnoreCase) ? "sp-fail__item-sub" : "sp-must__item-sub")">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForBody(entry.Summary))</div>
+                                        }
+                                        @if (!string.IsNullOrWhiteSpace(entry.Body))
+                                        {
+                                            <div class="sp-rich-text @(type.Equals("Assessment point", StringComparison.OrdinalIgnoreCase) ? "sp-evidence__item-sub" : type.Equals("Consideration", StringComparison.OrdinalIgnoreCase) ? "sp-fail__item-sub" : "sp-must__item-sub")">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForBody(entry.Body))</div>
+                                        }
+                                        <div class="sp-entry-meta">
+                                            @if (!string.IsNullOrWhiteSpace(entry.Strength))
+                                            {
+                                                <span class="sp-entry-chip">@entry.Strength</span>
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(entry.EntryType))
+                                            {
+                                                <span class="sp-entry-chip">@entry.EntryType</span>
+                                            }
+                                            @foreach (var role in entry.Roles)
+                                            {
+                                                <span class="sp-entry-chip sp-entry-chip--role">@role.Title</span>
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(entry.Notes))
+                                        {
+                                            <div class="sp-rich-text @(type.Equals("Assessment point", StringComparison.OrdinalIgnoreCase) ? "sp-evidence__item-sub" : type.Equals("Consideration", StringComparison.OrdinalIgnoreCase) ? "sp-fail__item-sub" : "sp-must__item-sub")">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForBody(entry.Notes))</div>
+                                        }
+                                    </div>
+                                    @if (hasCritical)
+                                    {
+                                        <span class="sp-must__item-flag sp-must__item-flag--critical">Critical</span>
+                                    }
+                                    else if (hasLegal)
+                                    {
+                                        <span class="sp-must__item-flag sp-must__item-flag--legal">Legal</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Entries.Count == 0)
+            {
+                <p class="govuk-body">No guidance entries match the selected phase.</p>
+            }
+        </div>
+    </div>
+
+    @if (Model.AvailableRoles.Count > 0 || Model.AvailableStrengths.Count > 0)
+    {
+        <div class="sp-prose sp-rich-text">
+            <h2 class="govuk-heading-s">Linked resources</h2>
+            <ul class="govuk-list govuk-list--bullet">
+                @if (Model.AvailableRoles.Count > 0)
+                {
+                    <li>Relevant roles for this standard include: @string.Join(", ", Model.AvailableRoles.Select(r => r.Title))</li>
+                }
+                @if (Model.AvailableStrengths.Count > 0)
+                {
+                    <li>Guidance strengths covered: @string.Join(", ", Model.AvailableStrengths)</li>
+                }
+            </ul>
+        </div>
+    }
+</div>

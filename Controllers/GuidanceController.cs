@@ -80,6 +80,7 @@ public class GuidanceController : Controller
                 Collections = area.Collections
                     .Where(collection =>
                         (selectedProfessionSet.Count == 0 ||
+                        collection.ApplicableProfessions.Any(p => p.Title.Equals("All DDaT Professions", StringComparison.OrdinalIgnoreCase)) ||
                         ProfessionTagsForCollection(area, collection)
                             .Any(profession => selectedProfessionSet.Contains(profession.Slug)))
                         && MatchesSearch(area, collection, selectedSearchTerm))
@@ -88,24 +89,24 @@ public class GuidanceController : Controller
             .Where(area => area.Collections.Count > 0)
             .ToList();
 
-        var uniqueCollections = page.Areas
+        var uniqueCards = page.Areas
             .SelectMany(area => area.Collections)
-            .GroupBy(collection => collection.Slug, StringComparer.OrdinalIgnoreCase)
+            .GroupBy(collection => collection.Key, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
             .ToList();
 
         var collectionProfessionMappings = page.Areas
             .SelectMany(area => area.Collections.Select(collection => new
             {
-                CollectionSlug = collection.Slug,
+                CardKey = collection.Key,
                 Professions = ProfessionTagsForCollection(area, collection)
             }))
-            .Where(mapping => !string.IsNullOrWhiteSpace(mapping.CollectionSlug))
+            .Where(mapping => !string.IsNullOrWhiteSpace(mapping.CardKey))
             .SelectMany(mapping => mapping.Professions
                 .Where(profession => !string.IsNullOrWhiteSpace(profession.Slug) && !string.IsNullOrWhiteSpace(profession.Title))
                 .Select(profession => new
                 {
-                    mapping.CollectionSlug,
+                    mapping.CardKey,
                     Profession = profession
                 }))
             .ToList();
@@ -117,7 +118,7 @@ public class GuidanceController : Controller
                 Slug = group.First().Profession.Slug,
                 Label = group.First().Profession.Title,
                 Count = group
-                    .Select(mapping => mapping.CollectionSlug)
+                    .Select(mapping => mapping.CardKey)
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .Count()
             })
@@ -140,7 +141,7 @@ public class GuidanceController : Controller
             SelectedGuidanceAreaSlug = selectedAreaSlug,
             SelectedProfessionSlugs = selectedProfessionSlugs,
             SelectedSearchTerm = selectedSearchTerm,
-            TotalCollectionCount = uniqueCollections.Count
+            TotalCollectionCount = uniqueCards.Count
         };
 
         ViewData["Title"] = "Guidance";

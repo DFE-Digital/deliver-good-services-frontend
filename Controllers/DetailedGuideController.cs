@@ -82,7 +82,9 @@ namespace ServiceManual.Controllers
                         Number = i + 2,
                         Title = p.Title,
                         Url = $"/guidance/guides/{guide.Slug}/{p.Slug}",
-                        IsCurrent = false
+                        IsCurrent = false,
+                        Phases = p.Phases,
+                        Professions = p.Professions
                     });
                 }
             }
@@ -231,5 +233,6 @@ namespace ServiceManual.Controllers
                 ApplyNoContentsSectionStyle = false
             };
         }
+
     }
 }

@@ -22,6 +22,9 @@ namespace ServiceManual.Services
         Task<Lifecycle?> GetLifecycleBySlugAsync(string slug);
         Task<Phase?> GetPhaseBySlugAsync(string slug);
         Task<List<ContentIndexItem>> GetAllPublishedContentAsync();
+        Task<List<ContentEntry>> GetContentEntriesAsync(string? strength = null, string? phaseSlug = null, string? roleSlug = null);
+        Task<List<ServiceStandardSummary>> GetServiceStandardsAsync();
+        Task<ServiceStandardPage?> GetServiceStandardBySlugAsync(string slug);
 
         /// <summary>Looks up a published redirect by short URL. Returns the URL to redirect to, or null if not found.</summary>
         Task<string?> GetRedirectUrlByShortUrlAsync(string shortUrl);
