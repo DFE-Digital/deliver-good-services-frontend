@@ -1,5 +1,7 @@
 using Markdig;
+using ServiceManual.Models;
 using ServiceManual.Services;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ServiceManual.Helpers
@@ -146,6 +148,136 @@ namespace ServiceManual.Helpers
                 result = result.Replace(fullMatch, html);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Replaces [[ServiceStandardList]] with a standards-style list built from detailed guide pages.
+        /// </summary>
+        public static string? ReplaceServiceStandardListShortcode(string? markdown, string? guideSlug, List<DetailedGuidePageSummary>? pages)
+        {
+            if (string.IsNullOrEmpty(markdown) || !markdown.Contains("[[ServiceStandardList]]", StringComparison.Ordinal))
+                return markdown;
+
+            var listHtml = BuildServiceStandardListHtml(guideSlug, pages);
+            return markdown.Replace("[[ServiceStandardList]]", listHtml, StringComparison.Ordinal);
+        }
+
+        private static string BuildServiceStandardListHtml(string? guideSlug, List<DetailedGuidePageSummary>? pages)
+        {
+            if (pages == null || pages.Count == 0 || string.IsNullOrWhiteSpace(guideSlug))
+                return string.Empty;
+
+            var sb = new StringBuilder();
+            sb.Append("<ul class=\"ss-standard-list\" role=\"list\">");
+
+            var rowNumber = 0;
+            for (var i = 0; i < pages.Count; i++)
+            {
+                var page = pages[i];
+                var slug = page.Slug ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(slug))
+                    continue;
+
+                rowNumber++;
+                var href = $"/guidance/guides/{guideSlug.Trim('/')}/{slug.Trim('/')}";
+                sb.Append("<li>");
+                sb.Append("<a class=\"ss-row\" href=\"");
+                sb.Append(HtmlEncode(href));
+                sb.Append("\">");
+                sb.Append("<span class=\"ss-row__num\">");
+                sb.Append(rowNumber);
+                sb.Append("</span>");
+                sb.Append("<div class=\"ss-row__body\">");
+                sb.Append("<p class=\"ss-row__title\">");
+                sb.Append(HtmlEncode(page.Title));
+                sb.Append("</p>");
+
+                if (!string.IsNullOrWhiteSpace(page.MetaDescription))
+                {
+                    sb.Append("<p class=\"ss-row__desc\">");
+                    sb.Append(HtmlEncode(page.MetaDescription));
+                    sb.Append("</p>");
+                }
+
+                var hasPhases = page.Phases?.Any(p => !string.IsNullOrWhiteSpace(p.Title)) == true;
+                var hasProfessions = page.Professions?.Any(p => !string.IsNullOrWhiteSpace(p.Title)) == true;
+
+                if (hasPhases)
+                {
+                    sb.Append("<div class=\"ss-row__meta\">");
+
+                    if (page.Phases != null)
+                    {
+                        foreach (var phase in page.Phases)
+                        {
+                            var phaseTitle = phase.Title?.Trim();
+                            if (string.IsNullOrWhiteSpace(phaseTitle))
+                                continue;
+
+                            var phaseClass = PhaseClassFromSlug(phase.Slug);
+                            sb.Append("<span class=\"ss-ph");
+                            if (!string.IsNullOrEmpty(phaseClass))
+                            {
+                                sb.Append(' ');
+                                sb.Append(phaseClass);
+                            }
+                            sb.Append("\">");
+                            sb.Append(HtmlEncode(phaseTitle));
+                            sb.Append("</span>");
+                        }
+                    }
+
+                    sb.Append("</div>");
+                }
+
+                if (hasProfessions)
+                {
+                    sb.Append("<div class=\"ss-row__meta\">");
+
+                    if (page.Professions != null)
+                    {
+                        foreach (var profession in page.Professions)
+                        {
+                            var professionTitle = profession.Title?.Trim();
+                            if (string.IsNullOrWhiteSpace(professionTitle))
+                                continue;
+
+                            sb.Append("<span class=\"ss-role\">");
+                            sb.Append(HtmlEncode(professionTitle));
+                            sb.Append("</span>");
+                        }
+                    }
+
+                    sb.Append("</div>");
+                }
+
+                sb.Append("</div>");
+                sb.Append("</a>");
+                sb.Append("</li>");
+            }
+
+            sb.Append("</ul>");
+            return sb.ToString();
+        }
+
+        public static string PhaseClassFromSlug(string? slug)
+        {
+            if (string.IsNullOrWhiteSpace(slug))
+                return string.Empty;
+
+            var normalized = slug.Trim().ToLowerInvariant().Replace('_', '-');
+
+            return normalized switch
+            {
+                "discovery" => "ss-ph--disc",
+                "alpha" => "ss-ph--alpha",
+                "beta" => "ss-ph--beta",
+                "private-beta" => "ss-ph--beta",
+                "public-beta" => "ss-ph--beta",
+                "live" => "ss-ph--live",
+                _ when normalized.EndsWith("-beta", StringComparison.Ordinal) => "ss-ph--beta",
+                _ => string.Empty
+            };
         }
 
         /// <summary>Renders one standard as a dfe-f-std-card-a card (block + cards wrapper).</summary>

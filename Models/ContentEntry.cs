@@ -13,5 +13,14 @@ namespace ServiceManual.Models
         public string? Notes { get; set; }
         public List<TagRef> Phases { get; set; } = [];
         public List<TagRef> Roles { get; set; } = [];
+        public List<ContentEntryLink> Links { get; set; } = [];
+    }
+
+    public class ContentEntryLink
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Url { get; set; } = string.Empty;
+        public bool OpenInNewTab { get; set; }
+        public bool ExternalLink { get; set; }
     }
 }

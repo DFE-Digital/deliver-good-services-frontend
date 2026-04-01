@@ -29,6 +29,25 @@
     var canonicalCurrentUrl = string.IsNullOrEmpty(requestHost)
         ? currentPath
         : $"{requestScheme}://{requestHost}{currentPath}";
+
+    string ModuleItemClass(ContentEntry entry)
+    {
+        return "s5-item s5-item--must";
+    }
+}
+
+@if (!string.IsNullOrEmpty(vm.CustomCSS))
+{
+    @section Styles {
+        <style>@Html.Raw(vm.CustomCSS)</style>
+    }
+}
+
+@if (!string.IsNullOrEmpty(vm.CustomJS))
+{
+    @section Scripts {
+        <script>@Html.Raw(vm.CustomJS)</script>
+    }
 }
 
 <div class="guide-modern">
@@ -80,6 +99,7 @@
                             {
                                 <h2 class="govuk-heading-l">@vm.PageTitle</h2>
                             }
+
                             @if (!string.IsNullOrEmpty(vm.PageBeforeContentsHtml))
                             {
                                 <div class="dfe-f-content-header__intro govuk-body">
@@ -94,6 +114,80 @@
                         <div class="dfe-f-body">
                             @Html.Raw(vm.BodyHtml)
                         </div>
+                    }
+
+                    @if (vm.ContentGroupTabs.Count > 0)
+                    {
+                        <section class="govuk-!-margin-top-8" id="guide-grouped-content">
+                            @if (vm.ContentGroupTabs.Count > 1)
+                            {
+                                <div class="s5-tabs" role="tablist" aria-label="Content groups">
+                                    @for (var i = 0; i < vm.ContentGroupTabs.Count; i++)
+                                    {
+                                        var tab = vm.ContentGroupTabs[i];
+                                        <button class="s5-tab"
+                                                role="tab"
+                                                aria-selected="@(i == 0 ? "true" : "false")"
+                                                aria-controls="@tab.PanelId"
+                                                onclick="s5tab(this,'@tab.PanelId')"
+                                                type="button">@tab.GroupName</button>
+                                    }
+                                </div>
+                            }
+
+                            @for (var i = 0; i < vm.ContentGroupTabs.Count; i++)
+                            {
+                                var tab = vm.ContentGroupTabs[i];
+                                <div class="s5-panel@(vm.ContentGroupTabs.Count > 1 ? (i == 0 ? " on" : "") : " on")" id="@tab.PanelId" role="tabpanel" data-name="@tab.GroupName">
+                                    @foreach (var contentBlock in tab.Sections)
+                                    {
+                                        <h3 class="govuk-heading-m">@contentBlock.Title</h3>
+                                        <hr class="govuk-section-break govuk-section-break--visible">
+
+                                        @if (!string.IsNullOrWhiteSpace(contentBlock.BodyHtml))
+                                        {
+                                            <div class="govuk-body govuk-!-margin-bottom-4">
+                                                @Html.Raw(contentBlock.BodyHtml)
+                                            </div>
+                                        }
+
+                                        @if (contentBlock.Modules.Count > 0)
+                                        {
+                                            <ul class="s5-list govuk-!-margin-bottom-8">
+                                                @foreach (var entry in contentBlock.Modules)
+                                                {
+                                                    <li class="@ModuleItemClass(entry)">
+                                                        <span class="s5-item__num"></span>
+                                                        <div class="s5-body">
+                                                            <p class="s5-title">@entry.Title</p>
+                                                            @if (!string.IsNullOrWhiteSpace(entry.Summary))
+                                                            {
+                                                                <p class="s5-desc">@entry.Summary</p>
+                                                            }
+                                                            else if (!string.IsNullOrWhiteSpace(entry.Body))
+                                                            {
+                                                                <div class="s5-desc">@Html.Raw(GovUkMarkdownHelper.ToGovUkHtmlForBody(entry.Body))</div>
+                                                            }
+                                                            @if (entry.Links.Count > 0)
+                                                            {
+                                                                <div class="s5-links">
+                                                                    @foreach (var link in entry.Links)
+                                                                    {
+                                                                        <a class="s5-link"
+                                                                           href="@link.Url"
+                                                                           @if (link.OpenInNewTab) { <text>target="_blank" rel="noopener noreferrer"</text> }>@link.Title →</a>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    }
+                                </div>
+                            }
+                        </section>
                     }
 
                     @if (vm.PaginationPrevUrl != null || vm.PaginationNextUrl != null)

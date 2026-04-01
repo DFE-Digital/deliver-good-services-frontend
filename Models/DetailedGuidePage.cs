@@ -10,6 +10,8 @@ namespace ServiceManual.Models
         public string? GuideTitle { get; set; }
         public string? GuideSlug { get; set; }
         public string? GuideMetaDescription { get; set; }
+        /// <summary>Optional replacement label for "Overview" inherited from the parent guide.</summary>
+        public string? OverrideOverviewTitle { get; set; }
         /// <summary>When true, hide the contents list on the guide's primary (overview) page.</summary>
         public bool HideContentsOnPrimaryPage { get; set; }
         public bool HideTitleAndDescription { get; set; }
@@ -23,6 +25,9 @@ namespace ServiceManual.Models
         public List<DetailedGuidePageSummary> SiblingPages { get; set; } = [];
         public List<RelatedContentItem> RelatedContent { get; set; } = [];
         public List<string> Professions { get; set; } = [];
+        /// <summary>Applicable phases for this page (used for [[phases]] shortcode).</summary>
+        public List<TagRef> Phases { get; set; } = [];
+        public List<DetailedGuidePageSection> Sections { get; set; } = [];
         /// <summary>When true, show "Last reviewed: [date]" under the meta description.</summary>
         public bool ShowLastReviewedDateOnPage { get; set; }
         /// <summary>Formatted last reviewed date for display (e.g. "7 January 2026").</summary>
@@ -43,5 +48,17 @@ namespace ServiceManual.Models
         public List<TagRef> AudienceTags { get; set; } = [];
         /// <summary>Related files for the Downloads sidebar section.</summary>
         public List<RelatedFileItem> RelatedFiles { get; set; } = [];
+        /// <summary>Custom CSS inherited from the parent guide to inject into the page &lt;style&gt; block.</summary>
+        public string? CustomCSS { get; set; }
+        /// <summary>Custom JavaScript inherited from the parent guide to inject into the page &lt;script&gt; block.</summary>
+        public string? CustomJS { get; set; }
+    }
+
+    public class DetailedGuidePageSection
+    {
+        public string Title { get; set; } = string.Empty;
+        public string? Group { get; set; }
+        public string? Body { get; set; }
+        public List<ContentEntry> ContentModules { get; set; } = [];
     }
 }

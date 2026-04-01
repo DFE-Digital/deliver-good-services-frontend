@@ -347,8 +347,8 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage" +
-                          "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage&fields[10]=customJS&fields[11]=customCSS&fields[12]=overrideOverviewTitle" +
+                          "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug&populate[detailed_guide_pages][fields][2]=metaDescription" +
                           "&populate[detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
                           "&populate[detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide_pages][populate][applicableProfessions][fields][1]=slug" +
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
@@ -383,6 +383,7 @@ namespace ServiceManual.Services
                     Slug = item.Slug ?? string.Empty,
                     MetaDescription = item.MetaDescription,
                     Body = item.Body,
+                    OverrideOverviewTitle = item.OverrideOverviewTitle,
                     CollectionTitle = firstCollection?.Title,
                     CollectionSlug = firstCollection?.Slug,
                     Collections = collections,
@@ -392,6 +393,7 @@ namespace ServiceManual.Services
                         {
                             Title = p.Title ?? string.Empty,
                             Slug = p.Slug ?? string.Empty,
+                            MetaDescription = p.MetaDescription,
                             Phases = p.ApplicablePhases?
                                 .Where(ph => !string.IsNullOrWhiteSpace(ph.Slug) || !string.IsNullOrWhiteSpace(ph.Title))
                                 .Select(ph => new TagRef { Slug = ph.Slug ?? "", Title = ph.Title ?? "" })
@@ -425,6 +427,8 @@ namespace ServiceManual.Services
                         .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
                         .ToList() ?? [],
                     RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
+                    CustomCSS = item.CustomCss,
+                    CustomJS = item.CustomJs,
                 };
             }
             catch (Exception ex)
@@ -440,9 +444,19 @@ namespace ServiceManual.Services
             {
                 var url = $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
                           "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav&fields[8]=showLastReviewedDateOnPage&fields[9]=lastReviewedDate" +
+                          "&populate[applicablePhases][fields][0]=title&populate[applicablePhases][fields][1]=slug" +
                           "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug" +
-                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage&populate[detailed_guide][fields][6]=showOwnerOnPage&populate[detailed_guide][fields][7]=showApplicablePhasesOnPage&populate[detailed_guide][fields][8]=showApplicableProfessionsOnPage" +
-                          "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug" +
+                          "&populate[Section][fields][0]=title&populate[Section][fields][1]=group&populate[Section][fields][2]=body" +
+                          "&populate[Section][populate][contentModules][fields][0]=title&populate[Section][populate][contentModules][fields][1]=slug&populate[Section][populate][contentModules][fields][2]=summary&populate[Section][populate][contentModules][fields][3]=body&populate[Section][populate][contentModules][fields][4]=entryType&populate[Section][populate][contentModules][fields][5]=strength&populate[Section][populate][contentModules][fields][6]=priority&populate[Section][populate][contentModules][fields][7]=legalRequirement&populate[Section][populate][contentModules][fields][8]=notes" +
+                          "&populate[Section][populate][contentModules][populate][phases][fields][0]=title&populate[Section][populate][contentModules][populate][phases][fields][1]=slug" +
+                          "&populate[Section][populate][contentModules][populate][roles][fields][0]=title&populate[Section][populate][contentModules][populate][roles][fields][1]=slug" +
+                          "&populate[Section][populate][contentModules][populate][links][fields][0]=title&populate[Section][populate][contentModules][populate][links][fields][1]=url&populate[Section][populate][contentModules][populate][links][fields][2]=newTab&populate[Section][populate][contentModules][populate][links][fields][3]=externalLink" +
+                          "&populate[Section][populate][contentModules][populate][detailedGuides][fields][0]=title&populate[Section][populate][contentModules][populate][detailedGuides][fields][1]=slug" +
+                          "&populate[Section][populate][contentModules][populate][collections][fields][0]=title&populate[Section][populate][contentModules][populate][collections][fields][1]=slug" +
+                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage&populate[detailed_guide][fields][6]=showOwnerOnPage&populate[detailed_guide][fields][7]=showApplicablePhasesOnPage&populate[detailed_guide][fields][8]=showApplicableProfessionsOnPage&populate[detailed_guide][fields][9]=customJS&populate[detailed_guide][fields][10]=customCSS&populate[detailed_guide][fields][11]=overrideOverviewTitle" +
+                          "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug&populate[detailed_guide][populate][detailed_guide_pages][fields][2]=metaDescription" +
+                          "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
+                          "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][1]=slug" +
                           "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
                           "&populate[detailed_guide][populate][contentOwner][fields][0]=title&populate[detailed_guide][populate][contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
                           "&populate[detailed_guide][populate][applicablePhases][fields][0]=title&populate[detailed_guide][populate][applicablePhases][fields][1]=slug" +
@@ -482,15 +496,44 @@ namespace ServiceManual.Services
                     GuideTitle = item.Detailed_Guide?.Title,
                     GuideSlug = item.Detailed_Guide?.Slug,
                     GuideMetaDescription = item.Detailed_Guide?.MetaDescription,
+                    OverrideOverviewTitle = item.Detailed_Guide?.OverrideOverviewTitle,
                     HideContentsOnPrimaryPage = item.Detailed_Guide?.HideContentsOnPrimaryPage ?? false,
                     CollectionTitle = firstGuideCollection?.Title,
                     CollectionSlug = firstGuideCollection?.Slug,
                     Collections = guideCollections,
                     SiblingPages = item.Detailed_Guide?.Detailed_Guide_Pages?
-                        .Select(p => new DetailedGuidePageSummary { Title = p.Title ?? string.Empty, Slug = p.Slug ?? string.Empty })
+                        .Select(p => new DetailedGuidePageSummary
+                        {
+                            Title = p.Title ?? string.Empty,
+                            Slug = p.Slug ?? string.Empty,
+                            MetaDescription = p.MetaDescription,
+                            Phases = p.ApplicablePhases?
+                                .Where(ph => !string.IsNullOrWhiteSpace(ph.Slug) || !string.IsNullOrWhiteSpace(ph.Title))
+                                .Select(ph => new TagRef { Slug = ph.Slug ?? "", Title = ph.Title ?? "" })
+                                .ToList() ?? [],
+                            Professions = p.ApplicableProfessions?
+                                .Where(pr => !string.IsNullOrWhiteSpace(pr.Slug) || !string.IsNullOrWhiteSpace(pr.Title))
+                                .Select(pr => new TagRef { Slug = pr.Slug ?? "", Title = pr.Title ?? "" })
+                                .ToList() ?? [],
+                        })
                         .ToList() ?? [],
                     RelatedContent = item.RelatedContent?
                         .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
+                        .ToList() ?? [],
+                    Sections = item.Section?
+                        .Select(section => new DetailedGuidePageSection
+                        {
+                            Title = section.Title ?? string.Empty,
+                            Group = section.Group,
+                            Body = section.Body,
+                            ContentModules = section.ContentModules?
+                                .Select(MapContentEntry)
+                                .ToList() ?? []
+                        })
+                        .ToList() ?? [],
+                    Phases = item.ApplicablePhases?
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
                         .ToList() ?? [],
                     Professions = item.ApplicableProfessions?
                         .Where(p => !string.IsNullOrWhiteSpace(p.Title))
@@ -512,6 +555,8 @@ namespace ServiceManual.Services
                         .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
                         .ToList() ?? [],
                     RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
+                    CustomCSS = item.Detailed_Guide?.CustomCss,
+                    CustomJS = item.Detailed_Guide?.CustomJs,
                 };
             }
             catch (Exception ex)
@@ -1483,8 +1528,51 @@ namespace ServiceManual.Services
                 Roles = item.Roles?
                     .Where(r => !string.IsNullOrWhiteSpace(r.Slug) || !string.IsNullOrWhiteSpace(r.Title))
                     .Select(r => new TagRef { Slug = r.Slug ?? string.Empty, Title = r.Title ?? string.Empty })
-                    .ToList() ?? []
+                    .ToList() ?? [],
+                Links = MapContentEntryLinks(item)
             };
+        }
+
+        private static List<ContentEntryLink> MapContentEntryLinks(StrapiContentEntryListItem item)
+        {
+            var links = new List<ContentEntryLink>();
+
+            if (item.Links != null)
+            {
+                links.AddRange(item.Links
+                    .Where(link => !string.IsNullOrWhiteSpace(link.Title) && !string.IsNullOrWhiteSpace(link.Url))
+                    .Select(link => new ContentEntryLink
+                    {
+                        Title = link.Title!.Trim(),
+                        Url = link.Url!.Trim(),
+                        OpenInNewTab = link.NewTab,
+                        ExternalLink = link.ExternalLink ?? false,
+                    }));
+            }
+
+            if (item.DetailedGuides != null)
+            {
+                links.AddRange(item.DetailedGuides
+                    .Where(guide => !string.IsNullOrWhiteSpace(guide.Title) && !string.IsNullOrWhiteSpace(guide.Slug))
+                    .Select(guide => new ContentEntryLink
+                    {
+                        Title = guide.Title!.Trim(),
+                        Url = "/guidance/guides/" + Uri.EscapeDataString(guide.Slug!.Trim())
+                    }));
+            }
+
+            if (item.Collections != null)
+            {
+                links.AddRange(item.Collections
+                    .Where(collection => !string.IsNullOrWhiteSpace(collection.Title) && !string.IsNullOrWhiteSpace(collection.Slug))
+                    .Select(collection => new ContentEntryLink
+                    {
+                        Title = collection.Title!.Trim(),
+                        Url = "/guidance/collections/" + Uri.EscapeDataString(collection.Slug!.Trim())
+                    }));
+            }
+
+            return links;
         }
 
         public async Task<string?> GetRedirectUrlByShortUrlAsync(string shortUrl)
@@ -2543,6 +2631,8 @@ namespace ServiceManual.Services
             public string? Url { get; set; }
             [JsonPropertyName("newTab")]
             public bool NewTab { get; set; }
+            [JsonPropertyName("externalLink")]
+            public bool? ExternalLink { get; set; }
             public string? Description { get; set; }
         }
 
@@ -2573,6 +2663,8 @@ namespace ServiceManual.Services
             public string? Slug { get; set; }
             public string? MetaDescription { get; set; }
             public string? Body { get; set; }
+            [JsonPropertyName("overrideOverviewTitle")]
+            public string? OverrideOverviewTitle { get; set; }
             [JsonPropertyName("hideContentsOnPrimaryPage")]
             public bool? HideContentsOnPrimaryPage { get; set; }
             public StrapiCollectionRef? Collection { get; set; }
@@ -2600,6 +2692,10 @@ namespace ServiceManual.Services
             [JsonConverter(typeof(StrapiRelatedFilesConverter))]
             [JsonPropertyName("relatedFiles")]
             public List<StrapiFileItem>? RelatedFiles { get; set; }
+            [JsonPropertyName("customCSS")]
+            public string? CustomCss { get; set; }
+            [JsonPropertyName("customJS")]
+            public string? CustomJs { get; set; }
         }
 
         private class StrapiTagsProfession
@@ -2618,8 +2714,13 @@ namespace ServiceManual.Services
             public bool? HideTitleAndDescription { get; set; }
             public bool? HideContents { get; set; }
             public bool? HideGuidePagesNav { get; set; }
+            [JsonConverter(typeof(StrapiTagRefListConverter))]
+            [JsonPropertyName("applicablePhases")]
+            public List<StrapiTagRef>? ApplicablePhases { get; set; }
             [JsonPropertyName("applicableProfessions")]
             public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
+            [JsonPropertyName("Section")]
+            public List<StrapiDetailedGuidePageSection>? Section { get; set; }
             public StrapiDetailedGuideRef? Detailed_Guide { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
             [JsonConverter(typeof(StrapiRelatedFilesConverter))]
@@ -2629,6 +2730,15 @@ namespace ServiceManual.Services
             public bool? ShowLastReviewedDateOnPage { get; set; }
             [JsonPropertyName("lastReviewedDate")]
             public string? LastReviewedDate { get; set; }
+        }
+
+        private class StrapiDetailedGuidePageSection
+        {
+            public string? Title { get; set; }
+            public string? Group { get; set; }
+            public string? Body { get; set; }
+            [JsonPropertyName("contentModules")]
+            public List<StrapiContentEntryListItem>? ContentModules { get; set; }
         }
 
         private class StrapiDetailedGuideSummary
@@ -2642,6 +2752,7 @@ namespace ServiceManual.Services
         {
             public string? Title { get; set; }
             public string? Slug { get; set; }
+            public string? MetaDescription { get; set; }
             [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicablePhases")]
             public List<StrapiTagRef>? ApplicablePhases { get; set; }
@@ -2661,6 +2772,8 @@ namespace ServiceManual.Services
             public string? Title { get; set; }
             public string? Slug { get; set; }
             public string? MetaDescription { get; set; }
+            [JsonPropertyName("overrideOverviewTitle")]
+            public string? OverrideOverviewTitle { get; set; }
             [JsonPropertyName("showLastReviewedDateOnPage")]
             public bool? ShowLastReviewedDateOnPage { get; set; }
             [JsonPropertyName("lastReviewedDate")]
@@ -2683,6 +2796,10 @@ namespace ServiceManual.Services
             public bool? ShowApplicablePhasesOnPage { get; set; }
             [JsonPropertyName("showApplicableProfessionsOnPage")]
             public bool? ShowApplicableProfessionsOnPage { get; set; }
+            [JsonPropertyName("customCSS")]
+            public string? CustomCss { get; set; }
+            [JsonPropertyName("customJS")]
+            public string? CustomJs { get; set; }
             public List<StrapiDetailedGuidePageSummary>? Detailed_Guide_Pages { get; set; }
         }
 
@@ -2890,6 +3007,12 @@ namespace ServiceManual.Services
             [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("roles")]
             public List<StrapiTagRef>? Roles { get; set; }
+            [JsonPropertyName("links")]
+            public List<StrapiExternalLink>? Links { get; set; }
+            [JsonPropertyName("detailedGuides")]
+            public List<StrapiSlugRef>? DetailedGuides { get; set; }
+            [JsonPropertyName("collections")]
+            public List<StrapiSlugRef>? Collections { get; set; }
         }
 
         private class StrapiServiceStandard

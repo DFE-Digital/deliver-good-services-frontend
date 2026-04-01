@@ -3159,8 +3159,13 @@ a:focus-visible {
 
 /* ── Callout shortcode [callout type=warning|important|information] ─────────── */
 .dfe-f-callout {
-  padding: 20px 22px;
-  margin: 28px 0;
+    padding: 14px 18px;
+    margin-bottom: 32px;
+    border-left: 4px solid #d8dde0;
+    background: #f3f2f1;
+    font-size: 1rem;
+    color: #0b0c0c;
+    line-height: 1.6;
 }
 
 .dfe-f-callout strong {
@@ -3169,7 +3174,7 @@ a:focus-visible {
 }
 
 .dfe-f-callout.warning {
-  background: var(--govuk-colour-white);
+   background: var(  --govuk-colour-red-tint-95);
   border-left: 6px solid var(--govuk-colour-red);
 }
 
@@ -3178,7 +3183,7 @@ a:focus-visible {
 }
 
 .dfe-f-callout.important {
-  background: var(--govuk-colour-white);
+  background: var(  --govuk-colour-orange-tint-95);
   border-left: 6px solid var(--govuk-colour-orange);
 }
 
@@ -3187,7 +3192,7 @@ a:focus-visible {
 }
 
 .dfe-f-callout.information {
-  background: var(--govuk-colour-white);
+  background: var(  --govuk-colour-blue-tint-95);
   border-left: 6px solid var(--govuk-colour-blue);
 }
 
@@ -3197,6 +3202,7 @@ a:focus-visible {
 
 .dfe-f-callout p {
   margin-bottom: 0;
+  font-size: 1rem;
 }
 
 /* ── Secondary navigation bar ───────────────────────────────────────────── */
@@ -6566,8 +6572,8 @@ ul > li:last-child {
   margin-bottom: 15px;
   border-radius: 2px;
   background: #00ffe0;
-  border: 1px solid #158187;
-  color: #1d70b8;
+  border: 1px solid #1964a5;
+  color: #1964a5;
 }
 
 /** Title - Shared Base Styles **/
@@ -8785,3 +8791,93 @@ i[class*=" fa-"] {
   }
 }
 
+
+/* Phase tabs */
+.s5-tabs        { display:flex; border-bottom:2px solid #d8dde0; margin-bottom:28px; }
+.s5-tab         { padding:10px 20px 12px; font-family:inherit; font-size:16px; font-weight:600;
+                  color:#505a5f; background:none; border:none; border-bottom:3px solid transparent;
+                  margin-bottom:-2px; cursor:pointer; white-space:nowrap; transition:color .1s; }
+.s5-tab:hover   { color:#0b0c0c; }
+.s5-tab[aria-selected=true] { color:var(--govuk-colour-blue); border-bottom-color:currentColor; }
+
+
+.s5-panel       { display:none; }
+.s5-panel.on    { display:block; }
+
+/* Phase context callout */
+.s5-context { padding:14px 18px; margin-bottom:32px; border-left:4px solid #d8dde0;
+              background:#f3f2f1; font-size:15px; color:#0b0c0c; line-height:1.6; }
+
+
+/* Legal prereq panel (Beta only) */
+.s5-legal { border-left:4px solid #d4351c; background:#fff8f8; border:1px solid #f8cccc;
+            border-left-width:4px; padding:18px 20px; margin-bottom:28px; }
+.s5-legal__label { font-size:11px; font-weight:800; letter-spacing:.7px; text-transform:uppercase;
+                   color:#7a1526; display:block; margin-bottom:6px; }
+.s5-legal h3 { font-size:16px; font-weight:700; color:#0b0c0c; margin:0 0 8px; }
+.s5-legal p  { font-size:14px; color:#505a5f; line-height:1.65; margin:0; }
+
+/* Section headings — each type visually distinct */
+.s5-hd        { display:flex; align-items:center; gap:10px;
+                padding:10px 0; margin:0 0 20px; border-bottom:2px solid; }
+.s5-hd--must  { border-color:#0b0c0c; color:#0b0c0c; }
+.s5-hd--evid  { border-color:#00703c; color:#00703c; }
+.s5-hd--fail  { border-color:#b10e1e; color:#b10e1e; }
+.s5-hd__icon  { font-size:18px; font-weight:900; line-height:1; flex-shrink:0; }
+.s5-hd__text  { font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; flex:1; }
+.s5-hd__n     { font-size:12px; font-weight:500; color:#6f777b; margin-left:auto; white-space:nowrap; }
+
+/* Section wrapper — spacing between all three */
+.s5-section     { margin-bottom:40px; }
+.s5-section:last-child { margin-bottom:0; }
+
+/* Individual items */
+.s5-list        { list-style:none; margin:0; padding:0; }
+.s5-item        { display:grid; gap:0; padding:16px 0;
+                  border-bottom:1px solid #e8e8e8; }
+.s5-item:last-child { border-bottom:none; }
+
+/* Must-do items: number + body side by side */
+.s5-item--must  { grid-template-columns:0px 1fr auto; align-items:start; }
+.s5-item__num   { font-size:14px; font-weight:800; color:#b1b4b6; padding-top:1px;
+                  font-variant-numeric:tabular-nums; }
+/* Evidence items: checkbox circle + body */
+.s5-item--evid  { grid-template-columns:28px 1fr; align-items:start; }
+.s5-item__check { width:18px; height:18px; border-radius:50%; border:2px solid #00703c;
+                  margin-top:2px; flex-shrink:0; }
+/* Failure items: warning mark + body */
+.s5-item--fail  { grid-template-columns:28px 1fr; align-items:start; }
+.s5-item__warn  { font-size:18px; line-height:1; color:#b10e1e; font-weight:900; margin-top:-1px; }
+
+/* Item body */
+.s5-body        { }
+.s5-title       { font-size:16px; font-weight:700; color:#0b0c0c;
+                  line-height:1.4; margin:0 0 6px; }
+.s5-desc        { font-size:14px; color:#505a5f; line-height:1.65; margin:0; }
+.s5-links       { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.s5-link        { font-size:12px; font-weight:600; color:#1d70b8; text-decoration:none;
+                  border:1px solid #b1c9e1; background:#eef4fb; padding:3px 9px;
+                  transition:background .1s; }
+.s5-link:hover  { background:#c8def2; }
+.s5-link--green { color:#005a30; border-color:#a8d9c7; background:#dff1e9; }
+.s5-link--green:hover { background:#b5e6d5; }
+
+/* Flags (legal / critical) */
+.s5-flag        { align-self:start; margin-top:3px; flex-shrink:0; padding-left:8px; }
+.s5-tag         { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.3px;
+                  text-transform:uppercase; padding:2px 7px; white-space:nowrap; }
+.s5-tag--legal  { background:#dff1e9; color:#005a30; border:1px solid #a8d9c7; }
+.s5-tag--crit   { background:#fef3e6; color:#744108; border:1px solid #f5c27f; }
+
+/* Sidebar */
+.s5-cta         { background:#eef4fb; border:1px solid #b1c9e1; border-left:4px solid #1d70b8;
+                  padding:18px; margin-bottom:20px; }
+.s5-cta h3      { font-size:14px; font-weight:700; margin:0 0 6px; }
+.s5-cta p       { font-size:13px; color:#505a5f; line-height:1.6; margin:0 0 12px; }
+.s5-cta a       { font-size:14px; font-weight:700; color:#1d70b8; text-decoration:none; }
+.s5-cta a:hover { text-decoration:underline; }
+
+.ss-ph--disc{ background:var(--govuk-colour-magenta); color: var(--govuk-colour-white); }
+.ss-ph--alpha{ background:var(--govuk-colour-orange); color: var(--govuk-colour-black); }
+.ss-ph--beta{ background:var(--govuk-colour-green); color: var(--govuk-colour-white); }
+.ss-ph--live{ background:var(--govuk-colour-red); color: var(--govuk-colour-white); }

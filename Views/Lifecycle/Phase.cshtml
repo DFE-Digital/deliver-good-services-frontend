@@ -119,25 +119,32 @@
                   @if (a.Resources.Any())
                   {
                     <p class="govuk-heading-s govuk-!-margin-top-4 govuk-!-margin-bottom-2">Resources</p>
-                    <ul class="govuk-list govuk-list--bullet govuk-!-margin-bottom-4">
+                    <div class="dfe-f-task-panel__resource-grid govuk-!-margin-bottom-4">
                       @foreach (var res in a.Resources)
                       {
                         var resUrl = !string.IsNullOrEmpty(res.Url) ? res.Url : res.MediaUrl;
                         var resLabel = res.ResourceType switch { "download" => "Download", "artefact" => "Artefact", "template" => "Template", "case_study" => "Case study", _ => "Link" };
-                        <li class="govuk-!-margin-bottom-2">
+                        <div class="dfe-f-task-panel__resource-row">
+                          <div class="dfe-f-task-panel__resource-head">
                           @if (!string.IsNullOrEmpty(resUrl))
                           {
                             <a class="govuk-link" href="@resUrl" target="_blank" rel="noopener noreferrer">@res.Title</a>
-                            <span class="govuk-body-s"> (@resLabel)</span>
                           }
                           else
                           {
-                            <span>@res.Title</span>
-                            @if (!string.IsNullOrEmpty(res.Description)) { <span class="govuk-body-s">— @res.Description</span> }
+                            <span class="govuk-!-font-weight-bold">@res.Title</span>
                           }
-                        </li>
-                      }
-                    </ul>
+                          </div>
+                          <div class="dfe-f-task-panel__resource-body">
+                            <span class="dfe-f-task-panel__resource-type">@resLabel</span>
+                            @if (!string.IsNullOrEmpty(res.Description))
+                            {
+                              <span class="dfe-f-task-panel__resource-desc">@res.Description</span>
+                            }
+                          </div>
+                        </div>
+                          }
+                    </div>
                   }
                   @if (a.RelatedContent.Any())
                   {

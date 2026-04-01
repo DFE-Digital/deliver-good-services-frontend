@@ -7,6 +7,8 @@ namespace ServiceManual.Models
         public string? MetaDescription { get; set; }
         /// <summary>Richtext body for the guide landing page (replaces the previous first child page).</summary>
         public string? Body { get; set; }
+        /// <summary>Optional replacement label for "Overview" on guide navigation and headings.</summary>
+        public string? OverrideOverviewTitle { get; set; }
         public string? CollectionTitle { get; set; }
         public string? CollectionSlug { get; set; }
         /// <summary>All collections this guide is part of; first is primary ("Part of"), rest are "Also part of".</summary>
@@ -37,12 +39,17 @@ namespace ServiceManual.Models
         public List<TagRef> AudienceTags { get; set; } = [];
         /// <summary>Related files for the Downloads sidebar section.</summary>
         public List<RelatedFileItem> RelatedFiles { get; set; } = [];
+        /// <summary>Custom CSS to inject into the page &lt;style&gt; block.</summary>
+        public string? CustomCSS { get; set; }
+        /// <summary>Custom JavaScript to inject into the page &lt;script&gt; block.</summary>
+        public string? CustomJS { get; set; }
     }
 
     public class DetailedGuidePageSummary
     {
         public string Title { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
+        public string? MetaDescription { get; set; }
         public List<TagRef> Phases { get; set; } = [];
         public List<TagRef> Professions { get; set; } = [];
     }

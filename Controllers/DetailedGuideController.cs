@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ServiceManual.Helpers;
 using ServiceManual.Models;
 using ServiceManual.Services;
+using System.Text;
 
 namespace ServiceManual.Controllers
 {
@@ -59,9 +60,13 @@ namespace ServiceManual.Controllers
         private static GuidePageViewModel BuildViewModelFromGuide(DetailedGuide guide, string? resolvedBody = null)
         {
             var bodyMarkdown = resolvedBody ?? guide.Body;
+            bodyMarkdown = GovUkMarkdownHelper.ReplaceServiceStandardListShortcode(bodyMarkdown, guide.Slug, guide.Pages);
             var bodyHtml = !string.IsNullOrEmpty(bodyMarkdown)
                 ? GovUkMarkdownHelper.ToGovUkHtmlForBody(bodyMarkdown)
                 : "";
+            var overviewTitle = string.IsNullOrWhiteSpace(guide.OverrideOverviewTitle)
+                ? "Overview"
+                : guide.OverrideOverviewTitle.Trim();
 
             List<GuideContentsItem> contents;
             bool showContents;
@@ -72,7 +77,7 @@ namespace ServiceManual.Controllers
                 contentsUseNumbers = true;
                 contents = new List<GuideContentsItem>
                 {
-                    new() { Number = 1, Title = "Overview", Url = null, IsCurrent = true }
+                    new() { Number = 1, Title = overviewTitle, Url = null, IsCurrent = true }
                 };
                 for (var i = 0; i < guide.Pages.Count; i++)
                 {
@@ -124,42 +129,70 @@ namespace ServiceManual.Controllers
                 ShowContents = showContents,
                 ContentsUseNumbers = contentsUseNumbers,
                 ContentsItems = contents,
+                OverviewTitle = overviewTitle,
                 BodyHtml = bodyHtml,
                 ShowPageHeader = true,
-                PageTitle = "Overview",
+                PageTitle = overviewTitle,
                 PaginationNextUrl = guide.Pages.Count > 0 ? $"/guidance/guides/{guide.Slug}/{guide.Pages[0].Slug}" : null,
                 PaginationNextLabel = guide.Pages.Count > 0 ? guide.Pages[0].Title : null,
                 RelatedContent = guide.RelatedContent,
                 RelatedFiles = guide.RelatedFiles,
-                ApplyNoContentsSectionStyle = guide.HideContentsOnPrimaryPage
+                ApplyNoContentsSectionStyle = guide.HideContentsOnPrimaryPage,
+                CustomCSS = guide.CustomCSS,
+                CustomJS = guide.CustomJS,
             };
         }
 
         private static GuidePageViewModel BuildViewModelFromGuidePage(DetailedGuidePage guidePage, string? resolvedBody = null, string? resolvedBeforeContents = null)
         {
+            var overviewTitle = string.IsNullOrWhiteSpace(guidePage.OverrideOverviewTitle)
+                ? "Overview"
+                : guidePage.OverrideOverviewTitle.Trim();
+
             var professionsTagsHtml = "";
             if (guidePage.Professions.Count > 0)
             {
                 var sb = new System.Text.StringBuilder();
+                sb.Append("<div class=\"ss-row__meta\">");
                 foreach (var p in guidePage.Professions)
                 {
-                    sb.Append("<strong class=\"govuk-tag govuk-!-margin-right-2 govuk-!-margin-bottom-2\">");
+                    sb.Append("<span class=\"ss-role\">");
                     sb.Append(System.Net.WebUtility.HtmlEncode(p));
-                    sb.Append("</strong>");
+                    sb.Append("</span>");
                 }
+                sb.Append("</div>");
                 professionsTagsHtml = sb.ToString();
             }
 
-            var bodyMarkdown = (resolvedBody ?? guidePage.Body ?? "").Replace("[[professions]]", professionsTagsHtml);
+            var phasesTagsHtml = "";
+            if (guidePage.Phases.Count > 0)
+            {
+                var sbPh = new System.Text.StringBuilder();
+                sbPh.Append("<div class=\"ss-row__meta\">");
+                foreach (var phase in guidePage.Phases)
+                {
+                    var cls = GovUkMarkdownHelper.PhaseClassFromSlug(phase.Slug);
+                    sbPh.Append("<span class=\"ss-ph");
+                    if (!string.IsNullOrEmpty(cls)) { sbPh.Append(' '); sbPh.Append(cls); }
+                    sbPh.Append("\">");
+                    sbPh.Append(System.Net.WebUtility.HtmlEncode(phase.Title));
+                    sbPh.Append("</span>");
+                }
+                sbPh.Append("</div>");
+                phasesTagsHtml = sbPh.ToString();
+            }
+
+            var bodyMarkdown = (resolvedBody ?? guidePage.Body ?? "").Replace("[[professions]]", professionsTagsHtml).Replace("[[phases]]", phasesTagsHtml);
+            bodyMarkdown = GovUkMarkdownHelper.ReplaceServiceStandardListShortcode(bodyMarkdown, guidePage.GuideSlug, guidePage.SiblingPages);
             var bodyHtml = GovUkMarkdownHelper.ToGovUkHtmlForBody(bodyMarkdown);
             var beforeContentsRaw = resolvedBeforeContents ?? guidePage.BeforeContents ?? "";
             var beforeContentsHtml = !string.IsNullOrWhiteSpace(beforeContentsRaw)
-                ? GovUkMarkdownHelper.ToGovUkHtmlForBody(beforeContentsRaw.Replace("[[professions]]", professionsTagsHtml))
+                ? GovUkMarkdownHelper.ToGovUkHtmlForBody(GovUkMarkdownHelper.ReplaceServiceStandardListShortcode(beforeContentsRaw.Replace("[[professions]]", professionsTagsHtml).Replace("[[phases]]", phasesTagsHtml), guidePage.GuideSlug, guidePage.SiblingPages))
                 : null;
 
             var contents = new List<GuideContentsItem>
             {
-                new() { Number = 1, Title = "Overview", Url = $"/guidance/guides/{guidePage.GuideSlug}", IsCurrent = false }
+                new() { Number = 1, Title = overviewTitle, Url = $"/guidance/guides/{guidePage.GuideSlug}", IsCurrent = false }
             };
             var currentIndex = guidePage.SiblingPages.FindIndex(p => p.Slug == guidePage.Slug);
             for (var i = 0; i < guidePage.SiblingPages.Count; i++)
@@ -179,7 +212,7 @@ namespace ServiceManual.Controllers
             if (currentIndex == 0)
             {
                 prevUrl = $"/guidance/guides/{guidePage.GuideSlug}";
-                prevLabel = "Overview";
+                prevLabel = overviewTitle;
             }
             else if (currentIndex > 0)
             {
@@ -197,8 +230,32 @@ namespace ServiceManual.Controllers
             }
 
             var showContents = !guidePage.HideTitleAndDescription
+                && !guidePage.HideContents
                 && !string.IsNullOrEmpty(guidePage.GuideTitle)
                 && guidePage.SiblingPages.Count >= 1;
+
+            var currentPageSummary = guidePage.SiblingPages.FirstOrDefault(p => string.Equals(p.Slug, guidePage.Slug, StringComparison.OrdinalIgnoreCase));
+            var summaryPhases = currentPageSummary?.Phases?
+                .Where(p => !string.IsNullOrWhiteSpace(p.Title))
+                .GroupBy(p => (p.Slug ?? string.Empty).Trim().ToLowerInvariant() + "|" + (p.Title ?? string.Empty).Trim().ToLowerInvariant())
+                .Select(g => g.First())
+                .ToList() ?? [];
+            var summaryProfessions = currentPageSummary?.Professions?
+                .Where(p => !string.IsNullOrWhiteSpace(p.Title))
+                .Select(p => p.Title!.Trim())
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList() ?? [];
+
+            if (summaryProfessions.Count == 0 && guidePage.Professions.Count > 0)
+            {
+                summaryProfessions = guidePage.Professions
+                    .Where(p => !string.IsNullOrWhiteSpace(p))
+                    .Select(p => p.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
+
+            var contentGroupTabs = BuildContentGroupTabs(guidePage.Sections);
 
             return new GuidePageViewModel
             {
@@ -220,7 +277,10 @@ namespace ServiceManual.Controllers
                 ShowContents = showContents,
                 ContentsUseNumbers = true,
                 ContentsItems = contents,
+                OverviewTitle = overviewTitle,
                 BodyHtml = bodyHtml,
+                SummaryPhasesPrimarilyAssessedAt = summaryPhases,
+                SummaryProfessionsResponsible = summaryProfessions,
                 ShowPageHeader = !guidePage.HideTitleAndDescription || !string.IsNullOrWhiteSpace(guidePage.BeforeContents),
                 PageTitle = guidePage.Title,
                 PageBeforeContentsHtml = beforeContentsHtml,
@@ -230,8 +290,77 @@ namespace ServiceManual.Controllers
                 PaginationNextLabel = nextLabel,
                 RelatedContent = guidePage.RelatedContent,
                 RelatedFiles = guidePage.RelatedFiles,
-                ApplyNoContentsSectionStyle = false
+                ContentGroupTabs = contentGroupTabs,
+                ApplyNoContentsSectionStyle = guidePage.HideContents || guidePage.HideTitleAndDescription,
+                CustomCSS = guidePage.CustomCSS,
+                CustomJS = guidePage.CustomJS,
             };
+        }
+
+        private static List<GuidePageContentGroupTab> BuildContentGroupTabs(List<DetailedGuidePageSection> sections)
+        {
+            var result = new List<GuidePageContentGroupTab>();
+            var indexByGroup = new Dictionary<string, GuidePageContentGroupTab>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var section in sections)
+            {
+                var sectionTitle = string.IsNullOrWhiteSpace(section.Title) ? "Section" : section.Title.Trim();
+                var groupName = string.IsNullOrWhiteSpace(section.Group) ? "General" : section.Group.Trim();
+                var groupKey = groupName.ToLowerInvariant();
+
+                if (!indexByGroup.TryGetValue(groupKey, out var groupTab))
+                {
+                    var panelBase = "guide-group-" + Slugify(groupName);
+                    var panelId = panelBase;
+                    var duplicate = 2;
+                    while (result.Any(g => string.Equals(g.PanelId, panelId, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        panelId = panelBase + "-" + duplicate;
+                        duplicate++;
+                    }
+
+                    groupTab = new GuidePageContentGroupTab
+                    {
+                        GroupName = groupName,
+                        PanelId = panelId
+                    };
+                    indexByGroup[groupKey] = groupTab;
+                    result.Add(groupTab);
+                }
+
+                groupTab.Sections.Add(new GuidePageContentGroupSection
+                {
+                    Title = sectionTitle,
+                    BodyHtml = string.IsNullOrWhiteSpace(section.Body)
+                        ? null
+                        : GovUkMarkdownHelper.ToGovUkHtmlForBody(section.Body),
+                    Modules = section.ContentModules
+                });
+            }
+
+            return result;
+        }
+
+        private static string Slugify(string value)
+        {
+            var builder = new StringBuilder();
+            var previousDash = false;
+
+            foreach (var ch in value.Trim().ToLowerInvariant())
+            {
+                if (char.IsLetterOrDigit(ch))
+                {
+                    builder.Append(ch);
+                    previousDash = false;
+                }
+                else if (!previousDash)
+                {
+                    builder.Append('-');
+                    previousDash = true;
+                }
+            }
+
+            return builder.ToString().Trim('-');
         }
 
     }
