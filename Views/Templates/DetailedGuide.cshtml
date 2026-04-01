@@ -138,7 +138,8 @@
                             @for (var i = 0; i < vm.ContentGroupTabs.Count; i++)
                             {
                                 var tab = vm.ContentGroupTabs[i];
-                                <div class="s5-panel@(vm.ContentGroupTabs.Count > 1 ? (i == 0 ? " on" : "") : " on")" id="@tab.PanelId" role="tabpanel" data-name="@tab.GroupName">
+                                var useTabPanels = vm.ContentGroupTabs.Count > 1;
+                                <div class="@(useTabPanels ? $"s5-panel{(i == 0 ? " on" : "")}" : "s5-single-group")" id="@tab.PanelId" role="@(useTabPanels ? "tabpanel" : null)" data-name="@tab.GroupName">
                                     @foreach (var contentBlock in tab.Sections)
                                     {
                                         <h3 class="govuk-heading-m">@contentBlock.Title</h3>
