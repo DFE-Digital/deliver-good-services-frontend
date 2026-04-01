@@ -15,6 +15,8 @@ namespace ServiceManual.Models
         public List<CollectionRef> Collections { get; set; } = [];
         /// <summary>When true, hide the contents list on the guide's primary (overview) page.</summary>
         public bool HideContentsOnPrimaryPage { get; set; }
+        /// <summary>When true, show detailed guide pages navigation on the right sidebar.</summary>
+        public bool ShowGuidePagesOnRight { get; set; }
         public List<DetailedGuidePageSummary> Pages { get; set; } = [];
         public List<RelatedContentItem> RelatedContent { get; set; } = [];
         /// <summary>When true, show "Last reviewed: [date]" under the meta description.</summary>

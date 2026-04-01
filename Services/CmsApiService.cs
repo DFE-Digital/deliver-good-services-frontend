@@ -347,7 +347,7 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage&fields[10]=customJS&fields[11]=customCSS&fields[12]=overrideOverviewTitle" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage&fields[10]=customJS&fields[11]=customCSS&fields[12]=overrideOverviewTitle&fields[13]=showGuidePagesOnRight" +
                           "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug&populate[detailed_guide_pages][fields][2]=metaDescription" +
                           "&populate[detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
                           "&populate[detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide_pages][populate][applicableProfessions][fields][1]=slug" +
@@ -388,6 +388,7 @@ namespace ServiceManual.Services
                     CollectionSlug = firstCollection?.Slug,
                     Collections = collections,
                     HideContentsOnPrimaryPage = item.HideContentsOnPrimaryPage ?? false,
+                    ShowGuidePagesOnRight = item.ShowGuidePagesOnRight ?? false,
                     Pages = item.Detailed_Guide_Pages?
                         .Select(p => new DetailedGuidePageSummary
                         {
@@ -453,7 +454,7 @@ namespace ServiceManual.Services
                           "&populate[Section][populate][contentModules][populate][links][fields][0]=title&populate[Section][populate][contentModules][populate][links][fields][1]=url&populate[Section][populate][contentModules][populate][links][fields][2]=newTab&populate[Section][populate][contentModules][populate][links][fields][3]=externalLink" +
                           "&populate[Section][populate][contentModules][populate][detailedGuides][fields][0]=title&populate[Section][populate][contentModules][populate][detailedGuides][fields][1]=slug" +
                           "&populate[Section][populate][contentModules][populate][collections][fields][0]=title&populate[Section][populate][contentModules][populate][collections][fields][1]=slug" +
-                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage&populate[detailed_guide][fields][6]=showOwnerOnPage&populate[detailed_guide][fields][7]=showApplicablePhasesOnPage&populate[detailed_guide][fields][8]=showApplicableProfessionsOnPage&populate[detailed_guide][fields][9]=customJS&populate[detailed_guide][fields][10]=customCSS&populate[detailed_guide][fields][11]=overrideOverviewTitle" +
+                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage&populate[detailed_guide][fields][6]=showOwnerOnPage&populate[detailed_guide][fields][7]=showApplicablePhasesOnPage&populate[detailed_guide][fields][8]=showApplicableProfessionsOnPage&populate[detailed_guide][fields][9]=customJS&populate[detailed_guide][fields][10]=customCSS&populate[detailed_guide][fields][11]=overrideOverviewTitle&populate[detailed_guide][fields][12]=showGuidePagesOnRight" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug&populate[detailed_guide][populate][detailed_guide_pages][fields][2]=metaDescription" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][1]=slug" +
@@ -498,6 +499,7 @@ namespace ServiceManual.Services
                     GuideMetaDescription = item.Detailed_Guide?.MetaDescription,
                     OverrideOverviewTitle = item.Detailed_Guide?.OverrideOverviewTitle,
                     HideContentsOnPrimaryPage = item.Detailed_Guide?.HideContentsOnPrimaryPage ?? false,
+                    ShowGuidePagesOnRight = item.Detailed_Guide?.ShowGuidePagesOnRight ?? false,
                     CollectionTitle = firstGuideCollection?.Title,
                     CollectionSlug = firstGuideCollection?.Slug,
                     Collections = guideCollections,
@@ -2667,6 +2669,8 @@ namespace ServiceManual.Services
             public string? OverrideOverviewTitle { get; set; }
             [JsonPropertyName("hideContentsOnPrimaryPage")]
             public bool? HideContentsOnPrimaryPage { get; set; }
+            [JsonPropertyName("showGuidePagesOnRight")]
+            public bool? ShowGuidePagesOnRight { get; set; }
             public StrapiCollectionRef? Collection { get; set; }
             [JsonConverter(typeof(StrapiContentOwnerRefConverter))]
             [JsonPropertyName("contentOwner")]
@@ -2780,6 +2784,8 @@ namespace ServiceManual.Services
             public string? LastReviewedDate { get; set; }
             [JsonPropertyName("hideContentsOnPrimaryPage")]
             public bool? HideContentsOnPrimaryPage { get; set; }
+            [JsonPropertyName("showGuidePagesOnRight")]
+            public bool? ShowGuidePagesOnRight { get; set; }
             public StrapiCollectionRef? Collection { get; set; }
             [JsonConverter(typeof(StrapiContentOwnerRefConverter))]
             [JsonPropertyName("contentOwner")]

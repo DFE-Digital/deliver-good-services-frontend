@@ -14,6 +14,8 @@ namespace ServiceManual.Models
         public string? OverrideOverviewTitle { get; set; }
         /// <summary>When true, hide the contents list on the guide's primary (overview) page.</summary>
         public bool HideContentsOnPrimaryPage { get; set; }
+        /// <summary>When true, show detailed guide pages navigation on the right sidebar.</summary>
+        public bool ShowGuidePagesOnRight { get; set; }
         public bool HideTitleAndDescription { get; set; }
         public bool HideContents { get; set; }
         /// <summary>When true, the "Pages in this guide" sidebar is hidden (takes precedence over other rules).</summary>

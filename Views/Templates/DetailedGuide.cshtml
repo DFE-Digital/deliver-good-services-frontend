@@ -233,6 +233,28 @@
                     ["LibDescription"] = vm.HeroIntro ?? string.Empty
                 })
 
+                @if (vm.ShowGuidePagesOnRight && vm.GuidePagesRightNav.Count > 0)
+                {
+                    <aside class="guide-sidebar__card wtd-sidebar-box" aria-label="Other pages">
+                        <h3 class="govuk-heading-s">Other pages</h3>
+                        <ul>
+                            @foreach (var item in vm.GuidePagesRightNav)
+                            {
+                                <li class="@(item.IsCurrent ? "wtd-sidebar-box__item--active" : null)">
+                                    @if (item.IsCurrent || string.IsNullOrEmpty(item.Url))
+                                    {
+                                        <span class="wtd-sidebar-box__current" aria-current="page">@item.Number. @item.Title</span>
+                                    }
+                                    else
+                                    {
+                                        <a href="@item.Url">@item.Number. @item.Title</a>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </aside>
+                }
+
                 @if (vm.RelatedContent.Count > 0)
                 {
                     <aside class="guide-sidebar__card" aria-label="Related content">

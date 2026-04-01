@@ -137,6 +137,16 @@ namespace ServiceManual.Controllers
                 PaginationNextLabel = guide.Pages.Count > 0 ? guide.Pages[0].Title : null,
                 RelatedContent = guide.RelatedContent,
                 RelatedFiles = guide.RelatedFiles,
+                ShowGuidePagesOnRight = guide.ShowGuidePagesOnRight,
+                GuidePagesRightNav = guide.Pages
+                    .Select((p, i) => new GuidePageRightNavItem
+                    {
+                        Number = i + 1,
+                        Title = p.Title,
+                        Url = $"/guidance/guides/{guide.Slug}/{p.Slug}",
+                        IsCurrent = false
+                    })
+                    .ToList(),
                 ApplyNoContentsSectionStyle = guide.HideContentsOnPrimaryPage,
                 CustomCSS = guide.CustomCSS,
                 CustomJS = guide.CustomJS,
@@ -290,6 +300,18 @@ namespace ServiceManual.Controllers
                 PaginationNextLabel = nextLabel,
                 RelatedContent = guidePage.RelatedContent,
                 RelatedFiles = guidePage.RelatedFiles,
+                ShowGuidePagesOnRight = guidePage.ShowGuidePagesOnRight,
+                GuidePagesRightNav = guidePage.SiblingPages
+                    .Select((p, i) => new GuidePageRightNavItem
+                    {
+                        Number = i + 1,
+                        Title = p.Title,
+                        Url = string.Equals(p.Slug, guidePage.Slug, StringComparison.OrdinalIgnoreCase)
+                            ? null
+                            : $"/guidance/guides/{guidePage.GuideSlug}/{p.Slug}",
+                        IsCurrent = string.Equals(p.Slug, guidePage.Slug, StringComparison.OrdinalIgnoreCase)
+                    })
+                    .ToList(),
                 ContentGroupTabs = contentGroupTabs,
                 ApplyNoContentsSectionStyle = guidePage.HideContents || guidePage.HideTitleAndDescription,
                 CustomCSS = guidePage.CustomCSS,

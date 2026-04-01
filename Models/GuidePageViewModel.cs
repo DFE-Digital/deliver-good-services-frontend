@@ -42,6 +42,8 @@ namespace ServiceManual.Models
         public List<RelatedContentItem> RelatedContent { get; set; } = [];
         /// <summary>Related files for the Downloads sidebar section.</summary>
         public List<RelatedFileItem> RelatedFiles { get; set; } = [];
+        public bool ShowGuidePagesOnRight { get; set; }
+        public List<GuidePageRightNavItem> GuidePagesRightNav { get; set; } = [];
         public List<GuidePageContentGroupTab> ContentGroupTabs { get; set; } = [];
         /// <summary>When true, apply guide-content-section--no-contents (overview only, when contents hidden).</summary>
         public bool ApplyNoContentsSectionStyle { get; set; }
@@ -74,5 +76,13 @@ namespace ServiceManual.Models
         public string Title { get; set; } = string.Empty;
         public string? BodyHtml { get; set; }
         public List<ContentEntry> Modules { get; set; } = [];
+    }
+
+    public class GuidePageRightNavItem
+    {
+        public int Number { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? Url { get; set; }
+        public bool IsCurrent { get; set; }
     }
 }
