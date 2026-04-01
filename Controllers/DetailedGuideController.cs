@@ -137,16 +137,8 @@ namespace ServiceManual.Controllers
                 PaginationNextLabel = guide.Pages.Count > 0 ? guide.Pages[0].Title : null,
                 RelatedContent = guide.RelatedContent,
                 RelatedFiles = guide.RelatedFiles,
-                ShowGuidePagesOnRight = guide.ShowGuidePagesOnRight,
-                GuidePagesRightNav = guide.Pages
-                    .Select((p, i) => new GuidePageRightNavItem
-                    {
-                        Number = i + 1,
-                        Title = p.Title,
-                        Url = $"/guidance/guides/{guide.Slug}/{p.Slug}",
-                        IsCurrent = false
-                    })
-                    .ToList(),
+                ShowGuidePagesOnRight = false,
+                GuidePagesRightNav = [],
                 ApplyNoContentsSectionStyle = guide.HideContentsOnPrimaryPage,
                 CustomCSS = guide.CustomCSS,
                 CustomJS = guide.CustomJS,
