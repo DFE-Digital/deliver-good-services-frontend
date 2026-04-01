@@ -6564,7 +6564,7 @@ ul > li:last-child {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 10px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.9px;
   text-transform: uppercase;
@@ -6590,7 +6590,7 @@ ul > li:last-child {
 
 /** Intro Text - Shared Base Styles **/
 .guide-modern .page-hero__lede {
-  font-weight: 350;
+  font-weight: 400;
   line-height: 1.65;
   margin-bottom: 16px;
   max-width: 680px;
@@ -6703,7 +6703,7 @@ ul > li:last-child {
 }
 
 .guide-modern .page-hero--guidance .page-hero__lede {
-  font-size: 16px;
+  font-size: 1.1875rem;
   color: var(--ink-mid);
 }
 
@@ -6829,7 +6829,7 @@ ul > li:last-child {
   }
 
   .guide-modern .page-hero__lede {
-    font-size: 15px;
+    font-size: 1rem;
     line-height: 1.6;
   }
 }
