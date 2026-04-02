@@ -18,25 +18,6 @@
     ("Home", "/"),
     ("Search", null!)
   };
-
-  string BuildSearchUrl(string? keywords, IEnumerable<string>? types, bool highlight)
-  {
-    var query = new List<KeyValuePair<string, string?>>();
-
-    if (!string.IsNullOrWhiteSpace(keywords))
-      query.Add(new KeyValuePair<string, string?>("keywords", keywords));
-
-    foreach (var type in types ?? Enumerable.Empty<string>())
-    {
-      if (!string.IsNullOrWhiteSpace(type))
-        query.Add(new KeyValuePair<string, string?>("type", type));
-    }
-
-    if (highlight)
-      query.Add(new KeyValuePair<string, string?>("highlight", "1"));
-
-    return query.Count == 0 ? "/search" : QueryHelpers.AddQueryString("/search", query);
-  }
 }
 
 @functions {
@@ -139,10 +120,6 @@
               {
                 <input type="hidden" name="highlight" value="1">
               }
-              @foreach (var type in Model.Types)
-              {
-                <input type="hidden" name="type" value="@type" />
-              }
               <label class="govuk-label govuk-visually-hidden" for="search-filter-keywords">Search results</label>
               <input class="govuk-input" id="search-filter-keywords" name="keywords" type="search" value="@Model.Keywords" placeholder="Search results" autocomplete="off">
               <div class="guidance-filters__actions gf-search__actions">
@@ -150,62 +127,9 @@
               </div>
             </form>
           </div>
-
-          @if (Model.Facets.Count > 0)
-          {
-            <div class="gf-block guidance-filters__divider">
-              <span class="gf-title">Filter by content type</span>
-              <form method="get" action="/search">
-                @if (Model.HighlightKeywords)
-                {
-                  <input type="hidden" name="highlight" value="1">
-                }
-                <input type="hidden" name="keywords" value="@Model.Keywords" />
-
-                <ul class="gf-list">
-                  @foreach (var facet in Model.Facets)
-                  {
-                    var isChecked = Model.Types.Contains(facet.ContentType, StringComparer.OrdinalIgnoreCase);
-                    <li class="gf-item">
-                      <label class="gf-check">
-                        <input name="type" type="checkbox" value="@facet.ContentType" checked="@(isChecked ? "checked" : null)">
-                        <span class="gf-check__lbl">@facet.ContentType</span>
-                        <span class="gf-count">@facet.Count</span>
-                      </label>
-                    </li>
-                  }
-                </ul>
-
-                <div class="guidance-filters__actions">
-                  <button type="submit" class="govuk-button guidance-filters__button" data-module="govuk-button">Apply filters</button>
-                  <a href="@BuildSearchUrl(Model.Keywords, null, Model.HighlightKeywords)" class="govuk-link guidance-filters__clear">Clear all filters</a>
-                </div>
-              </form>
-            </div>
-          }
         </aside>
 
         <div class="govuk-grid-column-two-thirds guidance-main">
-          @if (Model.Types.Count > 0)
-          {
-            <div class="dfe-standards-filter__applied dfe-standards-filter__applied--above-results govuk-!-margin-bottom-4">
-              <p class="dfe-standards-filter__applied-heading">Applied filters</p>
-              <ul class="dfe-standards-filter__chips">
-                @foreach (var type in Model.Types)
-                {
-                  var remainingTypes = Model.Types.Where(t => !string.Equals(t, type, StringComparison.OrdinalIgnoreCase)).ToList();
-                  <li>
-                    <span class="dfe-standards-filter__chip">
-                      <span class="dfe-standards-filter__chip-text">@type</span>
-                      <a href="@BuildSearchUrl(Model.Keywords, remainingTypes, Model.HighlightKeywords)" class="dfe-standards-filter__chip-remove" aria-label="Remove @type filter"><span aria-hidden="true">×</span></a>
-                    </span>
-                  </li>
-                }
-              </ul>
-              <a href="@BuildSearchUrl(Model.Keywords, null, Model.HighlightKeywords)" class="dfe-standards-filter__clear-all govuk-link govuk-link--no-visited-state">Clear all filters</a>
-            </div>
-          }
-
           <p class="govuk-body govuk-!-margin-bottom-4"><strong>@Model.Results.Count</strong> result@(Model.Results.Count == 1 ? "" : "s") for @Model.Keywords</p>
 
           <ul class="govuk-list search-results-list">

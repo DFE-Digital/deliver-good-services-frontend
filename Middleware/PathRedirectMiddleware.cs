@@ -18,6 +18,8 @@ public class PathRedirectMiddleware
         _logger = logger;
     }
 
+    
+
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? string.Empty;
