@@ -234,7 +234,7 @@ blockquote.govuk-inset-text {
   color: var(--govuk-colour-white);
   font-size: 56px;
   line-height: 1.1;
-  font-weight: 800;
+  font-weight: 700;
   margin-bottom: 24px;
   letter-spacing: -0.02em;
 }
@@ -571,7 +571,7 @@ blockquote.govuk-inset-text {
   padding: 6px 1rem;
   border-radius: 6px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -818,7 +818,7 @@ blockquote.govuk-inset-text {
   display: inline-block;
   padding: 10px 20px;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   margin-right: 8px;
   margin-bottom: 8px;
@@ -6295,7 +6295,7 @@ ul > li:last-child {
 
 .hero__h1 {
   font-size: clamp(38px, 4.2vw, 56px);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.05;
   letter-spacing: -2px;
   color: #fff;
@@ -6578,7 +6578,7 @@ ul > li:last-child {
 
 /** Title - Shared Base Styles **/
 .guide-modern .page-hero__h1 {
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -1px;
   line-height: 1.08;
   margin-bottom: 12px;
@@ -7943,7 +7943,7 @@ h4,
 h5,
 h6 {
   letter-spacing: -1px !important;
-  font-weight: 800 !important;
+  font-weight: 700 !important;
 }
 .gf-search {
   margin-top: 15px;
@@ -8533,7 +8533,7 @@ i[class*=" fa-"] {
   display: block;
   font-size: 34px;
   line-height: 1;
-  font-weight: 800;
+  font-weight: 700;
   color: #0b0c0c;
 }
 
@@ -8714,7 +8714,7 @@ i[class*=" fa-"] {
   display: block;
   font-size: 1.7rem;
   line-height: 1;
-  font-weight: 800;
+  font-weight: 700;
   color: #0b0c0c;
 }
 
