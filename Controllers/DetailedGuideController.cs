@@ -263,7 +263,9 @@ namespace ServiceManual.Controllers
             {
                 IsOverviewPage = false,
                 HeroTitle = guidePage.GuideTitle ?? "",
-                HeroIntro = guidePage.GuideMetaDescription,
+                HeroIntro = !string.IsNullOrWhiteSpace(guidePage.MetaDescription)
+                    ? guidePage.MetaDescription
+                    : guidePage.GuideMetaDescription,
                 CollectionSlug = guidePage.CollectionSlug,
                 CollectionTitle = guidePage.CollectionTitle,
                 Collections = guidePage.Collections,

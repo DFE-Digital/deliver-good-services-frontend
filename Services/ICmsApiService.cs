@@ -23,6 +23,9 @@ namespace ServiceManual.Services
         Task<Phase?> GetPhaseBySlugAsync(string slug);
         Task<List<ContentIndexItem>> GetAllPublishedContentAsync();
         Task<List<ContentEntry>> GetContentEntriesAsync(string? strength = null, string? phaseSlug = null, string? roleSlug = null);
+
+        /// <summary>All published content modules (content-entries) from the CMS, sorted by title A–Z.</summary>
+        Task<List<ContentEntry>> GetAllContentModulesAlphabeticalAsync();
         Task<List<ServiceStandardSummary>> GetServiceStandardsAsync();
         Task<ServiceStandardPage?> GetServiceStandardBySlugAsync(string slug);
 

@@ -36,6 +36,8 @@
     var useInverseNav = (bool?)ViewBag.UseInverseNav ?? false;
     var heroSectionTitle = ViewBag.HeroSectionTitle as string ?? "Guidance";
     var heroSectionUrl = ViewBag.HeroSectionUrl as string ?? "/guidance";
+    var heroHeadingCaption = ViewBag.HeroHeadingCaption as string ?? "";
+    var hideAudienceChips = (bool?)ViewBag.HeroHideAudienceChips ?? false;
     var heroClass = heroType == "collection" ? "page-hero--collection" : "page-hero--guidance";
     var heroMetaClass = useInverseNav ? "page-hero__meta page-hero__meta--inverse" : "page-hero__meta";
     var chipColors = new[] { "#5439F9", "#15B187", "#CA357C" };
@@ -84,15 +86,22 @@
                         </ol>
                     </nav>
 
-                    @* Badge *@
-                    @if (!hideBadge){
+                    @* Badge (not shown on guidance hero skin — page-hero--guidance) *@
+                    @if (!hideBadge && heroType != "guidance")
+                    {
                     <div class="pg-badge">
                         @if (heroType == "collection")
                         {
                             <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="4" height="4" fill="currentColor"></rect><rect x="7" y="1" width="4" height="4" fill="currentColor"></rect><rect x="1" y="7" width="4" height="4" fill="currentColor"></rect><rect x="7" y="7" width="4" height="4" fill="currentColor"></rect></svg>
                         }
                         @badgeText
-                    </div>}
+                    </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(heroHeadingCaption))
+                    {
+                        <p class="page-hero__caption govuk-!-margin-bottom-1">@System.Net.WebUtility.HtmlEncode(heroHeadingCaption)</p>
+                    }
 
                     @* Title *@
                     <h1 class="page-hero__h1">@title</h1>
@@ -171,9 +180,11 @@
 
                     @* Audience chips *@
                     @{
-                        var tagsToDisplay = audienceTags.Count > 0 ? audienceTags 
-                            : (heroType == "guidance" && showApplicableProfessions ? audienceTags 
-                            : new List<dynamic>());
+                        var tagsToDisplay = hideAudienceChips
+                            ? new List<dynamic>()
+                            : (audienceTags.Count > 0 ? audienceTags
+                                : (heroType == "guidance" && showApplicableProfessions ? audienceTags
+                                    : new List<dynamic>()));
                     }
                     @if (tagsToDisplay.Count > 0)
                     {

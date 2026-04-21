@@ -3937,15 +3937,6 @@ ul > li:last-child {
   align-self: center;
 }
 
-.govuk-warning-text__icon {
-  background-color: var(--govuk-colour-red);
-  border-color: var(--govuk-colour-red);
-}
-
-.govuk-warning-text__text {
-  color: var(--govuk-colour-red);
-}
-
 .govuk-warning-callout {
   background: var(--govuk-colour-white);
   border-left: 6px solid var(--brand-orange);
@@ -5858,25 +5849,6 @@ ul > li:last-child {
   background: transparent;
 }
 
-.guide-modern .guide-sidebar__card ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.guide-modern .guide-sidebar__card li {
-  margin-bottom: 0;
-}
-
-.guide-modern .guide-sidebar__card a {
-  color: var(--guide-accent);
-  text-decoration: none;
-}
-
-.guide-modern .guide-sidebar__card a:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
 
 /* Sidebar Downloads section */
 .guide-modern .guide-sidebar__card--downloads .govuk-heading-s {
@@ -6549,15 +6521,6 @@ ul > li:last-child {
   max-width: 760px;
 }
 
-/** Breadcrumbs - Shared Across All Hero Types **/
-.guide-modern .page-hero .govuk-breadcrumbs {
-  margin-bottom: 1rem;
-}
-
-.guide-modern .page-hero .govuk-breadcrumbs__list {
-  font-size: 13px;
-  line-height: 1.4;
-}
 
 /** Badge - Shared Across All Hero Types **/
 .guide-modern .page-hero .pg-badge {
@@ -6601,26 +6564,14 @@ ul > li:last-child {
   background: #1d70b8;
 }
 
-.guide-modern .page-hero--collection .govuk-breadcrumbs__link,
-.guide-modern
-  .page-hero--collection
-  .govuk-breadcrumbs__list-item,
-.guide-modern
-  .page-hero--collection
-  .govuk-breadcrumbs__list-item::before {
-  color: rgba(255, 255, 255, 0.9);
-}
+
 
 .guide-modern .page-hero--collection .govuk-breadcrumbs__link {
   text-decoration: underline;
   text-decoration-color: rgba(255, 255, 255, 0.4);
 }
 
-.guide-modern
-  .page-hero--collection
-  .govuk-breadcrumbs__link:hover {
-  text-decoration-color: #ffffff;
-}
+
 
 .guide-modern .page-hero--collection .page-hero__h1 {
   font-size: clamp(28px, 3vw, 40px);
@@ -6700,6 +6651,14 @@ ul > li:last-child {
 .guide-modern .page-hero--guidance .page-hero__h1 {
   font-size: clamp(28px, 3vw, 40px);
   color: var(--ink);
+}
+
+.guide-modern .page-hero--guidance .page-hero__caption {
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--ink-mid);
+  max-width: 680px;
 }
 
 .guide-modern .page-hero--guidance .page-hero__lede {
@@ -8559,7 +8518,6 @@ i[class*=" fa-"] {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-left: 4px solid var(--calc-c);
   background: #0b0c0c;
   padding: 9px 1rem;
 }
@@ -8921,4 +8879,18 @@ i[class*=" fa-"] {
   color: #0b0c0c;
   display: block;
   padding: 8px 10px;
+}
+
+
+.dfe-list--cross,.dfe-list--tick {
+  list-style: none;
+  margin-top: 0;
+  padding-left: 40px;
+  position: relative;
+}
+
+.dfe-list--cross svg,.dfe-list--tick svg {
+  left: -4px;
+  margin-top: -5px;
+  position: absolute
 }

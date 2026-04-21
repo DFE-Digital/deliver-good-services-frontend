@@ -192,64 +192,64 @@ namespace ServiceManual.Helpers
                 sb.Append(HtmlEncode(page.Title));
                 sb.Append("</p>");
 
-                if (!string.IsNullOrWhiteSpace(page.MetaDescription))
-                {
-                    sb.Append("<p class=\"ss-row__desc\">");
-                    sb.Append(HtmlEncode(page.MetaDescription));
-                    sb.Append("</p>");
-                }
+                // if (!string.IsNullOrWhiteSpace(page.MetaDescription))
+                // {
+                //     sb.Append("<p class=\"ss-row__desc\">");
+                //     sb.Append(HtmlEncode(page.MetaDescription));
+                //     sb.Append("</p>");
+                // }
 
-                var hasPhases = page.Phases?.Any(p => !string.IsNullOrWhiteSpace(p.Title)) == true;
-                var hasProfessions = page.Professions?.Any(p => !string.IsNullOrWhiteSpace(p.Title)) == true;
+                // var hasPhases = page.Phases?.Any(p => !string.IsNullOrWhiteSpace(p.Title)) == true;
+                // var hasProfessions = page.Professions?.Any(p => !string.IsNullOrWhiteSpace(p.Title)) == true;
 
-                if (hasPhases)
-                {
-                    sb.Append("<div class=\"ss-row__meta\">");
+                // if (hasPhases)
+                // {
+                //     sb.Append("<div class=\"ss-row__meta\">");
 
-                    if (page.Phases != null)
-                    {
-                        foreach (var phase in page.Phases)
-                        {
-                            var phaseTitle = phase.Title?.Trim();
-                            if (string.IsNullOrWhiteSpace(phaseTitle))
-                                continue;
+                //     if (page.Phases != null)
+                //     {
+                //         foreach (var phase in page.Phases)
+                //         {
+                //             var phaseTitle = phase.Title?.Trim();
+                //             if (string.IsNullOrWhiteSpace(phaseTitle))
+                //                 continue;
 
-                            var phaseClass = PhaseClassFromSlug(phase.Slug);
-                            sb.Append("<span class=\"ss-ph");
-                            if (!string.IsNullOrEmpty(phaseClass))
-                            {
-                                sb.Append(' ');
-                                sb.Append(phaseClass);
-                            }
-                            sb.Append("\">");
-                            sb.Append(HtmlEncode(phaseTitle));
-                            sb.Append("</span>");
-                        }
-                    }
+                //             var phaseClass = PhaseClassFromSlug(phase.Slug);
+                //             sb.Append("<span class=\"ss-ph");
+                //             if (!string.IsNullOrEmpty(phaseClass))
+                //             {
+                //                 sb.Append(' ');
+                //                 sb.Append(phaseClass);
+                //             }
+                //             sb.Append("\">");
+                //             sb.Append(HtmlEncode(phaseTitle));
+                //             sb.Append("</span>");
+                //         }
+                //     }
 
-                    sb.Append("</div>");
-                }
+                //     sb.Append("</div>");
+                // }
 
-                if (hasProfessions)
-                {
-                    sb.Append("<div class=\"ss-row__meta\">");
+                // if (hasProfessions)
+                // {
+                //     sb.Append("<div class=\"ss-row__meta\">");
 
-                    if (page.Professions != null)
-                    {
-                        foreach (var profession in page.Professions)
-                        {
-                            var professionTitle = profession.Title?.Trim();
-                            if (string.IsNullOrWhiteSpace(professionTitle))
-                                continue;
+                //     if (page.Professions != null)
+                //     {
+                //         foreach (var profession in page.Professions)
+                //         {
+                //             var professionTitle = profession.Title?.Trim();
+                //             if (string.IsNullOrWhiteSpace(professionTitle))
+                //                 continue;
 
-                            sb.Append("<span class=\"ss-role\">");
-                            sb.Append(HtmlEncode(professionTitle));
-                            sb.Append("</span>");
-                        }
-                    }
+                //             sb.Append("<span class=\"ss-role\">");
+                //             sb.Append(HtmlEncode(professionTitle));
+                //             sb.Append("</span>");
+                //         }
+                //     }
 
-                    sb.Append("</div>");
-                }
+                //     sb.Append("</div>");
+                // }
 
                 sb.Append("</div>");
                 sb.Append("</a>");

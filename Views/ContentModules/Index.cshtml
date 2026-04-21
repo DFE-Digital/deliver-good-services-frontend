@@ -1,0 +1,45 @@
+@model IReadOnlyList<ServiceManual.Models.ContentEntry>
+@using System.Linq
+@using ServiceManual.Models
+@{
+    ViewData["Title"] = "Content modules";
+}
+
+@section Breadcrumbs {
+    <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
+    <li class="govuk-breadcrumbs__list-item" aria-current="page">Content modules</li>
+}
+
+<div class="govuk-width-container govuk-!-padding-top-4 govuk-!-padding-bottom-9">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-xl govuk-!-margin-bottom-4">Content modules</h1>
+            <p class="govuk-body-l">All published content modules from the CMS, sorted alphabetically by title.</p>
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <p class="govuk-body govuk-!-margin-top-6">No content modules were returned.</p>
+    }
+    else
+    {
+        <p class="govuk-body govuk-!-margin-top-4"><strong>@Model.Count</strong> module@(Model.Count == 1 ? "" : "s")</p>
+        <ol class="govuk-list govuk-list--number govuk-!-margin-top-4">
+            @foreach (var m in Model)
+            {
+                <li class="govuk-!-margin-bottom-3">
+                    <strong class="govuk-body">@m.Title</strong>
+                    @if (!string.IsNullOrWhiteSpace(m.EntryType))
+                    {
+                        <span class="govuk-hint govuk-!-display-block govuk-!-margin-top-1 govuk-!-margin-bottom-0">@m.EntryType</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(m.Slug))
+                    {
+                        <code class="govuk-body-s govuk-!-display-block govuk-!-margin-top-1">@m.Slug</code>
+                    }
+                </li>
+            }
+        </ol>
+    }
+</div>

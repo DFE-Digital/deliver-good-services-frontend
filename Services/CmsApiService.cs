@@ -350,12 +350,12 @@ namespace ServiceManual.Services
                           "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage&fields[10]=customJS&fields[11]=customCSS&fields[12]=overrideOverviewTitle&fields[13]=showGuidePagesOnRight" +
                           "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug&populate[detailed_guide_pages][fields][2]=metaDescription" +
                           "&populate[detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
-                          "&populate[detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide_pages][populate][applicableProfessions][fields][1]=slug" +
+                          "&populate[detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide_pages][populate][applicableProfessions][fields][1]=slug&populate[detailed_guide_pages][populate][applicableProfessions][fields][2]=plural" +
                           "&populate[collection][fields][0]=title&populate[collection][fields][1]=slug" +
                           "&populate[contentOwner][fields][0]=title&populate[contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
                           "&populate[applicablePhases][fields][0]=title&populate[applicablePhases][fields][1]=slug" +
-                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug" +
+                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug&populate[applicableProfessions][fields][2]=plural" +
                           "&populate[relatedFiles]=true";
 
                 var response = await _httpClient.GetAsync(url);
@@ -400,8 +400,8 @@ namespace ServiceManual.Services
                                 .Select(ph => new TagRef { Slug = ph.Slug ?? "", Title = ph.Title ?? "" })
                                 .ToList() ?? [],
                             Professions = p.ApplicableProfessions?
-                                .Where(pr => !string.IsNullOrWhiteSpace(pr.Slug) || !string.IsNullOrWhiteSpace(pr.Title))
-                                .Select(pr => new TagRef { Slug = pr.Slug ?? "", Title = pr.Title ?? "" })
+                                .Where(pr => !string.IsNullOrWhiteSpace(pr.Slug) || !string.IsNullOrWhiteSpace(pr.Plural) || !string.IsNullOrWhiteSpace(pr.Title))
+                                .Select(pr => new TagRef { Slug = pr.Slug ?? "", Title = (pr.Plural ?? pr.Title ?? "").Trim() })
                                 .ToList() ?? [],
                         })
                         .ToList() ?? [],
@@ -420,12 +420,12 @@ namespace ServiceManual.Services
                         .ToList() ?? [],
                     ShowApplicableProfessionsOnPage = item.ShowApplicableProfessionsOnPage ?? false,
                     Audience = item.ApplicableProfessions?
-                        .Where(p => !string.IsNullOrWhiteSpace(p.Title))
-                        .Select(p => p.Title!.Trim())
+                        .Select(p => (p.Plural ?? p.Title ?? "").Trim())
+                        .Where(p => !string.IsNullOrWhiteSpace(p))
                         .ToList() ?? [],
                     AudienceTags = item.ApplicableProfessions?
-                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
-                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Plural) || !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = (p.Plural ?? p.Title ?? "").Trim() })
                         .ToList() ?? [],
                     RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
                     CustomCSS = item.CustomCss,
@@ -446,7 +446,7 @@ namespace ServiceManual.Services
                 var url = $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
                           "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav&fields[8]=showLastReviewedDateOnPage&fields[9]=lastReviewedDate" +
                           "&populate[applicablePhases][fields][0]=title&populate[applicablePhases][fields][1]=slug" +
-                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug" +
+                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug&populate[applicableProfessions][fields][2]=plural" +
                           "&populate[Section][fields][0]=title&populate[Section][fields][1]=group&populate[Section][fields][2]=body" +
                           "&populate[Section][populate][contentModules][fields][0]=title&populate[Section][populate][contentModules][fields][1]=slug&populate[Section][populate][contentModules][fields][2]=summary&populate[Section][populate][contentModules][fields][3]=body&populate[Section][populate][contentModules][fields][4]=entryType&populate[Section][populate][contentModules][fields][5]=strength&populate[Section][populate][contentModules][fields][6]=priority&populate[Section][populate][contentModules][fields][7]=legalRequirement&populate[Section][populate][contentModules][fields][8]=notes" +
                           "&populate[Section][populate][contentModules][populate][phases][fields][0]=title&populate[Section][populate][contentModules][populate][phases][fields][1]=slug" +
@@ -457,11 +457,11 @@ namespace ServiceManual.Services
                           "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage&populate[detailed_guide][fields][6]=showOwnerOnPage&populate[detailed_guide][fields][7]=showApplicablePhasesOnPage&populate[detailed_guide][fields][8]=showApplicableProfessionsOnPage&populate[detailed_guide][fields][9]=customJS&populate[detailed_guide][fields][10]=customCSS&populate[detailed_guide][fields][11]=overrideOverviewTitle&populate[detailed_guide][fields][12]=showGuidePagesOnRight" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug&populate[detailed_guide][populate][detailed_guide_pages][fields][2]=metaDescription" +
                           "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
-                          "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][1]=slug" +
+                          "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][1]=slug&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][2]=plural" +
                           "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
                           "&populate[detailed_guide][populate][contentOwner][fields][0]=title&populate[detailed_guide][populate][contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
                           "&populate[detailed_guide][populate][applicablePhases][fields][0]=title&populate[detailed_guide][populate][applicablePhases][fields][1]=slug" +
-                          "&populate[detailed_guide][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][applicableProfessions][fields][1]=slug" +
+                          "&populate[detailed_guide][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][applicableProfessions][fields][1]=slug&populate[detailed_guide][populate][applicableProfessions][fields][2]=plural" +
                           "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
                           "&populate[relatedFiles]=true";
 
@@ -514,8 +514,8 @@ namespace ServiceManual.Services
                                 .Select(ph => new TagRef { Slug = ph.Slug ?? "", Title = ph.Title ?? "" })
                                 .ToList() ?? [],
                             Professions = p.ApplicableProfessions?
-                                .Where(pr => !string.IsNullOrWhiteSpace(pr.Slug) || !string.IsNullOrWhiteSpace(pr.Title))
-                                .Select(pr => new TagRef { Slug = pr.Slug ?? "", Title = pr.Title ?? "" })
+                                .Where(pr => !string.IsNullOrWhiteSpace(pr.Slug) || !string.IsNullOrWhiteSpace(pr.Plural) || !string.IsNullOrWhiteSpace(pr.Title))
+                                .Select(pr => new TagRef { Slug = pr.Slug ?? "", Title = (pr.Plural ?? pr.Title ?? "").Trim() })
                                 .ToList() ?? [],
                         })
                         .ToList() ?? [],
@@ -538,8 +538,8 @@ namespace ServiceManual.Services
                         .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
                         .ToList() ?? [],
                     Professions = item.ApplicableProfessions?
-                        .Where(p => !string.IsNullOrWhiteSpace(p.Title))
-                        .Select(p => p.Title!.Trim())
+                        .Select(p => (p.Plural ?? p.Title ?? "").Trim())
+                        .Where(p => !string.IsNullOrWhiteSpace(p))
                         .ToList() ?? [],
                     ShowLastReviewedDateOnPage = item.ShowLastReviewedDateOnPage ?? false,
                     LastReviewedDateDisplay = FormatDateTime(item.LastReviewedDate),
@@ -553,8 +553,8 @@ namespace ServiceManual.Services
                         .ToList() ?? [],
                     ShowApplicableProfessionsOnPage = item.Detailed_Guide?.ShowApplicableProfessionsOnPage ?? false,
                     AudienceTags = item.Detailed_Guide?.ApplicableProfessions?
-                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
-                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
+                        .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Plural) || !string.IsNullOrWhiteSpace(p.Title))
+                        .Select(p => new TagRef { Slug = p.Slug ?? "", Title = (p.Plural ?? p.Title ?? "").Trim() })
                         .ToList() ?? [],
                     RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
                     CustomCSS = item.Detailed_Guide?.CustomCss,
@@ -1382,34 +1382,61 @@ namespace ServiceManual.Services
                 var json = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiContentEntryListItem>>(json, JsonOptions);
 
-                return result?.Data?
-                    .Select(item => new ContentEntry
-                    {
-                        Title = item.Title ?? string.Empty,
-                        Slug = item.Slug ?? string.Empty,
-                        Summary = item.Summary,
-                        Body = item.Body,
-                        EntryType = item.EntryType,
-                        Strength = item.Strength,
-                        Priority = item.Priority,
-                        LegalRequirement = item.LegalRequirement ?? false,
-                        Notes = item.Notes,
-                        Phases = item.Phases?
-                            .Where(p => !string.IsNullOrWhiteSpace(p.Slug) || !string.IsNullOrWhiteSpace(p.Title))
-                            .Select(p => new TagRef { Slug = p.Slug ?? string.Empty, Title = p.Title ?? string.Empty })
-                            .ToList() ?? [],
-                        Roles = item.Roles?
-                            .Where(r => !string.IsNullOrWhiteSpace(r.Slug) || !string.IsNullOrWhiteSpace(r.Title))
-                            .Select(r => new TagRef { Slug = r.Slug ?? string.Empty, Title = r.Title ?? string.Empty })
-                            .ToList() ?? []
-                    })
-                    .ToList() ?? [];
+                return result?.Data?.Select(MapContentEntry).ToList() ?? [];
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching content entries");
                 return [];
             }
+        }
+
+        public async Task<List<ContentEntry>> GetAllContentModulesAlphabeticalAsync()
+        {
+            const int pageSize = 100;
+            const string fields =
+                "fields[0]=title&fields[1]=slug&fields[2]=summary&fields[3]=body&fields[4]=entryType&fields[5]=strength&fields[6]=priority&fields[7]=legalRequirement&fields[8]=notes" +
+                "&populate[phases][fields][0]=title&populate[phases][fields][1]=slug" +
+                "&populate[roles][fields][0]=title&populate[roles][fields][1]=slug";
+
+            var all = new List<ContentEntry>();
+            try
+            {
+                for (var page = 1; ; page++)
+                {
+                    var url = "api/content-entries?publicationState=live" +
+                              "&pagination[pageSize]=" + pageSize +
+                              "&pagination[page]=" + page +
+                              "&" + fields;
+
+                    var response = await _httpClient.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        _logger.LogWarning("CMS API returned {StatusCode} for content-entries page {Page}", response.StatusCode, page);
+                        break;
+                    }
+
+                    var json = await response.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiContentEntryListItem>>(json, JsonOptions);
+                    var batch = result?.Data;
+                    if (batch == null || batch.Count == 0)
+                        break;
+
+                    foreach (var item in batch)
+                        all.Add(MapContentEntry(item));
+
+                    if (batch.Count < pageSize)
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching all content modules");
+            }
+
+            return all
+                .OrderBy(e => e.Title, StringComparer.OrdinalIgnoreCase)
+                .ToList();
         }
 
         public async Task<List<ServiceStandardSummary>> GetServiceStandardsAsync()
@@ -2031,7 +2058,7 @@ namespace ServiceManual.Services
             private static StrapiTagRef? ReadOneTagRef(ref Utf8JsonReader reader, JsonSerializerOptions options)
             {
                 if (reader.TokenType != JsonTokenType.StartObject) return null;
-                string? slug = null, title = null;
+                string? slug = null, title = null, plural = null;
                 while (reader.Read())
                 {
                     if (reader.TokenType == JsonTokenType.EndObject) break;
@@ -2050,15 +2077,19 @@ namespace ServiceManual.Services
                                     reader.Read();
                                     if (n == "slug") slug = reader.GetString();
                                     else if (n == "title") title = reader.GetString();
+                                    else if (n == "plural") plural = reader.GetString();
                                 }
                             }
                         }
                         else if (name == "slug") slug = reader.GetString();
                         else if (name == "title") title = reader.GetString();
+                        else if (name == "plural") plural = reader.GetString();
                         else reader.Skip();
                     }
                 }
-                return (slug != null || title != null) ? new StrapiTagRef { Slug = slug ?? "", Title = title ?? "" } : null;
+                return (slug != null || title != null || plural != null)
+                    ? new StrapiTagRef { Slug = slug ?? "", Title = title ?? "", Plural = plural }
+                    : null;
             }
 
             public override void Write(Utf8JsonWriter writer, List<StrapiTagRef>? value, JsonSerializerOptions options) =>
@@ -2538,9 +2569,8 @@ namespace ServiceManual.Services
             [JsonConverter(typeof(StrapiContentOwnerRefConverter))]
             [JsonPropertyName("contentOwner")]
             public StrapiContentOwnerRef? ContentOwner { get; set; }
-            [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicableProfessions")]
-            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
+            public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
             [JsonPropertyName("collection_sections")]
             public List<StrapiCollectionSection>? Collection_Sections { get; set; }
             [JsonPropertyName("relatedContent")]
@@ -2680,9 +2710,8 @@ namespace ServiceManual.Services
             [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicablePhases")]
             public List<StrapiTagRef>? ApplicablePhases { get; set; }
-            [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicableProfessions")]
-            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
+            public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
             [JsonPropertyName("showLastReviewedDateOnPage")]
             public bool? ShowLastReviewedDateOnPage { get; set; }
             [JsonPropertyName("lastReviewedDate")]
@@ -2706,6 +2735,8 @@ namespace ServiceManual.Services
         {
             public string? Title { get; set; }
             public string? Slug { get; set; }
+            [JsonPropertyName("plural")]
+            public string? Plural { get; set; }
         }
 
         private class StrapiDetailedGuidePage
@@ -2760,9 +2791,8 @@ namespace ServiceManual.Services
             [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicablePhases")]
             public List<StrapiTagRef>? ApplicablePhases { get; set; }
-            [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicableProfessions")]
-            public List<StrapiTagRef>? ApplicableProfessions { get; set; }
+            public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
         }
 
         private class StrapiCollectionRef
@@ -2887,6 +2917,8 @@ namespace ServiceManual.Services
         {
             public string? Slug { get; set; }
             public string? Title { get; set; }
+            [JsonPropertyName("plural")]
+            public string? Plural { get; set; }
         }
 
         /// <summary>Converter for contentOwner relation: { data: { attributes: { title, informationPage: { data: { attributes: { urlToRedirectTo } } } } } }.</summary>
@@ -2946,9 +2978,19 @@ namespace ServiceManual.Services
                     {
                         if (data.ValueKind == JsonValueKind.Null || data.ValueKind == JsonValueKind.Undefined) return null;
                         var attrs = data.TryGetProperty("attributes", out var a) ? a : data;
-                        return new StrapiTagRef { Slug = attrs.TryGetProperty("slug", out var slugEl) ? slugEl.GetString() : null, Title = attrs.TryGetProperty("title", out var titleEl) ? titleEl.GetString() : null };
+                        return new StrapiTagRef
+                        {
+                            Slug = attrs.TryGetProperty("slug", out var slugEl) ? slugEl.GetString() : null,
+                            Title = attrs.TryGetProperty("title", out var titleEl) ? titleEl.GetString() : null,
+                            Plural = attrs.TryGetProperty("plural", out var pluralEl) ? pluralEl.GetString() : null
+                        };
                     }
-                    return new StrapiTagRef { Slug = root.TryGetProperty("slug", out var slugEl2) ? slugEl2.GetString() : null, Title = root.TryGetProperty("title", out var titleEl2) ? titleEl2.GetString() : null };
+                    return new StrapiTagRef
+                    {
+                        Slug = root.TryGetProperty("slug", out var slugEl2) ? slugEl2.GetString() : null,
+                        Title = root.TryGetProperty("title", out var titleEl2) ? titleEl2.GetString() : null,
+                        Plural = root.TryGetProperty("plural", out var pluralEl2) ? pluralEl2.GetString() : null
+                    };
                 }
                 return null;
             }
