@@ -6522,23 +6522,6 @@ ul > li:last-child {
 }
 
 
-/** Badge - Shared Across All Hero Types **/
-.guide-modern .page-hero .pg-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.9px;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  margin-bottom: 15px;
-  border-radius: 2px;
-  background: #00ffe0;
-  border: 1px solid #1964a5;
-  color: #1964a5;
-}
-
 /** Title - Shared Base Styles **/
 .guide-modern .page-hero__h1 {
   font-weight: 700;
@@ -6547,8 +6530,8 @@ ul > li:last-child {
   margin-bottom: 12px;
 }
 
-.guide-modern .page-hero .pg-badge ~ .page-hero__h1 {
-  margin-top: 0;
+.guide-modern .page-hero--collection .govuk-caption-l {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /** Intro Text - Shared Base Styles **/
@@ -8157,7 +8140,7 @@ h6 {
   }
 }
 
-.govuk-grid-column-one-third > .library-btn {
+.govuk-grid-column-one-quarter > .library-btn {
   margin-top: 0;
   margin-bottom: 12px;
   width: 100%;
@@ -8332,7 +8315,7 @@ i[class*=" fa-"] {
 }
 
 @media (max-width: 48.0525em) {
-  .govuk-grid-column-one-third > .library-btn {
+  .govuk-grid-column-one-quarter > .library-btn {
     width: auto;
     justify-content: flex-start;
   }
@@ -8893,4 +8876,26 @@ i[class*=" fa-"] {
   left: -4px;
   margin-top: -5px;
   position: absolute
+}
+
+/* Tools hub (/tools) */
+.guide-modern.tools-index .tools-index__content {
+  padding-top: 2rem;
+  background: #f3f2f1;
+  border-top: 1px solid #b1b4b6;
+}
+
+.guide-modern.tools-index .tools-index__list-heading {
+  margin-top: 0;
+}
+
+.guide-modern.tools-index .tools-index__list-lede {
+  color: #505a5f;
+  margin-top: -0.25rem;
+  margin-bottom: 1.5rem;
+  max-width: 55ch;
+}
+
+.guide-modern.tools-index .tools-index__body {
+  max-width: 55ch;
 }

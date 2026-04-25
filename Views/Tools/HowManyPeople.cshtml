@@ -14,6 +14,7 @@
     ViewBag.HeroSectionTitle = "Tools";
     ViewBag.HeroSectionUrl = "/tools";
     ViewBag.UseInverseNav = true;
+    ViewBag.HeroSuppressBottomMargin = true;
 
     var dataJson = pageModel.Data?.GetRawText() ?? "{}";
     var disclaimerMarkdown = pageModel.DataDisclaimer ?? string.Empty;

@@ -5,9 +5,9 @@
 
     var activeParent = navItems.FirstOrDefault(item =>
     {
-        var isActive = item.Url is not null && (currentPath == item.Url || currentPath.StartsWith(item.Url + "/", StringComparison.OrdinalIgnoreCase));
+        var isActive = ServiceNavigationActiveHelper.IsServiceNavItemActive(item.Url, currentPath);
         var hasActiveChild = item.Children.Any(c =>
-            c.Url is not null && (currentPath == c.Url || currentPath.StartsWith(c.Url + "/", StringComparison.OrdinalIgnoreCase)));
+            ServiceNavigationActiveHelper.IsServiceNavItemActive(c.Url, currentPath));
         return item.Children.Any() && (isActive || hasActiveChild);
     });
 }
@@ -19,10 +19,7 @@
             <ul class="dfe-secondary-nav__list">
                 @foreach (var child in activeParent.Children)
                 {
-                    var childUrlTrimmed = child.Url?.TrimEnd('/') ?? "";
-                    var isChildActive = child.Url is not null && (
-                        string.Equals(currentPath.TrimEnd('/'), childUrlTrimmed, StringComparison.OrdinalIgnoreCase) ||
-                        currentPath.StartsWith(child.Url + "/", StringComparison.OrdinalIgnoreCase));
+                    var isChildActive = ServiceNavigationActiveHelper.IsServiceNavItemActive(child.Url, currentPath);
 
                     <li class="dfe-secondary-nav__item @(isChildActive ? "dfe-secondary-nav__item--active" : "")">
                         @if (child.Url is not null)

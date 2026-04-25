@@ -31,30 +31,64 @@
         || !string.IsNullOrWhiteSpace(articleAuthor);
     var collectionSlug = ViewBag.HeroCollectionSlug as string ?? "";
     var collectionTitle = ViewBag.HeroCollectionTitle as string ?? "";
-    var breadcrumbItems = ViewBag.HeroBreadcrumbItems as List<(string Title, string Url)> ?? new List<(string, string)>();
+    List<(string Title, string? Url)> breadcrumbItems;
+    var rawBreadcrumbs = ViewBag.HeroBreadcrumbItems;
+    if (rawBreadcrumbs is List<(string Title, string? Url)> nb)
+    {
+        breadcrumbItems = nb;
+    }
+    else if (rawBreadcrumbs is List<(string Title, string Url)> ob)
+    {
+        breadcrumbItems = ob.Select(x => (x.Title, string.IsNullOrEmpty(x.Url) ? (string?)null : x.Url)).ToList();
+    }
+    else
+    {
+        breadcrumbItems = new List<(string, string?)>();
+    }
     var hideBadge = (bool?)ViewBag.HideBadge ?? false;
     var useInverseNav = (bool?)ViewBag.UseInverseNav ?? false;
     var heroSectionTitle = ViewBag.HeroSectionTitle as string ?? "Guidance";
     var heroSectionUrl = ViewBag.HeroSectionUrl as string ?? "/guidance";
+    var heroBreadcrumbCurrent = ViewBag.HeroBreadcrumbCurrent as string ?? "";
     var heroHeadingCaption = ViewBag.HeroHeadingCaption as string ?? "";
     var hideAudienceChips = (bool?)ViewBag.HeroHideAudienceChips ?? false;
+    var heroSuppressBottomMargin = (bool?)ViewBag.HeroSuppressBottomMargin ?? false;
     var heroClass = heroType == "collection" ? "page-hero--collection" : "page-hero--guidance";
     var heroMetaClass = useInverseNav ? "page-hero__meta page-hero__meta--inverse" : "page-hero__meta";
     var chipColors = new[] { "#5439F9", "#15B187", "#CA357C" };
+    var h1Colour = heroType == "collection" ? "#ffffff" : "#0b0c0c";
 }
 
-<section class="page-hero @heroClass" aria-label="@title">
+<section class="page-hero @heroClass @(heroSuppressBottomMargin ? "govuk-!-margin-bottom-0" : "govuk-!-margin-bottom-6") govuk-!-padding-bottom-5" aria-label="@title">
     <div class="govuk-width-container">
         <div class="govuk-grid-row">
-            <div class="govuk-grid-column-two-thirds">
-                <div class="page-hero__inner">
+            <div class="govuk-grid-column-one-quarter" aria-hidden="true"></div>
+            <div class="govuk-grid-column-three-quarters">
                     @* Breadcrumbs *@
                     <nav class="govuk-breadcrumbs govuk-breadcrumbs--inverse" aria-label="Breadcrumb">
                         <ol class="govuk-breadcrumbs__list">
-                            @if (heroType == "collection")
+                            @if (breadcrumbItems.Count > 0)
+                            {
+                                @foreach (var item in breadcrumbItems)
+                                {
+                                    @if (!string.IsNullOrEmpty(item.Url))
+                                    {
+                                        <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@item.Url">@item.Title</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li class="govuk-breadcrumbs__list-item" aria-current="page">@item.Title</li>
+                                    }
+                                }
+                            }
+                            else if (heroType == "collection")
                             {
                                 <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
                                 <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@heroSectionUrl">@heroSectionTitle</a></li>
+                                @if (!string.IsNullOrEmpty(heroBreadcrumbCurrent))
+                                {
+                                    <li class="govuk-breadcrumbs__list-item" aria-current="page">@heroBreadcrumbCurrent</li>
+                                }
                             }
                             else if (heroType == "guidance")
                             {
@@ -65,20 +99,6 @@
                                     <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance/collections/@collectionSlug">@collectionTitle</a></li>
                                 }
                             }
-                            else if (breadcrumbItems.Count > 0)
-                            {
-                                @foreach (var item in breadcrumbItems)
-                                {
-                                    @if (item.Url != null)
-                                    {
-                                        <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@item.Url">@item.Title</a></li>
-                                    }
-                                    else
-                                    {
-                                        <li class="govuk-breadcrumbs__list-item" aria-current="page">@item.Title</li>
-                                    }
-                                }
-                            }
                             else
                             {
                                 <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
@@ -86,25 +106,19 @@
                         </ol>
                     </nav>
 
-                    @* Badge (not shown on guidance hero skin — page-hero--guidance) *@
+                    @* Caption above title (not shown on guidance hero skin — page-hero--guidance) *@
                     @if (!hideBadge && heroType != "guidance")
                     {
-                    <div class="pg-badge">
-                        @if (heroType == "collection")
-                        {
-                            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="1" y="1" width="4" height="4" fill="currentColor"></rect><rect x="7" y="1" width="4" height="4" fill="currentColor"></rect><rect x="1" y="7" width="4" height="4" fill="currentColor"></rect><rect x="7" y="7" width="4" height="4" fill="currentColor"></rect></svg>
-                        }
-                        @badgeText
-                    </div>
+                        <span class="govuk-caption-l govuk-!-margin-top-5 govuk-!-display-block">@System.Net.WebUtility.HtmlEncode(badgeText)</span>
                     }
 
                     @if (!string.IsNullOrWhiteSpace(heroHeadingCaption))
                     {
-                        <p class="page-hero__caption govuk-!-margin-bottom-1">@System.Net.WebUtility.HtmlEncode(heroHeadingCaption)</p>
+                        <span class="govuk-caption-l govuk-!-margin-top-5 govuk-!-display-block">@System.Net.WebUtility.HtmlEncode(heroHeadingCaption)</span>
                     }
 
                     @* Title *@
-                    <h1 class="page-hero__h1">@title</h1>
+                    <h1 class="govuk-heading-l" style="color: @h1Colour;">@title</h1>
 
                     @* Intro/Description *@
                     @if (!string.IsNullOrEmpty(intro))
@@ -202,7 +216,7 @@
                             }
                         </div>
                     }
-                </div>
+                
             </div>
         </div>
     </div>

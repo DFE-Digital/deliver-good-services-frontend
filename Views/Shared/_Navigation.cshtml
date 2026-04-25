@@ -4,6 +4,8 @@
         .Where(item => !string.Equals(item.Url, "/content", StringComparison.OrdinalIgnoreCase))
         .ToList();
     var currentPath = Context.Request.Path.Value ?? string.Empty;
+    bool NavItemActive(NavigationItem item) =>
+        ServiceNavigationActiveHelper.IsServiceNavItemActive(item.Url, currentPath);
 }
 
 @if (navItems.Any())
@@ -15,9 +17,8 @@
         <ul class="govuk-service-navigation__list" id="navigation">
             @foreach (var item in navItems)
             {
-                var isActive = item.Url is not null && (currentPath == item.Url || currentPath.StartsWith(item.Url + "/", StringComparison.OrdinalIgnoreCase));
-                var isParentActive = isActive || item.Children.Any(c =>
-                    c.Url is not null && (currentPath == c.Url || currentPath.StartsWith(c.Url + "/", StringComparison.OrdinalIgnoreCase)));
+                var isActive = NavItemActive(item);
+                var isParentActive = isActive || item.Children.Any(NavItemActive);
 
                 <li class="govuk-service-navigation__item @(isParentActive ? "govuk-service-navigation__item--active" : "")">
                     @if (item.Url is not null)

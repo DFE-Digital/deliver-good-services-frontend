@@ -1,6 +1,5 @@
 @*
-  Lifecycle hub – What to do when. All sections from CMS.
-  CMS: lifecycle, lifecycle-stage, stage-task-placement, task, track, role, output.
+  Lifecycle hub – What to do when. Stages and tasks from CMS; framing content aligned to service manual patterns (see Documentation/dfe-what-to-do-when.html).
 *@
 @using ServiceManual.Helpers
 @using ServiceManual.Models
@@ -20,33 +19,127 @@
     {
         ["explore"] = "#4338CA", ["discovery"] = "#1D70B8", ["alpha"] = "#BE185D", ["beta"] = "#C2410C", ["live"] = "#15803D"
     };
-    var heroTitle = fromCms && !string.IsNullOrEmpty(lifecycle!.Title) ? lifecycle.Title : "What to do when";
-    var heroIntro = fromCms && !string.IsNullOrEmpty(lifecycle!.Summary) ? lifecycle.Summary : "Stages and tasks for delivery. Filter by phase, track (Design, Build, Run) or role. Click a task to see what to do, why it matters and how to do it.";
+    const string hubBreadcrumbName = "What to do when";
+    var displayTitle = fromCms && !string.IsNullOrEmpty(lifecycle!.Title) ? lifecycle!.Title : hubBreadcrumbName;
+    var defaultHubIntro = "What to do, when to do it, why it matters and how to approach it — across every delivery phase and practice track. Use the task list to filter by phase, track (Design, Build, Run) or DDaT profession role. The sections below explain how phases, tracks and types of work fit together, including GOV.UK, campaigns and governance.";
+    var hubIntro = fromCms && !string.IsNullOrEmpty(lifecycle!.Summary) ? lifecycle!.Summary! : defaultHubIntro;
+
+    ViewBag.HeroType = "collection";
+    ViewBag.HeroTitle = displayTitle;
+    ViewBag.HeroIntro = hubIntro;
+    ViewBag.HeroBadgeText = "Delivery practice";
+    ViewBag.HeroSectionTitle = "Guidance";
+    ViewBag.HeroSectionUrl = "/guidance";
+    ViewBag.HeroBreadcrumbCurrent = hubBreadcrumbName;
+    ViewBag.UseInverseNav = true;
+    ViewBag.HideBadge = false;
 }
 
 @section Styles {
   <link rel="stylesheet" href="~/css/lifecycle-hub.css" asp-append-version="true" />
 }
 
-@section Masthead {
-  <header class="homepage-hero">
-    <div class="govuk-width-container">
-      <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
-        <ol class="govuk-breadcrumbs__list">
-          <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-          <li class="govuk-breadcrumbs__list-item" aria-current="page">@heroTitle</li>
-        </ol>
-      </nav>
-      <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-          <span class="guide-hero__label">Lifecycle</span>
-          <h1 class="govuk-heading-xl">@heroTitle</h1>
-          <p class="govuk-body-l homepage-hero__intro">@heroIntro</p>
+<div class="guide-modern lifecycle-wtw">
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
+
+    <div class="lifecycle-wtw__body govuk-!-padding-top-4 govuk-!-padding-bottom-4">
+        <div class="govuk-grid-row">
+            <div class="govuk-grid-column-one-quarter" aria-hidden="true"></div>
+            <div class="govuk-grid-column-three-quarters">
+                <p class="govuk-body-s govuk-!-margin-top-0 govuk-!-margin-bottom-6 lifecycle-wtw__meta">
+                    <span class="lifecycle-wtw__meta-item"><span class="govuk-!-font-weight-bold">Owner</span> Delivery &amp; design practice</span>
+                    <span class="lifecycle-wtw__meta-item" aria-hidden="true">·</span>
+                    <span class="lifecycle-wtw__meta-item"><span class="govuk-!-font-weight-bold">Audience</span> All DDaT professions</span>
+                </p>
+
+                <h2 class="govuk-heading-m govuk-!-margin-top-0" id="lch-how-this-works">How to use this page</h2>
+                <p class="govuk-body-l">
+                    Each task describes <strong>what</strong> to do, <strong>why it matters</strong> and <strong>how</strong> to approach it. Activities are organised by <strong>delivery phase</strong> and labelled with a <strong>track</strong> (Design, Build, Run) and <strong>roles</strong> so you can see what applies to transactional services, content, data, campaigns and information work.
+                </p>
+
+                <h2 class="govuk-heading-m govuk-!-margin-top-6" id="lch-delivery-phases">Delivery phases (at a glance)</h2>
+                <p class="govuk-body">Phases are not a rigid contract — they help teams sequence work. Compare this overview to the <a class="govuk-link" href="#content">task list below</a> (from the live model in the CMS) for the detail that applies in your team.</p>
+                <ul class="lifecycle-wtw__phase-list" role="list">
+                    <li class="lifecycle-wtw__phase-card" style="--phase:#4338CA">
+                        <h3 class="govuk-heading-s">Explore</h3>
+                        <p class="govuk-body-s">Validate that a problem is real and worth solving before committing to a full Discovery.</p>
+                        <p class="govuk-body-s govuk-!-margin-bottom-0"><span class="govuk-!-font-weight-bold">Typical scale:</span> 2–4 weeks · 1–3 people</p>
+                    </li>
+                    <li class="lifecycle-wtw__phase-card" style="--phase:#1D70B8">
+                        <h3 class="govuk-heading-s">Discovery</h3>
+                        <p class="govuk-body-s">Understand users and their needs. Identify constraints, map the landscape, decide whether and how a service should be built.</p>
+                        <p class="govuk-body-s govuk-!-margin-bottom-0"><span class="govuk-!-font-weight-bold">Typical scale:</span> 8–12 weeks · 4–6 people</p>
+                    </li>
+                    <li class="lifecycle-wtw__phase-card" style="--phase:#BE185D">
+                        <h3 class="govuk-heading-s">Alpha</h3>
+                        <p class="govuk-body-s">Test the riskiest assumptions with prototypes. Explore design approaches. Design and Build tracks often run in parallel.</p>
+                        <p class="govuk-body-s govuk-!-margin-bottom-0"><span class="govuk-!-font-weight-bold">Typical scale:</span> 8–12 weeks · 5–8 people</p>
+                    </li>
+                    <li class="lifecycle-wtw__phase-card" style="--phase:#C2410C">
+                        <h3 class="govuk-heading-s">Beta</h3>
+                        <p class="govuk-body-s">Build and test a working service with real users. All three practice tracks (Design, Build, Run) are in play.</p>
+                        <p class="govuk-body-s govuk-!-margin-bottom-0"><span class="govuk-!-font-weight-bold">Typical scale:</span> private 12–24 weeks then ongoing (public beta) · 8–12 people</p>
+                    </li>
+                    <li class="lifecycle-wtw__phase-card" style="--phase:#15803D">
+                        <h3 class="govuk-heading-s">Live</h3>
+                        <p class="govuk-body-s">Service in production for all users. Run leads operations; design continues to iterate. Major change may return to Alpha.</p>
+                        <p class="govuk-body-s govuk-!-margin-bottom-0"><span class="govuk-!-font-weight-bold">Typical scale:</span> ongoing · sustained team</p>
+                    </li>
+                </ul>
+
+                <h2 class="govuk-heading-m govuk-!-margin-top-6" id="lch-tracks">Practice tracks (Design, Build, Run)</h2>
+                <p class="govuk-body">Tracks describe the kind of practice work, not a separate org chart. Most teams touch more than one track; filters help you see what is design-led, build-led or run-led.</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li><span class="govuk-!-font-weight-bold" style="color:#9333EA">Design</span> — user research, service and interaction design, content design, and design decisions that de-risk the service.</li>
+                    <li><span class="govuk-!-font-weight-bold" style="color:#EA580C">Build</span> — technical design, software and infrastructure delivery, data pipelines, and quality practices (including accessibility in code).</li>
+                    <li><span class="govuk-!-font-weight-bold" style="color:#16A34A">Run</span> — live operations, service support, performance, incident and continuity, and continuous improvement in production.</li>
+                </ul>
+
+                <h2 class="govuk-heading-m govuk-!-margin-top-6" id="lch-product-types-heading">Types of work and channels</h2>
+                <p class="govuk-body">The same phase model applies across product types, but the right channel, standard and approval route differ. Use this table to align your work before you deep-dive the task list.</p>
+                <dl class="lifecycle-wtw__def-grid">
+                    <div>
+                        <dt>Transactional services</dt>
+                        <dd>User journeys with transactions, accounts, notifications or case-working. Meet the <span class="govuk-!-font-weight-bold">Service Standard</span>, accessibility regulations and the design, build and run work that matches your risk and scale. Assessment and service ownership expectations apply in Beta and Live.</dd>
+                    </div>
+                    <div>
+                        <dt>GOV.UK content</dt>
+                        <dd>Publishing and iterating factual guidance and information on GOV.UK. Follow GOV.UK design, content and SEO patterns. If you need to step outside the usual <span class="govuk-!-font-weight-bold">GOV.UK proposition</span> (for example a non-standard user need or format), you must get agreement through governance — do not “route around” the model.</dd>
+                    </div>
+                    <div>
+                        <dt>Data services</dt>
+                        <dd>Data products, APIs, reporting layers and data platforms. Plan for data ethics, information governance, quality, security, retention and how the service is operated and supported in the run phase, including for other teams who consume the data.</dd>
+                    </div>
+                    <div>
+                        <dt>Campaign sites</dt>
+                        <dd>Time-bound digital campaigns and supporting experiences. Use <span class="govuk-!-font-weight-bold">Government Communication Service (GCS)</span> and campaign design requirements (for example Design&nbsp;101). Campaigns are for a defined period and purpose — <span class="govuk-!-font-weight-bold">not</span> a long-term substitute for information that should be published on GOV.UK or provided through a properly governed information service.</dd>
+                    </div>
+                    <div>
+                        <dt>Information services</dt>
+                        <dd>Durable information and guidance (often spanning channels). <span class="govuk-!-font-weight-bold">Information services require approval from the Design and Run board</span> before you lock in a delivery route. Use GOV.UK when it is the appropriate place to publish. Use campaign routes only for genuine time-bound campaign need — not to bypass information service design, board decisions or proper GOV.UK publishing.</dd>
+                    </div>
+                </dl>
+
+                <div class="govuk-warning-text govuk-!-margin-top-4">
+                    <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+                    <strong class="govuk-warning-text__text">
+                        <span class="govuk-warning-text__assistive govuk-visually-hidden">Warning</span>
+                        Proposition and board decisions must not be bypassed — including by keeping content on a campaign site to avoid an information service or GOV.UK route.
+                    </strong>
+                </div>
+
+                <h3 class="govuk-heading-s govuk-!-margin-top-4" id="lch-governance">Governance, GOV.UK and GCS</h3>
+                <div class="govuk-inset-text govuk-!-margin-bottom-0">
+                    <ul class="govuk-list govuk-list--bullet">
+                        <li>Information services need <span class="govuk-!-font-weight-bold">Design and Run board</span> approval so funding, user need, channel and run capability are clear.</li>
+                        <li>Publish to <span class="govuk-!-font-weight-bold">GOV.UK</span> using the content and design standards that apply to your organisation and domain.</li>
+                        <li><span class="govuk-!-font-weight-bold">Campaigns</span> go through <span class="govuk-!-font-weight-bold">GCS</span> and the relevant campaign design process; they are time-bound, not a permanent information channel.</li>
+                        <li><span class="govuk-!-font-weight-bold">Exceptions to the GOV.UK proposition</span> (including format, ownership or long-lived content) go through the <span class="govuk-!-font-weight-bold">Design and Run board</span> so exceptions are visible and do not become the default way work gets done.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </header>
-}
 
 @if (fromCms)
 {
@@ -99,7 +192,7 @@
   </div>
 
   <div class="dfe-f-lch-wrap">
-    <p class="dfe-f-lch-intro">Filter by <strong>phase</strong>, <strong>track</strong> (Design, Build, Run) or <strong>role</strong>. Click a task to expand details, guidance and outputs.</p>
+    <p class="dfe-f-lch-intro">Filter by <strong>phase</strong>, <strong>track</strong> (Design, Build, Run) or <strong>role</strong>. Read <a class="govuk-link" href="#lch-how-this-works">how to use this page</a> and <a class="govuk-link" href="#lch-product-types-heading">types of work</a> above for context, then open a task for what to do, why it matters, and guidance.</p>
     <div id="empty-msg" class="dfe-f-lch-empty">No tasks match your filters. <button type="button" onclick="clearAll()">Clear all filters</button></div>
 
     @foreach (var stage in stages)
@@ -267,17 +360,16 @@
 }
 else
 {
-<div class="govuk-width-container govuk-!-padding-top-6">
   <div class="dfe-f-lifecycle-hub" id="content">
     <div class="dfe-f-lch-wrap">
       <div class="dfe-f-lch-empty-state-msg">
-        <p class="govuk-body" style="margin:0 0 8px"><strong>No lifecycle content yet</strong></p>
+        <p class="govuk-body govuk-!-margin-top-0"><strong>No lifecycle content yet</strong></p>
         <p class="govuk-body govuk-!-margin-bottom-0">Content is managed in the CMS. Create and publish a lifecycle (for example with slug <strong>service-delivery-lifecycle</strong>) and add stages and tasks in the CMS.</p>
       </div>
     </div>
   </div>
-</div>
 }
+</div>
 
 @section Scripts {
 <script>

@@ -7,12 +7,17 @@
 
     ViewBag.HeroType = "collection";
     ViewBag.HeroTitle = title;
-    ViewBag.HeroIntro = page.Description ?? string.Empty;
+    ViewBag.HeroIntro = string.IsNullOrWhiteSpace(page.Description)
+        ? "Self-serve tools and calculators to support accessible, user-centred delivery — from population estimates to other utilities we publish here."
+        : page.Description!;
     ViewBag.HeroBadgeText = "Tools";
     ViewBag.HeroMetaDescription = string.Empty;
-    ViewBag.HeroSectionTitle = "Tools";
-    ViewBag.HeroSectionUrl = "/tools";
     ViewBag.UseInverseNav = true;
+    ViewBag.HeroBreadcrumbItems = new List<(string Title, string? Url)>
+    {
+        ("Home", "/"),
+        (title, null)
+    };
 
     var bodyHtml = string.IsNullOrWhiteSpace(page.Body)
         ? string.Empty
@@ -28,30 +33,44 @@
             tool.OpenInNewTab
         })
         .ToList();
+
+    var cardColumns = cardItems.Count >= 2 ? 2 : 1;
 }
 
 <div class="guide-modern tools-index">
     @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
-    <div class="govuk-width-container govuk-!-margin-top-8 govuk-!-margin-bottom-8">
-        @if (!string.IsNullOrWhiteSpace(bodyHtml))
-        {
-            <div class="dfe-f-body govuk-!-margin-bottom-7">
-                @Html.Raw(bodyHtml)
-            </div>
-        }
+    <div class="tools-index__content govuk-!-margin-bottom-9">
+        <div class="govuk-width-container">
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-two-thirds">
+                    @if (!string.IsNullOrWhiteSpace(bodyHtml))
+                    {
+                        <div class="tools-index__body dfe-f-body govuk-!-margin-bottom-6">
+                            @Html.Raw(bodyHtml)
+                        </div>
+                    }
 
-        @if (cardItems.Count > 0)
-        {
-            @await Html.PartialAsync("~/Views/Shared/_CardList.cshtml", null, new ViewDataDictionary(ViewData)
-            {
-                ["Items"] = cardItems,
-                ["Columns"] = 1
-            })
-        }
-        else
-        {
-            <p class="govuk-body">No tools are available right now.</p>
-        }
+                    @if (cardItems.Count > 0)
+                    {
+                        <h2 class="govuk-heading-m tools-index__list-heading">All tools</h2>
+                        <p class="govuk-body tools-index__list-lede">Choose a tool to open it. Some links open in a new tab when they go to an external system.</p>
+                        @await Html.PartialAsync("~/Views/Shared/_CardList.cshtml", null, new ViewDataDictionary(ViewData)
+                        {
+                            ["Items"] = cardItems,
+                            ["Columns"] = cardColumns
+                        })
+                    }
+                    else
+                    {
+                        <div class="govuk-inset-text">
+                            <h2 class="govuk-heading-m govuk-!-margin-top-0">No tools listed yet</h2>
+                            <p class="govuk-body govuk-!-margin-bottom-2">There are no tools to show from the content source. Check back later, or browse <a class="govuk-link" href="/guidance">guidance</a> in the meantime.</p>
+                            <p class="govuk-body govuk-!-margin-bottom-0">If you edit the tools page in the CMS, publish it to update this list.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>

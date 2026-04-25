@@ -843,3 +843,84 @@
   .dfe-f-lch-acl-when,
   .dfe-f-lch-acl-who { display: none; }
 }
+
+/* --------------------------------------------------------------------------
+   "What to do when" — guide-modern framing (aligns with Collection / _HeroSection)
+   -------------------------------------------------------------------------- */
+.guide-modern.lifecycle-wtw {
+  background: var(--lch-bg);
+}
+
+.lifecycle-wtw__body {
+  background: var(--lch-bg);
+  border-bottom: 1px solid var(--lch-border-light);
+}
+
+.lifecycle-wtw__meta {
+  color: var(--lch-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lch-s2) var(--lch-s3);
+  align-items: center;
+}
+
+.lifecycle-wtw__phase-list {
+  list-style: none;
+  margin: 0 0 var(--lch-s5);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--lch-s4);
+}
+
+.lifecycle-wtw__phase-card {
+  margin: 0;
+  padding: var(--lch-s4);
+  background: var(--lch-bg-card);
+  border: 1px solid var(--lch-border-light);
+  border-radius: var(--lch-radius);
+  border-top: 4px solid var(--phase, var(--lch-blue));
+  box-shadow: var(--lch-shadow);
+}
+
+.lifecycle-wtw__phase-card .govuk-heading-s {
+  margin-top: 0;
+  color: var(--lch-text);
+}
+
+.lifecycle-wtw__def-grid {
+  margin: 0 0 var(--lch-s5);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--lch-s5);
+}
+
+.lifecycle-wtw__def-grid > div {
+  margin: 0;
+  padding-bottom: var(--lch-s4);
+  border-bottom: 1px solid var(--lch-border-light);
+}
+
+.lifecycle-wtw__def-grid > div:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.lifecycle-wtw__def-grid dt {
+  font-weight: 700;
+  color: var(--lch-text);
+  margin: 0 0 var(--lch-s2);
+  font-size: 1.125rem;
+}
+
+.lifecycle-wtw__def-grid dd {
+  margin: 0;
+  color: var(--lch-text);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.guide-modern.lifecycle-wtw .page-hero--collection .govuk-caption-l {
+  color: rgba(255, 255, 255, 0.92);
+}
