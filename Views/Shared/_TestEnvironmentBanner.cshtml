@@ -1,0 +1,23 @@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+  if (!HostEnvironment.IsEnvironment("Test"))
+  {
+    return;
+  }
+  var deploymentLabel = Configuration["EnvironmentBanner:DeploymentLabel"]
+    ?? Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME");
+}
+<div class="dfe-env-banner dfe-env-banner--test" role="region" aria-label="Test environment">
+  <div class="govuk-width-container">
+    <p class="govuk-body-s govuk-!-margin-bottom-0">
+      <span class="govuk-visually-hidden">Notice: </span>
+      <strong>Test environment</strong>
+      @if (!string.IsNullOrWhiteSpace(deploymentLabel))
+      {
+        <span class="dfe-env-banner__separator" aria-hidden="true"> — </span>
+        <span class="dfe-env-banner__label">@deploymentLabel</span>
+      }
+    </p>
+  </div>
+</div>

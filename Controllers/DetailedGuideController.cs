@@ -112,6 +112,7 @@ namespace ServiceManual.Controllers
             return new GuidePageViewModel
             {
                 IsOverviewPage = true,
+                GuideSlug = guide.Slug,
                 HeroTitle = guide.Title,
                 HeroIntro = guide.MetaDescription,
                 CollectionSlug = guide.CollectionSlug,
@@ -263,6 +264,7 @@ namespace ServiceManual.Controllers
             return new GuidePageViewModel
             {
                 IsOverviewPage = false,
+                GuideSlug = guidePage.GuideSlug ?? "",
                 HeroTitle = guidePage.GuideTitle ?? "",
                 HeroIntro = !string.IsNullOrWhiteSpace(guidePage.MetaDescription)
                     ? guidePage.MetaDescription

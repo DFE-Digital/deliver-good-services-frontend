@@ -1,5 +1,4 @@
-@using ServiceManual.Helpers
-@using ServiceManual.Models
+@using System.Linq
 @{
     // Hero Section Parameters
     // Type: "collection" or "guidance" - determines styling and content
@@ -8,27 +7,15 @@
     var intro = ViewBag.HeroIntro as string ?? "";
     var badgeText = ViewBag.HeroBadgeText as string ?? "Guidance";
     
-    // Collection-specific properties
-    var collection = ViewBag.Collection as Collection;
     var metaDescription = ViewBag.HeroMetaDescription as string ?? "";
-    var audienceTags = ViewBag.HeroAudienceTags as List<dynamic> ?? new List<dynamic>();
     
     // Guidance-specific properties
     var collections = ViewBag.HeroCollections as List<dynamic> ?? new List<dynamic>();
     var showLastReviewedDate = (bool?)ViewBag.HeroShowLastReviewedDate ?? false;
     var lastReviewedDateDisplay = ViewBag.HeroLastReviewedDateDisplay as string ?? "";
-    var showOwner = (bool?)ViewBag.HeroShowOwner ?? false;
+    var showOwner = (bool?)ViewBag.HeroShowOwner ?? true;
     var owner = ViewBag.HeroOwner as string ?? "";
     var ownerUrl = ViewBag.HeroOwnerUrl as string ?? "";
-    var showApplicablePhases = (bool?)ViewBag.HeroShowApplicablePhases ?? false;
-    var phaseTags = ViewBag.HeroPhaseTags as List<dynamic> ?? new List<dynamic>();
-    var showApplicableProfessions = (bool?)ViewBag.HeroShowApplicableProfessions ?? false;
-    var articlePublishedFromDisplay = ViewBag.HeroPublishedFromDisplay as string ?? "";
-    var articlePublishedToDisplay = ViewBag.HeroPublishedToDisplay as string ?? "";
-    var articleAuthor = ViewBag.HeroAuthor as string ?? "";
-    var hasArticleMeta = !string.IsNullOrWhiteSpace(articlePublishedFromDisplay)
-        || !string.IsNullOrWhiteSpace(articlePublishedToDisplay)
-        || !string.IsNullOrWhiteSpace(articleAuthor);
     var collectionSlug = ViewBag.HeroCollectionSlug as string ?? "";
     var collectionTitle = ViewBag.HeroCollectionTitle as string ?? "";
     List<(string Title, string? Url)> breadcrumbItems;
@@ -50,13 +37,21 @@
     var heroSectionTitle = ViewBag.HeroSectionTitle as string ?? "Guidance";
     var heroSectionUrl = ViewBag.HeroSectionUrl as string ?? "/guidance";
     var heroBreadcrumbCurrent = ViewBag.HeroBreadcrumbCurrent as string ?? "";
+    var heroGuideOverviewUrl = ViewBag.HeroGuideOverviewUrl as string ?? "";
+    var heroGuideOverviewTitle = ViewBag.HeroGuideOverviewTitle as string ?? "";
     var heroHeadingCaption = ViewBag.HeroHeadingCaption as string ?? "";
-    var hideAudienceChips = (bool?)ViewBag.HeroHideAudienceChips ?? false;
     var heroSuppressBottomMargin = (bool?)ViewBag.HeroSuppressBottomMargin ?? false;
+
     var heroClass = heroType == "collection" ? "page-hero--collection" : "page-hero--guidance";
     var heroMetaClass = useInverseNav ? "page-hero__meta page-hero__meta--inverse" : "page-hero__meta";
-    var chipColors = new[] { "#5439F9", "#15B187", "#CA357C" };
     var h1Colour = heroType == "collection" ? "#ffffff" : "#0b0c0c";
+
+    // Meta strip: Part of / Last reviewed / Owner only (when flags + values allow).
+    var metaShowPartOf = heroType != "collection"
+        && (collections.Count > 0 || (!string.IsNullOrEmpty(collectionSlug) && !string.IsNullOrEmpty(collectionTitle)));
+    var metaShowLastReviewed = showLastReviewedDate && !string.IsNullOrEmpty(lastReviewedDateDisplay);
+    var metaShowOwner = showOwner && !string.IsNullOrWhiteSpace(owner);
+    var metaAny = metaShowPartOf || metaShowLastReviewed || metaShowOwner;
 }
 
 <section class="page-hero @heroClass @(heroSuppressBottomMargin ? "govuk-!-margin-bottom-0" : "govuk-!-margin-bottom-6") govuk-!-padding-bottom-5" aria-label="@title">
@@ -98,6 +93,10 @@
                                 {
                                     <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/guidance/collections/@collectionSlug">@collectionTitle</a></li>
                                 }
+                                @if (!string.IsNullOrEmpty(heroGuideOverviewUrl) && !string.IsNullOrEmpty(heroGuideOverviewTitle))
+                                {
+                                    <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="@heroGuideOverviewUrl">@heroGuideOverviewTitle</a></li>
+                                }
                             }
                             else
                             {
@@ -106,7 +105,7 @@
                         </ol>
                     </nav>
 
-                    @* Caption above title (not shown on guidance hero skin — page-hero--guidance) *@
+                    @* Type caption — not shown on guidance hero (guide name caption + title carry structure) *@
                     @if (!hideBadge && heroType != "guidance")
                     {
                         <span class="govuk-caption-l govuk-!-margin-top-5 govuk-!-display-block">@System.Net.WebUtility.HtmlEncode(badgeText)</span>
@@ -130,88 +129,42 @@
                         <p class="page-hero__lede">@metaDescription</p>
                     }
 
-                    @* Guidance-specific meta information *@
-                    @if (heroType == "guidance")
+                    @* Meta: Part of · Last reviewed · Owner — not shown on collection heroes *@
+                    @if (metaAny && heroType != "collection")
                     {
                         <div class="@heroMetaClass">
-                            @if (collections.Count > 0)
+                            @if (metaShowPartOf)
                             {
-                                var c = collections[0];
-                                <span class="page-hero__meta-item"><strong>Part of:</strong> <a href="/guidance/collections/@c.Slug">@System.Net.WebUtility.HtmlEncode(c.Title) collection</a></span>
-                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
+                                @if (collections.Count > 0)
+                                {
+                                    var c = collections[0];
+                                    <span class="page-hero__meta-item"><strong>Part of:</strong> <a class="@(useInverseNav ? "govuk-link govuk-link--inverse" : "govuk-link")" href="/guidance/collections/@c.Slug">@System.Net.WebUtility.HtmlEncode(c.Title) collection</a></span>
+                                }
+                                else
+                                {
+                                    <span class="page-hero__meta-item"><strong>Part of:</strong> <a class="@(useInverseNav ? "govuk-link govuk-link--inverse" : "govuk-link")" href="/guidance/collections/@collectionSlug">@System.Net.WebUtility.HtmlEncode(collectionTitle) collection</a></span>
+                                }
+                                @if (metaShowLastReviewed || metaShowOwner)
+                                {
+                                    <span class="page-hero__meta-dot" aria-hidden="true">·</span>
+                                }
                             }
-                            else if (!string.IsNullOrEmpty(collectionSlug) && !string.IsNullOrEmpty(collectionTitle))
-                            {
-                                <span class="page-hero__meta-item"><strong>Part of:</strong> <a href="/guidance/collections/@collectionSlug">@System.Net.WebUtility.HtmlEncode(collectionTitle) collection</a></span>
-                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
-                            }
-                            @if (showLastReviewedDate && !string.IsNullOrEmpty(lastReviewedDateDisplay))
+                            @if (metaShowLastReviewed)
                             {
                                 <span class="page-hero__meta-item"><strong>Last reviewed:</strong> @System.Net.WebUtility.HtmlEncode(lastReviewedDateDisplay)</span>
-                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
+                                @if (metaShowOwner)
+                                {
+                                    <span class="page-hero__meta-dot" aria-hidden="true">·</span>
+                                }
                             }
-                            @if (showOwner && !string.IsNullOrWhiteSpace(owner))
+                            @if (metaShowOwner)
                             {
                                 <span class="page-hero__meta-item">
                                     <strong>Owner:</strong>
                                     @if (!string.IsNullOrWhiteSpace(ownerUrl))
-                                    { <a href="@System.Net.WebUtility.HtmlEncode(ownerUrl!)">@System.Net.WebUtility.HtmlEncode(owner!)</a> }
+                                    { <a class="@(useInverseNav ? "govuk-link govuk-link--inverse" : "govuk-link")" href="@System.Net.WebUtility.HtmlEncode(ownerUrl!)">@System.Net.WebUtility.HtmlEncode(owner!)</a> }
                                     else
                                     { @System.Net.WebUtility.HtmlEncode(owner!) }
-                                </span>
-                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
-                            }
-                            @if (showApplicablePhases && phaseTags.Count > 0)
-                            {
-                                <span class="page-hero__meta-item">
-                                    <strong>Applicable phases:</strong>
-                                    @Html.Raw(string.Join(", ", phaseTags.Select(p => $"<a href=\"/lifecycle#ph-{Uri.EscapeDataString(p.Slug)}\">{System.Net.WebUtility.HtmlEncode(p.Title)}</a>")))
-                                </span>
-                            }
-                        </div>
-                    }
-                    else if (heroType == "collection" && !string.IsNullOrEmpty(collectionSlug) && !string.IsNullOrEmpty(collectionTitle))
-                    {
-                        <div class="@heroMetaClass">
-                            <span class="page-hero__meta-item"><strong>Part of:</strong> <a class="govuk-link govuk-link--inverse" href="/guidance/collections/@collectionSlug">@System.Net.WebUtility.HtmlEncode(collectionTitle)</a></span>
-                        </div>
-                    }
-                    else if (heroType == "article" && hasArticleMeta)
-                    {
-                        <div class="@heroMetaClass">
-                            @if (!string.IsNullOrWhiteSpace(articlePublishedFromDisplay))
-                            {
-                                <span class="page-hero__meta-item"><strong>Published:</strong> @System.Net.WebUtility.HtmlEncode(articlePublishedFromDisplay)</span>
-                                <span class="page-hero__meta-dot" aria-hidden="true">·</span>
-                            }
-                           
-                            @if (!string.IsNullOrWhiteSpace(articleAuthor))
-                            {
-                                <span class="page-hero__meta-item"><strong>Author:</strong> @System.Net.WebUtility.HtmlEncode(articleAuthor)</span>
-                            }
-                        </div>
-                    }
-
-                    @* Audience chips *@
-                    @{
-                        var tagsToDisplay = hideAudienceChips
-                            ? new List<dynamic>()
-                            : (audienceTags.Count > 0 ? audienceTags
-                                : (heroType == "guidance" && showApplicableProfessions ? audienceTags
-                                    : new List<dynamic>()));
-                    }
-                    @if (tagsToDisplay.Count > 0)
-                    {
-                        <div class="page-hero__chips">
-                            <span class="page-hero__chips-label">Most relevant to</span>
-                            @for (var i = 0; i < tagsToDisplay.Count && i < 3; i++)
-                            {
-                                var audience = tagsToDisplay[i];
-                                var color = chipColors[i % chipColors.Length];
-                                var diyAttr = heroType == "guidance" ? $" style=\"--dot-color: {color}\"" : "";
-                                var dotAttr = heroType == "guidance" ? $" style=\"background: {color}\"" : "";
-                                <span class="page-hero__chip"@Html.Raw(diyAttr)>
-                                    <span class="page-hero__chip-dot"@Html.Raw(dotAttr)></span>@audience.Title
                                 </span>
                             }
                         </div>

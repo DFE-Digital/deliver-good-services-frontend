@@ -618,7 +618,7 @@ namespace ServiceManual.Services
                     Collections = collections,
                     HideContentsOnPrimaryPage = item.HideContentsOnPrimaryPage ?? false,
                     ShowGuidePagesOnRight = item.ShowGuidePagesOnRight ?? false,
-                    Pages = item.Detailed_Guide_Pages?
+                    Pages = (item.Detailed_Guide_Pages ?? item.DetailedGuidePagesCamel)?
                         .Select(p => new DetailedGuidePageSummary
                         {
                             Title = p.Title ?? string.Empty,
@@ -733,7 +733,53 @@ namespace ServiceManual.Services
                 var guideCollections = item.Detailed_Guide?.Collection != null && !string.IsNullOrEmpty(item.Detailed_Guide.Collection.Slug) && !string.IsNullOrEmpty(item.Detailed_Guide.Collection.Title)
                     ? new List<CollectionRef> { new CollectionRef { Slug = item.Detailed_Guide.Collection.Slug!, Title = item.Detailed_Guide.Collection.Title! } }
                     : new List<CollectionRef>();
+
+                // Parent guide's child pages: inline under detailed_guide when Strapi returns them. Often
+                // populate=* on the page does not populate detailed_guide.detailedGuidePages (one level only),
+                // or the relation is { "data": [ ... ] } — see StrapiDetailedGuidePageSummaryListConverter.
+                var rawSiblingRows = item.Detailed_Guide?.Detailed_Guide_Pages ?? item.Detailed_Guide?.DetailedGuidePagesCamel;
+                DetailedGuide? fullGuide = null;
+                List<DetailedGuidePageSummary> siblingPages;
+                if (rawSiblingRows != null && rawSiblingRows.Count > 0)
+                {
+                    siblingPages = rawSiblingRows
+                        .Select(p => new DetailedGuidePageSummary
+                        {
+                            Title = p.Title ?? string.Empty,
+                            Slug = p.Slug ?? string.Empty,
+                            MetaDescription = p.MetaDescription,
+                            Phases = p.ApplicablePhases?
+                                .Where(ph => !string.IsNullOrWhiteSpace(ph.Slug) || !string.IsNullOrWhiteSpace(ph.Title))
+                                .Select(ph => new TagRef { Slug = ph.Slug ?? "", Title = ph.Title ?? "" })
+                                .ToList() ?? [],
+                            Professions = p.ApplicableProfessions?
+                                .Where(pr => !string.IsNullOrWhiteSpace(pr.Slug) || !string.IsNullOrWhiteSpace(pr.Plural) || !string.IsNullOrWhiteSpace(pr.Title))
+                                .Select(pr => new TagRef { Slug = pr.Slug ?? "", Title = (pr.Plural ?? pr.Title ?? "").Trim() })
+                                .ToList() ?? [],
+                        })
+                        .ToList();
+                }
+                else
+                {
+                    fullGuide = await GetDetailedGuideBySlugAsync(guideSlug);
+                    siblingPages = fullGuide?.Pages ?? [];
+                }
+
+                // Collection on the parent guide is often not returned on nested detailed_guide with populate=*; fill from full guide.
+                if (guideCollections.Count == 0 && !string.IsNullOrEmpty(guideSlug))
+                {
+                    var fg = fullGuide ?? await GetDetailedGuideBySlugAsync(guideSlug);
+                    if (fg != null)
+                    {
+                        if (fg.Collections.Count > 0)
+                            guideCollections = fg.Collections.ToList();
+                        else if (!string.IsNullOrEmpty(fg.CollectionSlug) && !string.IsNullOrEmpty(fg.CollectionTitle))
+                            guideCollections = new List<CollectionRef> { new CollectionRef { Slug = fg.CollectionSlug, Title = fg.CollectionTitle } };
+                    }
+                }
+
                 var firstGuideCollection = guideCollections.FirstOrDefault();
+
                 return new DetailedGuidePage
                 {
                     Title = item.Title ?? string.Empty,
@@ -753,22 +799,7 @@ namespace ServiceManual.Services
                     CollectionTitle = firstGuideCollection?.Title,
                     CollectionSlug = firstGuideCollection?.Slug,
                     Collections = guideCollections,
-                    SiblingPages = item.Detailed_Guide?.Detailed_Guide_Pages?
-                        .Select(p => new DetailedGuidePageSummary
-                        {
-                            Title = p.Title ?? string.Empty,
-                            Slug = p.Slug ?? string.Empty,
-                            MetaDescription = p.MetaDescription,
-                            Phases = p.ApplicablePhases?
-                                .Where(ph => !string.IsNullOrWhiteSpace(ph.Slug) || !string.IsNullOrWhiteSpace(ph.Title))
-                                .Select(ph => new TagRef { Slug = ph.Slug ?? "", Title = ph.Title ?? "" })
-                                .ToList() ?? [],
-                            Professions = p.ApplicableProfessions?
-                                .Where(pr => !string.IsNullOrWhiteSpace(pr.Slug) || !string.IsNullOrWhiteSpace(pr.Plural) || !string.IsNullOrWhiteSpace(pr.Title))
-                                .Select(pr => new TagRef { Slug = pr.Slug ?? "", Title = (pr.Plural ?? pr.Title ?? "").Trim() })
-                                .ToList() ?? [],
-                        })
-                        .ToList() ?? [],
+                    SiblingPages = siblingPages,
                     RelatedContent = item.RelatedContent?
                         .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
                         .ToList() ?? [],
@@ -2426,6 +2457,8 @@ namespace ServiceManual.Services
             public string? Description { get; set; }
             public string? ColourHex { get; set; }
             public List<StrapiTagRef>? FeaturedProfessions { get; set; }
+            /// <summary>Custom <c>findIndex</c> maps placements to <c>collections</c> (not raw <c>guidance_area_collections</c>).</summary>
+            [JsonPropertyName("collections")]
             public List<StrapiGuidanceCollection>? Collections { get; set; }
         }
 
@@ -2543,6 +2576,55 @@ namespace ServiceManual.Services
             public string? Ext { get; set; }
             [JsonPropertyName("caption")]
             public string? Caption { get; set; }
+        }
+
+        /// <summary>
+        /// Strapi 5 serializes one-to-many relations as <c>{ "data": [ ... ] }</c> or a plain array.
+        /// Items may be flat or use <c>{ "attributes": { "title", "slug", ... } }</c>.
+        /// </summary>
+        private sealed class StrapiDetailedGuidePageSummaryListConverter : JsonConverter<List<StrapiDetailedGuidePageSummary>?>
+        {
+            public override List<StrapiDetailedGuidePageSummary>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Null) return null;
+
+                if (reader.TokenType == JsonTokenType.StartObject)
+                {
+                    using var doc = JsonDocument.ParseValue(ref reader);
+                    var root = doc.RootElement;
+                    if (!root.TryGetProperty("data", out var dataEl) || dataEl.ValueKind != JsonValueKind.Array)
+                        return null;
+                    return DeserializePageArray(dataEl, options);
+                }
+
+                if (reader.TokenType == JsonTokenType.StartArray)
+                {
+                    using var doc = JsonDocument.ParseValue(ref reader);
+                    return DeserializePageArray(doc.RootElement, options);
+                }
+
+                return null;
+            }
+
+            private static List<StrapiDetailedGuidePageSummary>? DeserializePageArray(JsonElement arrayEl, JsonSerializerOptions options)
+            {
+                var list = new List<StrapiDetailedGuidePageSummary>();
+                foreach (var el in arrayEl.EnumerateArray())
+                {
+                    var payload = el;
+                    if (el.ValueKind == JsonValueKind.Object && el.TryGetProperty("attributes", out var attrs))
+                        payload = attrs;
+
+                    var one = JsonSerializer.Deserialize<StrapiDetailedGuidePageSummary>(payload.GetRawText(), options);
+                    if (one != null)
+                        list.Add(one);
+                }
+
+                return list.Count > 0 ? list : null;
+            }
+
+            public override void Write(Utf8JsonWriter writer, List<StrapiDetailedGuidePageSummary>? value, JsonSerializerOptions options) =>
+                throw new NotImplementedException();
         }
 
         /// <summary>Deserializes relatedFiles from array or Strapi wrapper { "data": [ ... ] }; each item may be flat or have "attributes".</summary>
@@ -3157,7 +3239,14 @@ namespace ServiceManual.Services
             [JsonConverter(typeof(StrapiContentOwnerRefConverter))]
             [JsonPropertyName("contentOwner")]
             public StrapiContentOwnerRef? ContentOwner { get; set; }
+            /// <summary>Snake case from explicit populate query keys; matches via case-insensitive default name.</summary>
+            [JsonConverter(typeof(StrapiDetailedGuidePageSummaryListConverter))]
             public List<StrapiDetailedGuidePageSummary>? Detailed_Guide_Pages { get; set; }
+
+            /// <summary>CamelCase relation key from some Strapi / populate=* responses.</summary>
+            [JsonPropertyName("detailedGuidePages")]
+            [JsonConverter(typeof(StrapiDetailedGuidePageSummaryListConverter))]
+            public List<StrapiDetailedGuidePageSummary>? DetailedGuidePagesCamel { get; set; }
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
             [JsonConverter(typeof(StrapiTagRefListConverter))]
             [JsonPropertyName("applicablePhases")]
@@ -3320,7 +3409,14 @@ namespace ServiceManual.Services
             public string? CustomCss { get; set; }
             [JsonPropertyName("customJS")]
             public string? CustomJs { get; set; }
+            /// <summary>Snake case from explicit populate; matches via case-insensitive default name.</summary>
+            [JsonConverter(typeof(StrapiDetailedGuidePageSummaryListConverter))]
             public List<StrapiDetailedGuidePageSummary>? Detailed_Guide_Pages { get; set; }
+
+            /// <summary>Strapi 5 nested <c>populate=*</c> often serializes this relation as camelCase.</summary>
+            [JsonPropertyName("detailedGuidePages")]
+            [JsonConverter(typeof(StrapiDetailedGuidePageSummaryListConverter))]
+            public List<StrapiDetailedGuidePageSummary>? DetailedGuidePagesCamel { get; set; }
         }
 
         private class StrapiRelatedContent

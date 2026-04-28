@@ -5,37 +5,62 @@
     ViewData["Title"] = roadmap.Title;
     var bodyHtml = GovUkMarkdownHelper.ToGovUkHtml(roadmap.Body ?? string.Empty);
     var updateHistoryHtml = GovUkMarkdownHelper.ToGovUkHtml(roadmap.UpdateHistory ?? string.Empty);
+
+    var currentPath = Context?.Request?.Path.Value?.TrimEnd('/') ?? string.Empty;
+    var requestScheme = Context?.Request?.Scheme ?? "https";
+    var requestHost = Context?.Request?.Host.Value ?? string.Empty;
+    var canonicalCurrentUrl = string.IsNullOrEmpty(requestHost)
+        ? currentPath
+        : $"{requestScheme}://{requestHost}{currentPath}";
+
+    ViewBag.HeroType = "guidance";
+    ViewBag.HeroTitle = roadmap.Title;
+    ViewBag.HeroIntro = roadmap.MetaDescription ?? "";
+    ViewBag.HeroBadgeText = "Guidance";
 }
 
-@section Breadcrumbs {
-<li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="/">Home</a></li>
-<li class="govuk-breadcrumbs__list-item" aria-current="page">@roadmap.Title</li>
-}
+<div class="guide-modern">
+    @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
-<div class="govuk-grid-row govuk-!-margin-top-6">
-    <div class="govuk-grid-column-three-quarters">
-        <h1 class="govuk-heading-xl">@roadmap.Title</h1>
+    <div class="govuk-grid-row guide-content-row">
+        <div class="govuk-grid-column-two-thirds">
+            <section class="dfe-f-content-section guide-content-section" aria-label="Content">
+                @if (!string.IsNullOrWhiteSpace(roadmap.Body))
+                {
+                    <div class="dfe-f-body roadmap-body">
+                        @Html.Raw(bodyHtml)
+                    </div>
+                }
 
-
-        @if (!string.IsNullOrWhiteSpace(roadmap.Body))
-        {
-            <section class="roadmap-section">
-                @Html.Raw(bodyHtml)
+                @if (!string.IsNullOrWhiteSpace(roadmap.UpdateHistory))
+                {
+                    <div class="govuk-!-margin-top-6 roadmap-update-history">
+                        <h2 class="govuk-heading-l">Update history</h2>
+                        <div class="dfe-f-body">
+                            @Html.Raw(updateHistoryHtml)
+                        </div>
+                    </div>
+                }
             </section>
-        }
+        </div>
 
-        @if (!string.IsNullOrWhiteSpace(roadmap.UpdateHistory))
-        {
-            <section class="roadmap-section">
-                <h2 class="govuk-heading-l">Update history</h2>
-                @Html.Raw(updateHistoryHtml)
-            </section>
-        }
+        <div class="govuk-grid-column-one-third">
+            @await Html.PartialAsync("~/Views/Shared/_SharePage.cshtml", null, new ViewDataDictionary(ViewData)
+            {
+                ["ShareTitle"] = roadmap.Title,
+                ["ShareUrl"] = canonicalCurrentUrl,
+                ["LibId"] = currentPath,
+                ["LibTitle"] = roadmap.Title,
+                ["LibUrl"] = currentPath,
+                ["LibType"] = "Guidance",
+                ["LibDescription"] = roadmap.MetaDescription ?? string.Empty
+            })
+        </div>
     </div>
 </div>
 
 <style>
     .govuk-table__cell, .govuk-table__header {
-        font-size: 1rem;        
+        font-size: 1rem;
     }
 </style>

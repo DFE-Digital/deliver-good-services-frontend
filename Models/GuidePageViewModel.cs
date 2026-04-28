@@ -4,6 +4,8 @@ namespace ServiceManual.Models
     public class GuidePageViewModel
     {
         public bool IsOverviewPage { get; set; }
+        /// <summary>Slug for <c>/guidance/guides/{slug}</c>; set for guide overview and child pages.</summary>
+        public string GuideSlug { get; set; } = string.Empty;
         public string HeroTitle { get; set; } = string.Empty;
         public string? HeroIntro { get; set; }
         public string? CollectionSlug { get; set; }

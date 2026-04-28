@@ -15,18 +15,17 @@
     ViewBag.HeroShowOwner = vm.ShowOwnerOnPage;
     ViewBag.HeroOwner = vm.Owner;
     ViewBag.HeroOwnerUrl = vm.OwnerUrl;
-    ViewBag.HeroShowApplicablePhases = vm.ShowApplicablePhasesOnPage;
-    ViewBag.HeroPhaseTags = vm.PhaseTags;
     ViewBag.HeroCollectionSlug = vm.CollectionSlug;
     ViewBag.HeroCollectionTitle = vm.CollectionTitle;
-    ViewBag.HeroShowApplicableProfessions = vm.ShowApplicableProfessionsOnPage;
-    ViewBag.HeroAudienceTags = vm.AudienceTags;
     ViewBag.HeroBadgeText = "Guidance";
 
     if (!vm.IsOverviewPage)
     {
-        ViewBag.HeroHideAudienceChips = true;
-        ViewBag.HeroShowApplicableProfessions = false;
+        if (!string.IsNullOrWhiteSpace(vm.GuideSlug))
+        {
+            ViewBag.HeroGuideOverviewUrl = $"/guidance/guides/{vm.GuideSlug}";
+            ViewBag.HeroGuideOverviewTitle = vm.HeroTitle;
+        }
         if (!string.IsNullOrWhiteSpace(vm.PageTitle))
         {
             ViewBag.HeroHeadingCaption = vm.HeroTitle;

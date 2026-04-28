@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
-using ServiceManual.Configuration;
 using ServiceManual.Models;
 using ServiceManual.Services;
 
@@ -11,16 +9,13 @@ namespace ServiceManual.Filters
     {
         private readonly INavigationService _navigationService;
         private readonly ICmsApiService _cmsApiService;
-        private readonly IConfiguration _configuration;
 
         public NavigationFilter(
             INavigationService navigationService,
-            ICmsApiService cmsApiService,
-            IConfiguration configuration)
+            ICmsApiService cmsApiService)
         {
             _navigationService = navigationService;
             _cmsApiService = cmsApiService;
-            _configuration = configuration;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -30,11 +25,6 @@ namespace ServiceManual.Filters
             if (resultContext.Controller is Controller controller)
             {
                 var path = context.HttpContext.Request.Path.Value ?? string.Empty;
-
-                if (_configuration.IsDraftPreviewEnabled())
-                {
-                    controller.ViewData["ShowCmsDraftBanner"] = true;
-                }
 
                 // Fetch Tools data for header
                 var toolsPage = await _cmsApiService.GetToolsPageAsync();

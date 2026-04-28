@@ -6209,6 +6209,13 @@ ul > li:last-child {
   max-width: 1200px;
 }
 
+/* Footer nav already offsets container padding (govuk-footer__navigation negative margins).
+   An inner govuk-grid-row applies the same offset again and footer columns extend past main content */
+.govuk-footer__navigation .govuk-grid-row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════════
    Full-bleed hero — dark blue (homepage hero style)
    Used by Collection pages; mirrors the homepage .hero structure.
@@ -8898,4 +8905,12 @@ i[class*=" fa-"] {
 
 .guide-modern.tools-index .tools-index__body {
   max-width: 55ch;
+}
+
+/* Test slot (ASPNETCORE_ENVIRONMENT=Test) — full-width bar above header */
+.dfe-env-banner--test {
+  background-color: #f47738;
+  color: #0b0c0c;
+  padding: 0.5rem 0;
+  border-bottom: 2px solid #0b0c0c;
 }
