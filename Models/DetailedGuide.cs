@@ -45,6 +45,8 @@ namespace ServiceManual.Models
         public string? CustomCSS { get; set; }
         /// <summary>Custom JavaScript to inject into the page &lt;script&gt; block.</summary>
         public string? CustomJS { get; set; }
+        /// <summary>When true, show the unpublished draft banner under the hero.</summary>
+        public bool ShowDraftContentBanner { get; set; }
     }
 
     public class DetailedGuidePageSummary

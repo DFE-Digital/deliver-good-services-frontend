@@ -48,6 +48,15 @@
         </ul>
       </div>
     </div>
+    @if (ViewData["ShowCmsDraftBanner"] as bool? == true)
+    {
+      <div class="govuk-!-margin-bottom-4 govuk-!-padding-top-2 govuk-!-padding-bottom-2" style="border-top: 1px solid #b1b4b6;">
+        <p class="govuk-body-s govuk-!-margin-bottom-0">
+          <span class="govuk-tag govuk-tag--yellow">Draft preview</span>
+          <span class="govuk-!-margin-left-1">This deployment is configured to show unpublished Strapi drafts (<code class="govuk-!-font-size-14">DraftPreview:Enabled</code>).</span>
+        </p>
+      </div>
+    }
     <div class="govuk-footer__meta">
       <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
         <h2 class="govuk-visually-hidden">Support links</h2>

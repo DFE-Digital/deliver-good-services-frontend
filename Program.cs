@@ -1,11 +1,28 @@
+using Microsoft.Extensions.Configuration;
+using ServiceManual.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure Kestrel to use port 5066
 builder.WebHost.UseUrls("http://localhost:5066");
 
 // Add services to the container
+builder.Services.Configure<DraftPreviewOptions>(builder.Configuration.GetSection(DraftPreviewOptions.SectionName));
 builder.Services.AddMemoryCache();
-builder.Services.AddHttpClient<ServiceManual.Services.ICmsApiService, ServiceManual.Services.CmsApiService>();
+builder.Services.AddTransient<ServiceManual.Services.CmsDraftPreviewRequestHeadersHandler>();
+builder.Services.AddHttpClient<ServiceManual.Services.ICmsApiService, ServiceManual.Services.CmsApiService>()
+    .AddHttpMessageHandler<ServiceManual.Services.CmsDraftPreviewRequestHeadersHandler>();
+// Same CMS base URL/token but no draft header — used to check whether a published Strapi row exists (banner logic).
+builder.Services.AddHttpClient("CmsApiPublished", (sp, client) =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var baseUrl = configuration["CmsApi:BaseUrl"] ?? string.Empty;
+    var apiToken = configuration["CmsApi:ApiToken"] ?? string.Empty;
+    if (!string.IsNullOrEmpty(baseUrl))
+        client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+    if (!string.IsNullOrEmpty(apiToken))
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiToken);
+});
 builder.Services.AddHttpClient<ServiceManual.Services.DdtStandardsApiService>((sp, client) =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();

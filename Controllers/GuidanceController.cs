@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using ServiceManual.Configuration;
 using ServiceManual.Models;
 using ServiceManual.Services;
 
@@ -8,11 +10,13 @@ public class GuidanceController : Controller
 {
     private readonly ICmsApiService _cmsApiService;
     private readonly ISearchService _searchService;
+    private readonly IConfiguration _configuration;
 
-    public GuidanceController(ICmsApiService cmsApiService, ISearchService searchService)
+    public GuidanceController(ICmsApiService cmsApiService, ISearchService searchService, IConfiguration configuration)
     {
         _cmsApiService = cmsApiService;
         _searchService = searchService;
+        _configuration = configuration;
     }
 
     [Route("guidance")]
@@ -33,6 +37,9 @@ public class GuidanceController : Controller
         var selectedAreaSlug = string.IsNullOrWhiteSpace(guidanceArea) ? null : guidanceArea.Trim();
         var selectedSearchTerm = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
         var matchedGuidanceCardUrls = await GetMatchedGuidanceCardUrlsAsync(selectedSearchTerm);
+        // Draft content is often missing from the search index; do not hide cards by URL match when previewing drafts.
+        var restrictCardsBySearchMatches =
+            matchedGuidanceCardUrls != null && !_configuration.IsDraftPreviewEnabled();
 
         static IReadOnlyList<TagRef> ProfessionTagsForCollection(GuidanceAreaGroup area, GuidanceCollectionCard collection)
         {
@@ -67,8 +74,8 @@ public class GuidanceController : Controller
                         collection.ApplicableProfessions.Any(p => p.Title.Equals("All DDaT Professions", StringComparison.OrdinalIgnoreCase)) ||
                         ProfessionTagsForCollection(area, collection)
                             .Any(profession => selectedProfessionSet.Contains(profession.Slug)))
-                        && (matchedGuidanceCardUrls == null
-                            || (normalizedCollectionUrl != null && matchedGuidanceCardUrls.Contains(normalizedCollectionUrl)));
+                        && (!restrictCardsBySearchMatches
+                            || (normalizedCollectionUrl != null && matchedGuidanceCardUrls!.Contains(normalizedCollectionUrl)));
                     })
                     .ToList()
             })

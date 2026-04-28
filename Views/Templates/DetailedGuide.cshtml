@@ -65,6 +65,10 @@
     @* Guide hero - using standardized hero partial *@
     @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
+    @if (vm.ShowDraftContentBanner)
+    {
+        @await Html.PartialAsync("~/Views/Shared/_DraftContentBanner.cshtml")
+    }
 
         @* Contents: on overview, respect ShowContents (HideContentsOnPrimaryPage); on child pages always show when we have items *@
         @if (vm.ShowContents && vm.ContentsItems.Count > 0)

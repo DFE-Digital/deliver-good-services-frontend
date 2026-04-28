@@ -1,6 +1,12 @@
+using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
+using ServiceManual.Configuration;
 using ServiceManual.Models;
 
 namespace ServiceManual.Services
@@ -8,17 +14,25 @@ namespace ServiceManual.Services
     public class CmsApiService : ICmsApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<CmsApiService> _logger;
+        private readonly IConfiguration _configuration;
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public CmsApiService(HttpClient httpClient, IConfiguration configuration, ILogger<CmsApiService> logger)
+        public CmsApiService(
+            HttpClient httpClient,
+            IHttpClientFactory httpClientFactory,
+            IConfiguration configuration,
+            ILogger<CmsApiService> logger)
         {
             _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _configuration = configuration;
 
             var baseUrl = configuration["CmsApi:BaseUrl"] ?? string.Empty;
             var apiToken = configuration["CmsApi:ApiToken"] ?? string.Empty;
@@ -36,12 +50,240 @@ namespace ServiceManual.Services
             return string.IsNullOrEmpty(baseUrl) ? null : baseUrl.TrimEnd('/');
         }
 
+        /// <summary>Strapi 5: append <c>status=draft</c> when <c>DraftPreview:Enabled</c> is true in configuration.</summary>
+        private Task<HttpResponseMessage> GetCmsAsync(string relativeUrl) =>
+            _httpClient.GetAsync(ApplyCmsDraftStatusToRelativeUrl(relativeUrl));
+
+        /// <summary>Uses <see cref="DraftPreviewConfigurationReader"/> so JSON + env (e.g. <c>DraftPreview__Enabled</c>) parse reliably.</summary>
+        private bool IsCmsDraftPreviewEnabled() => _configuration.IsDraftPreviewEnabled();
+
+        /// <summary>
+        /// Strapi draft responses often use <c>publishedAt: null</c> even when a published version exists.
+        /// Show the banner only when draft preview is on and there is <strong>no</strong> published row for the same slug
+        /// (<c>status=published</c> via a client that does not send draft-preview headers).
+        /// </summary>
+        private async Task<bool> ShouldShowUnpublishedDraftBannerWhenNoPublishedRowExistsAsync(string publishedProbeRelativeUrl)
+        {
+            if (!_configuration.IsDraftPreviewEnabled())
+                return false;
+            var exists = await StrapiPublishedRowExistsAsync(publishedProbeRelativeUrl);
+            return !exists;
+        }
+
+        private async Task<bool> ShouldShowUnpublishedDraftBannerWhenGuidePageHasNoPublishedVersionAsync(string guideSlug, string pageSlug)
+        {
+            if (!_configuration.IsDraftPreviewEnabled())
+                return false;
+            return !await PublishedGuidePageExistsAsync(guideSlug, pageSlug);
+        }
+
+        private async Task<bool> StrapiPublishedRowExistsAsync(string relativeUrl)
+        {
+            try
+            {
+                var url = WithOnlyStrapiStatus(relativeUrl, "published");
+                var client = _httpClientFactory.CreateClient("CmsApiPublished");
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    return false;
+                var json = await response.Content.ReadAsStringAsync();
+                return StrapiResponseHasEntity(json);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Published-row probe failed for {Url}", relativeUrl);
+                return false;
+            }
+        }
+
+        private async Task<bool> PublishedGuidePageExistsAsync(string guideSlug, string pageSlug)
+        {
+            var rel =
+                $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
+                "&pagination[pageSize]=100&populate[detailed_guide][fields][0]=slug";
+            try
+            {
+                var url = WithOnlyStrapiStatus(rel, "published");
+                var client = _httpClientFactory.CreateClient("CmsApiPublished");
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    return false;
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonPublishedGuidePagesContainGuide(json, guideSlug);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Published guide-page probe failed");
+                return false;
+            }
+        }
+
+        private static bool JsonPublishedGuidePagesContainGuide(string json, string guideSlug)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data) || data.ValueKind != JsonValueKind.Array)
+                    return false;
+                foreach (var row in data.EnumerateArray())
+                {
+                    var g = ReadNestedGuideSlug(row);
+                    if (string.Equals(g, guideSlug, StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string? ReadNestedGuideSlug(JsonElement pageRow)
+        {
+            if (!pageRow.TryGetProperty("detailed_guide", out var rel) && !pageRow.TryGetProperty("detailedGuide", out rel))
+                return null;
+            rel = UnwrapStrapiDataEnvelope(rel);
+            if (rel.TryGetProperty("slug", out var s) && s.ValueKind == JsonValueKind.String)
+                return s.GetString();
+            if (rel.TryGetProperty("attributes", out var attrs)
+                && attrs.TryGetProperty("slug", out s)
+                && s.ValueKind == JsonValueKind.String)
+                return s.GetString();
+            return null;
+        }
+
+        private static JsonElement UnwrapStrapiDataEnvelope(JsonElement el)
+        {
+            if (el.ValueKind == JsonValueKind.Object && el.TryGetProperty("data", out var d))
+            {
+                if (d.ValueKind == JsonValueKind.Object && d.TryGetProperty("attributes", out var a))
+                    return a;
+                return d;
+            }
+
+            return el;
+        }
+
+        /// <summary>Returns true if <c>data</c> is a non-empty array or a single object entry.</summary>
+        private static bool StrapiResponseHasEntity(string json)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("data", out var data))
+                    return false;
+                return data.ValueKind switch
+                {
+                    JsonValueKind.Array => data.GetArrayLength() > 0,
+                    JsonValueKind.Object => true,
+                    _ => false
+                };
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>Rebuild query string with <c>status=&lt;status&gt;</c> (draft preview client must not be used).</summary>
+        private static string WithOnlyStrapiStatus(string relativeUrl, string status)
+        {
+            var q = relativeUrl.IndexOf('?', StringComparison.Ordinal);
+            var path = q < 0 ? relativeUrl : relativeUrl[..q];
+            var query = q < 0 ? string.Empty : relativeUrl[(q + 1)..];
+
+            var pairs = new Dictionary<string, StringValues>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in QueryHelpers.ParseQuery(query))
+                pairs[kvp.Key] = kvp.Value;
+
+            pairs.Remove("publicationState");
+            pairs["status"] = status;
+
+            var sb = new StringBuilder();
+            sb.Append(path);
+            var first = true;
+            foreach (var kvp in pairs)
+            {
+                if (kvp.Value.Count == 0)
+                {
+                    if (first) { sb.Append('?'); first = false; } else sb.Append('&');
+                    sb.Append(Uri.EscapeDataString(kvp.Key ?? string.Empty)).Append('=');
+                    continue;
+                }
+
+                foreach (var v in kvp.Value)
+                {
+                    if (first) { sb.Append('?'); first = false; } else sb.Append('&');
+                    sb.Append(Uri.EscapeDataString(kvp.Key ?? string.Empty))
+                        .Append('=')
+                        .Append(Uri.EscapeDataString(v ?? string.Empty));
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private string ApplyCmsDraftStatusToRelativeUrl(string relativeUrl)
+        {
+            if (!IsCmsDraftPreviewEnabled())
+                return relativeUrl;
+
+            var q = relativeUrl.IndexOf('?', StringComparison.Ordinal);
+            var path = q < 0 ? relativeUrl : relativeUrl[..q];
+            var query = q < 0 ? string.Empty : relativeUrl[(q + 1)..];
+
+            var pairs = new Dictionary<string, StringValues>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in QueryHelpers.ParseQuery(query))
+                pairs[kvp.Key] = kvp.Value;
+
+            pairs.Remove("publicationState");
+            pairs["status"] = "draft";
+
+            var sb = new StringBuilder();
+            sb.Append(path);
+            var first = true;
+            foreach (var kvp in pairs)
+            {
+                if (kvp.Value.Count == 0)
+                {
+                    if (first)
+                    {
+                        sb.Append('?');
+                        first = false;
+                    }
+                    else
+                        sb.Append('&');
+
+                    sb.Append(Uri.EscapeDataString(kvp.Key ?? string.Empty)).Append('=');
+                    continue;
+                }
+
+                foreach (var v in kvp.Value)
+                {
+                    if (first)
+                    {
+                        sb.Append('?');
+                        first = false;
+                    }
+                    else
+                        sb.Append('&');
+
+                    sb.Append(Uri.EscapeDataString(kvp.Key ?? string.Empty))
+                        .Append('=')
+                        .Append(Uri.EscapeDataString(v ?? string.Empty));
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public async Task<GuidanceIndexPage?> GetGuidanceIndexAsync()
         {
             try
             {
                 const string url = "api/guidance-areas/index";
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -144,9 +386,9 @@ namespace ServiceManual.Services
 
             try
             {
-                var url = $"api/articles/by-slug/{Uri.EscapeDataString(routeKey.Trim())}" +
-                          "?populate[leadImage][fields][0]=url&populate[leadImage][fields][1]=alternativeText";
-                var response = await _httpClient.GetAsync(url);
+                var url = $"api/articles?filters[slug][$eq]={Uri.EscapeDataString(routeKey.Trim())}" +
+                          "&pagination[pageSize]=1&populate[leadImage]=true";
+                var response = await GetCmsAsync(url);
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     return null;
@@ -197,7 +439,7 @@ namespace ServiceManual.Services
                                    "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=author&fields[4]=publishedFrom" +
                                    "&populate[leadImage][fields][0]=url&populate[leadImage][fields][1]=alternativeText";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("CMS API returned {StatusCode} for articles", response.StatusCode);
@@ -219,10 +461,17 @@ namespace ServiceManual.Services
         {
             try
             {
-                // Custom Strapi endpoint returns collection by slug with section items fully populated.
-                var url = $"api/collections/by-slug/{Uri.EscapeDataString(slug)}";
+                // Strapi 5: populate=* is only one level deep; sections need nested relations (see cms collection controller).
+                var url = $"api/collections?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
+                          "&pagination[pageSize]=1" +
+                          "&populate[sections][populate][0]=detailed_guides.detailed_guide" +
+                          "&populate[sections][populate][1]=detailed_guide_pages.detailed_guide_page.detailed_guide" +
+                          "&populate[sections][populate][2]=external_links.external_link" +
+                          "&populate[sections][populate][3]=job_descriptions.job_specifications" +
+                          "&populate[relatedContent]=true&populate[applicableProfessions]=true&populate[relatedFiles]=true" +
+                          "&populate[contentOwner][fields][0]=title&populate[contentOwner][populate][informationPage][fields][0]=urlToRedirectTo";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -252,33 +501,12 @@ namespace ServiceManual.Services
                         .Select(p => new TagRef { Slug = p.Slug ?? "", Title = p.Title ?? "" })
                         .ToList() ?? [],
                     RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
-                    Sections = item.Collection_Sections?
-                        .OrderBy(s => s.Order)
-                        .Select(s => new CollectionSection
-                        {
-                            Title = s.Title ?? string.Empty,
-                            Summary = s.Summary,
-                            Items = (s.Items ?? [])
-                                .Select(i => new ContentLink
-                                {
-                                    Title = i.Title ?? string.Empty,
-                                    Slug = i.Slug,
-                                    MetaDescription = i.MetaDescription,
-                                    Url = i.Url ?? string.Empty,
-                                    OpenInNewTab = i.NewTab,
-                                    ExternalLink = i.ExternalLink,
-                                    LinkType = i.LinkType,
-                                    PriorityInGroup = i.PriorityInGroup,
-                                    ContentType = ContentTypeLabel(i.Type),
-                                    Grade = i.Grade
-                                })
-                                .OrderByDescending(i => i.PriorityInGroup)
-                                .ToList()
-                        })
-                        .ToList() ?? [],
+                    Sections = MapCollectionSectionsFromStrapi(item),
                     RelatedContent = item.RelatedContent?
                         .Select(r => new RelatedContentItem { Header = r.Header ?? string.Empty, Content = r.Content })
-                        .ToList() ?? []
+                        .ToList() ?? [],
+                    ShowDraftContentBanner = await ShouldShowUnpublishedDraftBannerWhenNoPublishedRowExistsAsync(
+                        $"api/collections?filters[slug][$eq]={Uri.EscapeDataString(slug)}&pagination[pageSize]=1")
                 };
             }
             catch (Exception ex)
@@ -292,8 +520,9 @@ namespace ServiceManual.Services
         {
             try
             {
-                var url = $"api/job-specifications/by-slug/{Uri.EscapeDataString(slug)}";
-                var response = await _httpClient.GetAsync(url);
+                // Strapi 5: explicit nested field populate was returning errors for some environments; populate=* fills first-level relations.
+                var url = $"api/job-specifications?filters[slug][$eq]={Uri.EscapeDataString(slug)}&pagination[pageSize]=1&populate=*";
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -347,7 +576,7 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage&fields[10]=customJS&fields[11]=customCSS&fields[12]=overrideOverviewTitle&fields[13]=showGuidePagesOnRight" +
+                          "&fields[0]=title&fields[1]=slug&fields[2]=metaDescription&fields[3]=body&fields[4]=showLastReviewedDateOnPage&fields[5]=lastReviewedDate&fields[6]=hideContentsOnPrimaryPage&fields[7]=showOwnerOnPage&fields[8]=showApplicablePhasesOnPage&fields[9]=showApplicableProfessionsOnPage&fields[10]=customJS&fields[11]=customCSS&fields[12]=overrideOverviewTitle&fields[13]=showGuidePagesOnRight&fields[14]=publishedAt" +
                           "&populate[detailed_guide_pages][fields][0]=title&populate[detailed_guide_pages][fields][1]=slug&populate[detailed_guide_pages][fields][2]=metaDescription" +
                           "&populate[detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
                           "&populate[detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide_pages][populate][applicableProfessions][fields][1]=slug&populate[detailed_guide_pages][populate][applicableProfessions][fields][2]=plural" +
@@ -358,7 +587,7 @@ namespace ServiceManual.Services
                           "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug&populate[applicableProfessions][fields][2]=plural" +
                           "&populate[relatedFiles]=true";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -430,6 +659,8 @@ namespace ServiceManual.Services
                     RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
                     CustomCSS = item.CustomCss,
                     CustomJS = item.CustomJs,
+                    ShowDraftContentBanner = await ShouldShowUnpublishedDraftBannerWhenNoPublishedRowExistsAsync(
+                        $"api/detailed-guides?filters[slug][$eq]={Uri.EscapeDataString(slug)}&pagination[pageSize]=1"),
                 };
             }
             catch (Exception ex)
@@ -443,40 +674,59 @@ namespace ServiceManual.Services
         {
             try
             {
-                var url = $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
-                          "&fields[0]=title&fields[1]=slug&fields[2]=body&fields[3]=metaDescription&fields[4]=beforeContents&fields[5]=hideTitleAndDescription&fields[6]=hideContents&fields[7]=hideGuidePagesNav&fields[8]=showLastReviewedDateOnPage&fields[9]=lastReviewedDate" +
-                          "&populate[applicablePhases][fields][0]=title&populate[applicablePhases][fields][1]=slug" +
-                          "&populate[applicableProfessions][fields][0]=title&populate[applicableProfessions][fields][1]=slug&populate[applicableProfessions][fields][2]=plural" +
-                          "&populate[Section][fields][0]=title&populate[Section][fields][1]=group&populate[Section][fields][2]=body" +
-                          "&populate[Section][populate][contentModules][fields][0]=title&populate[Section][populate][contentModules][fields][1]=slug&populate[Section][populate][contentModules][fields][2]=summary&populate[Section][populate][contentModules][fields][3]=body&populate[Section][populate][contentModules][fields][4]=entryType&populate[Section][populate][contentModules][fields][5]=strength&populate[Section][populate][contentModules][fields][6]=priority&populate[Section][populate][contentModules][fields][7]=legalRequirement&populate[Section][populate][contentModules][fields][8]=notes" +
-                          "&populate[Section][populate][contentModules][populate][phases][fields][0]=title&populate[Section][populate][contentModules][populate][phases][fields][1]=slug" +
-                          "&populate[Section][populate][contentModules][populate][roles][fields][0]=title&populate[Section][populate][contentModules][populate][roles][fields][1]=slug" +
-                          "&populate[Section][populate][contentModules][populate][links][fields][0]=title&populate[Section][populate][contentModules][populate][links][fields][1]=url&populate[Section][populate][contentModules][populate][links][fields][2]=newTab&populate[Section][populate][contentModules][populate][links][fields][3]=externalLink" +
-                          "&populate[Section][populate][contentModules][populate][detailedGuides][fields][0]=title&populate[Section][populate][contentModules][populate][detailedGuides][fields][1]=slug" +
-                          "&populate[Section][populate][contentModules][populate][collections][fields][0]=title&populate[Section][populate][contentModules][populate][collections][fields][1]=slug" +
-                          "&populate[detailed_guide][fields][0]=title&populate[detailed_guide][fields][1]=slug&populate[detailed_guide][fields][2]=metaDescription&populate[detailed_guide][fields][3]=showLastReviewedDateOnPage&populate[detailed_guide][fields][4]=lastReviewedDate&populate[detailed_guide][fields][5]=hideContentsOnPrimaryPage&populate[detailed_guide][fields][6]=showOwnerOnPage&populate[detailed_guide][fields][7]=showApplicablePhasesOnPage&populate[detailed_guide][fields][8]=showApplicableProfessionsOnPage&populate[detailed_guide][fields][9]=customJS&populate[detailed_guide][fields][10]=customCSS&populate[detailed_guide][fields][11]=overrideOverviewTitle&populate[detailed_guide][fields][12]=showGuidePagesOnRight" +
-                          "&populate[detailed_guide][populate][detailed_guide_pages][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][fields][1]=slug&populate[detailed_guide][populate][detailed_guide_pages][fields][2]=metaDescription" +
-                          "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicablePhases][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicablePhases][fields][1]=slug" +
-                          "&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][1]=slug&populate[detailed_guide][populate][detailed_guide_pages][populate][applicableProfessions][fields][2]=plural" +
-                          "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
-                          "&populate[detailed_guide][populate][contentOwner][fields][0]=title&populate[detailed_guide][populate][contentOwner][populate][informationPage][fields][0]=urlToRedirectTo" +
-                          "&populate[detailed_guide][populate][applicablePhases][fields][0]=title&populate[detailed_guide][populate][applicablePhases][fields][1]=slug" +
-                          "&populate[detailed_guide][populate][applicableProfessions][fields][0]=title&populate[detailed_guide][populate][applicableProfessions][fields][1]=slug&populate[detailed_guide][populate][applicableProfessions][fields][2]=plural" +
-                          "&populate[relatedContent][fields][0]=Header&populate[relatedContent][fields][1]=Content" +
-                          "&populate[relatedFiles]=true";
+                // Two-step fetch: (1) tiny list URL finds documentId + parent guide — avoids multi‑KB query strings that
+                // trigger HTTP 431 (Request Header Fields Too Large) on Azure/IIS when combined with auth + cookies.
+                // (2) GET /api/detailed-guide-pages/:documentId — use Strapi 5's single top-level `populate=*` (valid).
+                //     Do NOT use `populate[someRelation]=*`; that is not valid REST syntax and returns HTTP 400.
+                var findUrl =
+                    $"api/detailed-guide-pages?filters[slug][$eq]={Uri.EscapeDataString(pageSlug)}" +
+                    "&pagination[pageSize]=100" +
+                    "&fields[0]=documentId" +
+                    "&populate[detailed_guide][fields][0]=slug";
 
-                var response = await _httpClient.GetAsync(url);
+                var findResponse = await GetCmsAsync(findUrl);
+                if (!findResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning(
+                        "CMS API returned {StatusCode} when resolving guide page candidates for slug '{PageSlug}'",
+                        findResponse.StatusCode,
+                        pageSlug);
+                    return null;
+                }
+
+                var findJson = await findResponse.Content.ReadAsStringAsync();
+                var findResult = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiDetailedGuidePageFindRow>>(findJson, JsonOptions);
+                var matched = findResult?.Data?
+                    .FirstOrDefault(p =>
+                        !string.IsNullOrEmpty(p.DocumentId) &&
+                        string.Equals(p.Detailed_Guide?.Slug, guideSlug, StringComparison.OrdinalIgnoreCase));
+
+                if (string.IsNullOrEmpty(matched?.DocumentId))
+                    return null;
+
+                // One level deep for all relations/components/media; keeps URL short and matches Strapi 5 docs.
+                // Nested Section → contentModules etc.: add explicit populate only if we need deeper than `populate=*`.
+                var detailUrl =
+                    $"api/detailed-guide-pages/{Uri.EscapeDataString(matched.DocumentId)}?populate=*";
+
+                var response = await GetCmsAsync(detailUrl);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning("CMS API returned {StatusCode} for guide page slug '{PageSlug}'", response.StatusCode, pageSlug);
+                    var errText = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning(
+                        "CMS API returned {StatusCode} for guide page document '{DocumentId}' (page slug '{PageSlug}'). Body: {Body}",
+                        response.StatusCode,
+                        matched.DocumentId,
+                        pageSlug,
+                        errText.Length > 800 ? errText[..800] + "..." : errText);
                     return null;
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<StrapiCollectionResponse<StrapiDetailedGuidePage>>(json, JsonOptions);
+                var result = JsonSerializer.Deserialize<StrapiSingleTypeResponse<StrapiDetailedGuidePage>>(json, JsonOptions);
 
-                var item = result?.Data?.FirstOrDefault();
+                var item = result?.Data;
                 if (item is null)
                     return null;
 
@@ -559,6 +809,7 @@ namespace ServiceManual.Services
                     RelatedFiles = MapRelatedFiles(item.RelatedFiles, GetCmsBaseUrl()),
                     CustomCSS = item.Detailed_Guide?.CustomCss,
                     CustomJS = item.Detailed_Guide?.CustomJs,
+                    ShowDraftContentBanner = await ShouldShowUnpublishedDraftBannerWhenGuidePageHasNoPublishedVersionAsync(guideSlug, pageSlug),
                 };
             }
             catch (Exception ex)
@@ -575,7 +826,7 @@ namespace ServiceManual.Services
                 var url = $"api/html-pages?filters[slug][$eq]={Uri.EscapeDataString(slug)}" +
                           "&fields[0]=title&fields[1]=metaDescription&fields[2]=slug&fields[3]=html&fields[4]=css&fields[5]=js";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -613,7 +864,7 @@ namespace ServiceManual.Services
             {
                 const string url = "api/roadmap?fields[0]=title&fields[1]=metaDescription&fields[2]=body&fields[3]=updateHistory";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -649,7 +900,7 @@ namespace ServiceManual.Services
             {
                 const string url = "api/tool?fields[0]=title&fields[1]=slug&fields[2]=description&fields[3]=body&populate[Tool][fields][0]=title&populate[Tool][fields][1]=url&populate[Tool][fields][2]=description&populate[Tool][fields][3]=internalOnly&populate[Tool][fields][4]=openInNewTab";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -696,7 +947,7 @@ namespace ServiceManual.Services
             {
                 const string url = "api/how-many-people?fields[0]=title&fields[1]=slug&fields[2]=quickPickNumbers&fields[3]=description&fields[4]=dataDisclaimer&fields[5]=data";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -734,7 +985,7 @@ namespace ServiceManual.Services
             {
                 const string url = "api/homepage?fields[0]=title&fields[1]=headline&fields[2]=html&fields[3]=customJS&fields[4]=customCSS";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -778,7 +1029,7 @@ namespace ServiceManual.Services
                           "&sort=order:asc" +
                           "&pagination[pageSize]=50";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("CMS API returned {StatusCode} for documentation-sections", response.StatusCode);
@@ -825,7 +1076,7 @@ namespace ServiceManual.Services
                           "&populate[documentations][fields][0]=title&populate[documentations][fields][1]=slug&populate[documentations][fields][2]=id" +
                           "&pagination[pageSize]=1";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("CMS API returned {StatusCode} for documentation-section slug '{Slug}'", response.StatusCode, sectionSlug);
@@ -869,7 +1120,7 @@ namespace ServiceManual.Services
                           "&populate[documentationSection][fields][0]=slug&populate[documentationSection][fields][1]=title" +
                           "&pagination[pageSize]=1";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("CMS API returned {StatusCode} for documentation slug '{SectionSlug}/{PageSlug}'", response.StatusCode, sectionSlug, pageSlug);
@@ -916,7 +1167,7 @@ namespace ServiceManual.Services
                           "&filters[enabled][$eq]=true" +
                           "&publicationState=live" +
                           "&fields[0]=title&fields[1]=message";
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1014,7 +1265,7 @@ namespace ServiceManual.Services
                           "&populate[stages][populate][placements][populate][task][populate][guidanceLinks]=*" +
                           "&populate[stages][populate][placements][populate][task][populate][howSteps]=*" +
                           "&populate[0]=lucidResources";
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1130,7 +1381,7 @@ namespace ServiceManual.Services
                           "&populate[outputs][populate][template_link][fields][0]=title&populate[outputs][populate][template_link][fields][1]=slug" +
                           "&populate[assurance][populate][preparation_guidance][fields][0]=title&populate[assurance][populate][preparation_guidance][fields][1]=slug";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1266,7 +1517,7 @@ namespace ServiceManual.Services
                           "&sort=order:asc" +
                           "&pagination[pageSize]=100";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1372,7 +1623,7 @@ namespace ServiceManual.Services
                 if (!string.IsNullOrWhiteSpace(roleSlug))
                     url += "&filters[roles][slug][$eq]=" + Uri.EscapeDataString(roleSlug.Trim());
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("CMS API returned {StatusCode} for content entries", response.StatusCode);
@@ -1409,7 +1660,7 @@ namespace ServiceManual.Services
                               "&pagination[page]=" + page +
                               "&" + fields;
 
-                    var response = await _httpClient.GetAsync(url);
+                    var response = await GetCmsAsync(url);
                     if (!response.IsSuccessStatusCode)
                     {
                         _logger.LogWarning("CMS API returned {StatusCode} for content-entries page {Page}", response.StatusCode, page);
@@ -1444,7 +1695,7 @@ namespace ServiceManual.Services
             try
             {
                 const string url = "api/service-standards?fields[0]=title&fields[1]=point&fields[2]=slug&fields[3]=description&sort[0]=point:asc&sort[1]=title:asc";
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1498,7 +1749,7 @@ namespace ServiceManual.Services
                           "&populate[Section][populate][content_entries][populate][roles][fields][0]=title" +
                           "&populate[Section][populate][content_entries][populate][roles][fields][1]=slug";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("CMS API returned {StatusCode} for service standard slug '{Slug}'", response.StatusCode, slug);
@@ -1612,7 +1863,7 @@ namespace ServiceManual.Services
             {
                 var url = "api/redirectors?filters[shortURL][$eq]=" + Uri.EscapeDataString(shortUrl.Trim()) +
                           "&publicationState=live";
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning("CMS API returned {StatusCode} for redirect shortUrl '{ShortUrl}'", response.StatusCode, shortUrl);
@@ -1654,7 +1905,7 @@ namespace ServiceManual.Services
             {
                 // Redirect-301 entries store rules as a JSON 'mapping' array — fetch all and match in-memory.
                 const string url = "api/redirect-301s?fields[0]=mapping&publicationState=live&pagination[pageSize]=100";
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     var body = await response.Content.ReadAsStringAsync();
@@ -1703,7 +1954,7 @@ namespace ServiceManual.Services
             try
             {
                 var url = $"{endpoint}?pagination[pageSize]={pageSize}{fields}";
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     var body = await response.Content.ReadAsStringAsync();
@@ -1746,7 +1997,7 @@ namespace ServiceManual.Services
                          "&populate[detailed_guide][populate][collection][fields][0]=title&populate[detailed_guide][populate][collection][fields][1]=slug" +
                          "&populate[applicablePhases][fields][0]=slug&populate[applicablePhases][fields][1]=title" +
                          "&populate[applicableProfessions][fields][0]=slug&populate[applicableProfessions][fields][1]=title";
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetCmsAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
                     var body = await response.Content.ReadAsStringAsync();
@@ -1910,6 +2161,188 @@ namespace ServiceManual.Services
                 "job_specification" => "Job description",
                 "external_link" => "External link",
                 _ => null
+            };
+        }
+
+        /// <summary>REST returns repeatable <c>sections</c> with nested relations; the old <c>by-slug</c> endpoint returned flat <c>items</c>. Map both.</summary>
+        private static List<CollectionSection> MapCollectionSectionsFromStrapi(StrapiCollection item)
+        {
+            var raw = item.Collection_Sections ?? item.Collection_Sections_Camel ?? item.Sections;
+            if (raw is null || raw.Count == 0)
+                return [];
+
+            return raw
+                .OrderBy(s => s.Order)
+                .Select(s => new CollectionSection
+                {
+                    Title = s.Title ?? string.Empty,
+                    Summary = s.Summary ?? s.Description,
+                    Items = MapCollectionSectionLinkItems(s)
+                })
+                .ToList();
+        }
+
+        private static List<ContentLink> MapCollectionSectionLinkItems(StrapiCollectionSection s)
+        {
+            if (s.Items is { Count: > 0 })
+            {
+                return s.Items
+                    .Select(i => new ContentLink
+                    {
+                        Title = i.Title ?? string.Empty,
+                        Slug = i.Slug,
+                        MetaDescription = i.MetaDescription,
+                        Url = i.Url ?? string.Empty,
+                        OpenInNewTab = i.NewTab,
+                        ExternalLink = i.ExternalLink,
+                        LinkType = i.LinkType,
+                        PriorityInGroup = i.PriorityInGroup,
+                        ContentType = ContentTypeLabel(i.Type),
+                        Grade = i.Grade
+                    })
+                    .OrderByDescending(i => i.PriorityInGroup)
+                    .ToList();
+            }
+
+            var withOrder = new List<(ContentLink Link, int Index)>();
+            var index = 0;
+
+            foreach (var row in s.DetailedGuides ?? [])
+            {
+                if (!row.TryGetProperty("detailed_guide", out var rel))
+                    continue;
+                var attrs = UnwrapStrapiEntityJson(rel);
+                var slug = JsonStringProp(attrs, "slug");
+                if (string.IsNullOrWhiteSpace(slug))
+                    continue;
+                withOrder.Add((new ContentLink
+                {
+                    Title = JsonStringProp(attrs, "title") ?? string.Empty,
+                    Slug = slug,
+                    MetaDescription = JsonStringProp(attrs, "metaDescription"),
+                    Url = $"/guidance/guides/{slug}",
+                    ContentType = ContentTypeLabel("detailed_guide")
+                }, index++));
+            }
+
+            foreach (var row in s.DetailedGuidePages ?? [])
+            {
+                if (!row.TryGetProperty("detailed_guide_page", out var pageRel))
+                    continue;
+                var page = UnwrapStrapiEntityJson(pageRel);
+                var pageSlug = JsonStringProp(page, "slug");
+                if (string.IsNullOrWhiteSpace(pageSlug))
+                    continue;
+                string url;
+                if (page.TryGetProperty("detailed_guide", out var guideRel))
+                {
+                    var guide = UnwrapStrapiEntityJson(guideRel);
+                    var guideSlug = JsonStringProp(guide, "slug");
+                    url = !string.IsNullOrWhiteSpace(guideSlug)
+                        ? $"/guidance/guides/{guideSlug}/{pageSlug}"
+                        : $"/guidance/guides/{pageSlug}";
+                }
+                else
+                    url = $"/guidance/guides/{pageSlug}";
+
+                withOrder.Add((new ContentLink
+                {
+                    Title = JsonStringProp(page, "title") ?? string.Empty,
+                    Slug = pageSlug,
+                    MetaDescription = JsonStringProp(page, "metaDescription"),
+                    Url = url,
+                    ContentType = ContentTypeLabel("detailed_guide_page")
+                }, index++));
+            }
+
+            foreach (var row in s.ExternalLinks ?? [])
+            {
+                if (!row.TryGetProperty("external_link", out var extRel))
+                    continue;
+                var ext = UnwrapStrapiEntityJson(extRel);
+                var url = JsonStringProp(ext, "url") ?? string.Empty;
+                var priority = JsonBoolProp(ext, "priorityInGroup");
+                withOrder.Add((new ContentLink
+                {
+                    Title = JsonStringProp(ext, "title") ?? string.Empty,
+                    MetaDescription = JsonStringProp(ext, "description"),
+                    Url = url,
+                    OpenInNewTab = JsonBoolProp(ext, "newTab"),
+                    ExternalLink = JsonBoolProp(ext, "externalLink"),
+                    LinkType = JsonStringProp(ext, "type"),
+                    PriorityInGroup = priority,
+                    ContentType = ContentTypeLabel("external_link")
+                }, index++));
+            }
+
+            foreach (var family in s.JobDescriptions ?? [])
+            {
+                if (!family.TryGetProperty("job_specifications", out var specsEl) || specsEl.ValueKind != JsonValueKind.Array)
+                    continue;
+                foreach (var specItem in specsEl.EnumerateArray())
+                {
+                    var spec = UnwrapStrapiEntityJson(specItem);
+                    var specSlug = JsonStringProp(spec, "slug");
+                    if (string.IsNullOrWhiteSpace(specSlug))
+                        continue;
+                    withOrder.Add((new ContentLink
+                    {
+                        Title = JsonStringProp(spec, "title") ?? string.Empty,
+                        Slug = specSlug,
+                        Url = $"/guidance/job-specifications/{specSlug}",
+                        Grade = JsonStringProp(spec, "grade"),
+                        ContentType = ContentTypeLabel("job_specification")
+                    }, index++));
+                }
+            }
+
+            return withOrder
+                .OrderByDescending(x => x.Link.PriorityInGroup)
+                .ThenBy(x => x.Index)
+                .Select(x => x.Link)
+                .ToList();
+        }
+
+        private static JsonElement UnwrapStrapiEntityJson(JsonElement el)
+        {
+            if (el.ValueKind == JsonValueKind.Object)
+            {
+                if (el.TryGetProperty("data", out var data) && data.ValueKind != JsonValueKind.Null)
+                {
+                    if (data.TryGetProperty("attributes", out var attrs) && attrs.ValueKind == JsonValueKind.Object)
+                        return attrs;
+                    return data.ValueKind == JsonValueKind.Object ? data : el;
+                }
+
+                if (el.TryGetProperty("attributes", out var topAttrs) && topAttrs.ValueKind == JsonValueKind.Object)
+                    return topAttrs;
+            }
+
+            return el;
+        }
+
+        private static string? JsonStringProp(JsonElement obj, string name) =>
+            obj.ValueKind == JsonValueKind.Object && obj.TryGetProperty(name, out var p)
+                ? p.ValueKind switch
+                {
+                    JsonValueKind.String => p.GetString(),
+                    JsonValueKind.Number => p.GetRawText(),
+                    JsonValueKind.True => "true",
+                    JsonValueKind.False => "false",
+                    _ => null
+                }
+                : null;
+
+        private static bool JsonBoolProp(JsonElement obj, string name)
+        {
+            if (obj.ValueKind != JsonValueKind.Object || !obj.TryGetProperty(name, out var p))
+                return false;
+            return p.ValueKind switch
+            {
+                JsonValueKind.True => true,
+                JsonValueKind.False => false,
+                JsonValueKind.String => string.Equals(p.GetString(), "true", StringComparison.OrdinalIgnoreCase),
+                _ => false
             };
         }
 
@@ -2573,11 +3006,20 @@ namespace ServiceManual.Services
             public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
             [JsonPropertyName("collection_sections")]
             public List<StrapiCollectionSection>? Collection_Sections { get; set; }
+
+            /// <summary>Same as <see cref="Collection_Sections"/> when Strapi / sanitizers emit camelCase keys.</summary>
+            [JsonPropertyName("collectionSections")]
+            public List<StrapiCollectionSection>? Collection_Sections_Camel { get; set; }
+            /// <summary>Strapi schema field name (repeatable section component); same data as <see cref="Collection_Sections"/> in responses.</summary>
+            [JsonPropertyName("sections")]
+            public List<StrapiCollectionSection>? Sections { get; set; }
             [JsonPropertyName("relatedContent")]
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
             [JsonConverter(typeof(StrapiRelatedFilesConverter))]
             [JsonPropertyName("relatedFiles")]
             public List<StrapiFileItem>? RelatedFiles { get; set; }
+            [JsonPropertyName("publishedAt")]
+            public string? PublishedAt { get; set; }
         }
 
         private class StrapiCollectionSection
@@ -2586,10 +3028,20 @@ namespace ServiceManual.Services
             public string? Title { get; set; }
             [JsonPropertyName("summary")]
             public string? Summary { get; set; }
+            [JsonPropertyName("description")]
+            public string? Description { get; set; }
             [JsonPropertyName("order")]
             public int Order { get; set; }
             [JsonPropertyName("items")]
             public List<StrapiSectionLinkItem>? Items { get; set; }
+            [JsonPropertyName("detailed_guides")]
+            public List<JsonElement>? DetailedGuides { get; set; }
+            [JsonPropertyName("detailed_guide_pages")]
+            public List<JsonElement>? DetailedGuidePages { get; set; }
+            [JsonPropertyName("external_links")]
+            public List<JsonElement>? ExternalLinks { get; set; }
+            [JsonPropertyName("job_descriptions")]
+            public List<JsonElement>? JobDescriptions { get; set; }
         }
 
         private class StrapiSectionLinkItem
@@ -2729,6 +3181,8 @@ namespace ServiceManual.Services
             public string? CustomCss { get; set; }
             [JsonPropertyName("customJS")]
             public string? CustomJs { get; set; }
+            [JsonPropertyName("publishedAt")]
+            public string? PublishedAt { get; set; }
         }
 
         private class StrapiTagsProfession
@@ -2754,9 +3208,20 @@ namespace ServiceManual.Services
             public List<StrapiTagRef>? ApplicablePhases { get; set; }
             [JsonPropertyName("applicableProfessions")]
             public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
-            [JsonPropertyName("Section")]
+            // Single property: Strapi may send "Section" or "section". Do not add a second property with
+            // [JsonPropertyName("section")] — with PropertyNameCaseInsensitive, STJ treats both as one JSON name and throws.
             public List<StrapiDetailedGuidePageSection>? Section { get; set; }
-            public StrapiDetailedGuideRef? Detailed_Guide { get; set; }
+
+            [JsonPropertyName("detailed_guide")]
+            [JsonConverter(typeof(StrapiDetailedGuideRefConverter))]
+            public StrapiDetailedGuideRef? Detailed_Guide_Snake { get; set; }
+
+            [JsonPropertyName("detailedGuide")]
+            [JsonConverter(typeof(StrapiDetailedGuideRefConverter))]
+            public StrapiDetailedGuideRef? Detailed_Guide_Camel { get; set; }
+
+            [JsonIgnore]
+            public StrapiDetailedGuideRef? Detailed_Guide => Detailed_Guide_Snake ?? Detailed_Guide_Camel;
             public List<StrapiRelatedContent>? RelatedContent { get; set; }
             [JsonConverter(typeof(StrapiRelatedFilesConverter))]
             [JsonPropertyName("relatedFiles")]
@@ -2765,6 +3230,8 @@ namespace ServiceManual.Services
             public bool? ShowLastReviewedDateOnPage { get; set; }
             [JsonPropertyName("lastReviewedDate")]
             public string? LastReviewedDate { get; set; }
+            [JsonPropertyName("publishedAt")]
+            public string? PublishedAt { get; set; }
         }
 
         private class StrapiDetailedGuidePageSection
@@ -2793,6 +3260,23 @@ namespace ServiceManual.Services
             public List<StrapiTagRef>? ApplicablePhases { get; set; }
             [JsonPropertyName("applicableProfessions")]
             public List<StrapiTagsProfession>? ApplicableProfessions { get; set; }
+        }
+
+        /// <summary>Minimal row for resolving <see cref="StrapiDetailedGuidePage.DocumentId"/> without a long populate query.</summary>
+        private sealed class StrapiDetailedGuidePageFindRow
+        {
+            public string? DocumentId { get; set; }
+
+            [JsonPropertyName("detailed_guide")]
+            [JsonConverter(typeof(StrapiDetailedGuideRefConverter))]
+            public StrapiDetailedGuideRef? Detailed_Guide_Snake { get; set; }
+
+            [JsonPropertyName("detailedGuide")]
+            [JsonConverter(typeof(StrapiDetailedGuideRefConverter))]
+            public StrapiDetailedGuideRef? Detailed_Guide_Camel { get; set; }
+
+            [JsonIgnore]
+            public StrapiDetailedGuideRef? Detailed_Guide => Detailed_Guide_Snake ?? Detailed_Guide_Camel;
         }
 
         private class StrapiCollectionRef
@@ -2919,6 +3403,35 @@ namespace ServiceManual.Services
             public string? Title { get; set; }
             [JsonPropertyName("plural")]
             public string? Plural { get; set; }
+        }
+
+        /// <summary>
+        /// Strapi 5 REST populates <c>detailed_guide</c> / <c>detailedGuide</c> as flat fields or as
+        /// <c>{ "data": { "attributes": { "slug", ... } } }</c>. Without this, <see cref="StrapiDetailedGuideRef.Slug"/> stays null and
+        /// <see cref="GetDetailedGuidePageBySlugAsync"/> cannot match the parent guide (404 for every sub-page).
+        /// </summary>
+        private sealed class StrapiDetailedGuideRefConverter : JsonConverter<StrapiDetailedGuideRef?>
+        {
+            public override StrapiDetailedGuideRef? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Null) return null;
+                if (reader.TokenType != JsonTokenType.StartObject) return null;
+                using var doc = JsonDocument.ParseValue(ref reader);
+                var root = doc.RootElement;
+                JsonElement payload;
+                if (root.TryGetProperty("data", out var data))
+                {
+                    if (data.ValueKind == JsonValueKind.Null || data.ValueKind == JsonValueKind.Undefined) return null;
+                    payload = data.TryGetProperty("attributes", out var a) ? a : data;
+                }
+                else
+                    payload = root;
+
+                return JsonSerializer.Deserialize<StrapiDetailedGuideRef>(payload.GetRawText(), options);
+            }
+
+            public override void Write(Utf8JsonWriter writer, StrapiDetailedGuideRef? value, JsonSerializerOptions options) =>
+                throw new NotImplementedException();
         }
 
         /// <summary>Converter for contentOwner relation: { data: { attributes: { title, informationPage: { data: { attributes: { urlToRedirectTo } } } } } }.</summary>

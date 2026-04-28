@@ -20,6 +20,8 @@ namespace ServiceManual.Models
         public List<TagRef> AudienceTags { get; set; } = [];
         /// <summary>Related files for the Downloads sidebar section.</summary>
         public List<RelatedFileItem> RelatedFiles { get; set; } = [];
+        /// <summary>When true, show the unpublished draft banner (draft preview + Strapi entry has no <c>publishedAt</c>).</summary>
+        public bool ShowDraftContentBanner { get; set; }
     }
 
     public class DetailedGuideSummary

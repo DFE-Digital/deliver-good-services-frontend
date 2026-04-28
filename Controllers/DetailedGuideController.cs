@@ -142,6 +142,7 @@ namespace ServiceManual.Controllers
                 ApplyNoContentsSectionStyle = guide.HideContentsOnPrimaryPage,
                 CustomCSS = guide.CustomCSS,
                 CustomJS = guide.CustomJS,
+                ShowDraftContentBanner = guide.ShowDraftContentBanner,
             };
         }
 
@@ -310,6 +311,7 @@ namespace ServiceManual.Controllers
                 ApplyNoContentsSectionStyle = guidePage.HideContents || guidePage.HideTitleAndDescription,
                 CustomCSS = guidePage.CustomCSS,
                 CustomJS = guidePage.CustomJS,
+                ShowDraftContentBanner = guidePage.ShowDraftContentBanner,
             };
         }
 

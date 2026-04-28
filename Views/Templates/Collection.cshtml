@@ -29,6 +29,11 @@
     @* Collection hero - using standardized hero partial *@
     @await Html.PartialAsync("~/Views/Shared/_HeroSection.cshtml")
 
+    @if (collection.ShowDraftContentBanner)
+    {
+        @await Html.PartialAsync("~/Views/Shared/_DraftContentBanner.cshtml")
+    }
+
     @* Contents: dashed list of section links (same style as guide when no sub pages) *@
     @if (showContentsNav)
     {
